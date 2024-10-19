@@ -14,8 +14,20 @@ const VisualAttributeSchema = z.object({
 const KeywordSchema = z.object({
   keyword: z.string(), // The keyword (e.g., "smiling person")
   confidence_score: z.number(), // Confidence score (between 0.0 and 1.0)
-  category: z.string(), // Category (e.g., "emotion", "object", "background")
+  category: z.string(), // Category (e.g., "emotion", "product", "brand", "person", "setting", "text", "call-to-action")
   visual_attributes: z.array(VisualAttributeSchema), // Array of visual attributes
+  location: z.enum([
+    "top-left",
+    "top-center",
+    "top-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
+    "unknown",
+  ]),
 });
 
 // Define the schema for sentiment analysis
@@ -57,7 +69,7 @@ export async function POST(req: NextRequest) {
         content: [
           {
             type: "text",
-            text: "You are an assistant that evaluates image-based ads. Given the following image, write a large essay on the visual features, shapes, colors, actions, and placement of features of the image ad. Be as detailed as possible. The user should be able to use this description to understand the image and its features.",
+            text: "You are an assistant that evaluates image-based ads. Given the following image, write a large essay on the visual features, shapes, colors, actions, and placement of features of the image ad. Be as detailed as possible, while only describing the visual features of the image. For each feature, include where the feature is located in the image.",
           },
           {
             type: "image_url",
@@ -68,7 +80,8 @@ export async function POST(req: NextRequest) {
         ],
       },
     ],
-    model: "llava-v1.5-7b-4096-preview",
+    // model: "llava-v1.5-7b-4096-preview",
+    model: "llama-3.2-90b-vision-preview",
     max_tokens: 2048,
     temperature: 0.2,
     top_p: 1,
@@ -76,6 +89,8 @@ export async function POST(req: NextRequest) {
   });
 
   const description = chatCompletion.choices[0].message.content;
+
+  //   return NextResponse.json({ description });
 
   if (!description) {
     return NextResponse.json(
@@ -112,6 +127,8 @@ Here is the ad image description: {imageDescription}
       { status: 400 }
     );
   }
+
+  ad_description.image_description = description;
 
   return NextResponse.json({ ad_description });
 }

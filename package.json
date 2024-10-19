@@ -14,6 +14,7 @@
     "openai": "^4.68.1",
     "react": "^18",
     "react-dom": "^18",
+    "supabase": "^1.204.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
