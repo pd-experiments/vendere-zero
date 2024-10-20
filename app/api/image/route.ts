@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { zodResponseFormat } from "openai/helpers/zod";
 import { parsePDF } from '@/app/utils/pdfParser';
 import { summarizeReferenceImages } from '@/app/utils/imageSummarizer';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 const CompanyProfileSchema = z.object({
   name: z.string(),
@@ -34,45 +35,139 @@ const AdRequestSchema = z.object({
 
 type AdRequest = z.infer<typeof AdRequestSchema>;
 
-async function generateAdPrompt(request: AdRequest): Promise<string> {
+interface LayerPrompt {
+  description: string;
+  prompt: string;
+}
+
+async function generateLayeredAdPrompts(request: AdRequest): Promise<LayerPrompt[]> {
   const requestString = JSON.stringify(request);
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
       {
         role: "system",
-        content: "You are an expert advertising creative director. Given details about a company, specific ad requirements, and a user prompt, create a detailed and compelling prompt for DALL-E to generate an advertisement image. Pay special attention to requests for including faces, brand logos, and hands/fingers in the image."
+        content: "You are an expert advertising creative director. Your task is to create a series of prompts for generating a layered, simple, and clean ad image. Focus on creating 2-3 layers maximum, with each layer being a separate DALL-E generation."
       },
       {
         role: "user",
-        content: `Generate a creative and detailed ad image prompt based on this company profile, ad features, and user prompt: ${requestString}. Be sure to explicitly mention the inclusion or exclusion of faces, brand logo, and hands/fingers as specified in the ad features.`
+        content: `Based on this ad request: ${requestString}, create a series of 2-3 layer prompts for DALL-E to generate a simple, clean ad image. 
+
+        Guidelines:
+        1. First layer should always be a simple, minimalist background that sets the mood and color scheme.
+        2. Second layer (optional) could be a main focal object or element that represents the brand or message.
+        3. Third layer (optional) could be an additional element to enhance the message or brand identity.
+        4. Do NOT include any text or words in any of the layers.
+        5. Ensure each layer complements the others and maintains a clean, simple aesthetic.
+        6. Consider the brand's color scheme and style in all layers.
+        7. Leave appropriate space for text overlay in the final composition.
+
+        Return the layers as a JSON array of objects, each with a 'description' and 'prompt' field.`
       }
     ],
-    max_tokens: 300
+    response_format: { type: "json_object" },
   });
 
-  return response.choices[0].message.content || "A compelling advertisement image";
+  const layers = JSON.parse(response.choices[0].message.content || "[]");
+  return layers.layers;
+}
+
+async function generateAndComposeImage(layerPrompts: LayerPrompt[]): Promise<{ layerUrls: string[], composedUrl: string }> {
+  const layerUrls: string[] = [];
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const layerBuffers: Buffer[] = [];
+
+  for (let i = 0; i < layerPrompts.length; i++) {
+    const layer = layerPrompts[i];
+    let response;
+
+    if (i === 0) {
+      // Generate the first layer
+      response = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: layer.prompt,
+        n: 1,
+        size: "1024x1024",
+        response_format: "b64_json",
+      });
+
+      layerBuffers.push(Buffer.from(response.data[0].b64_json || '', 'base64'));
+    } else {
+      // Create a transparent image for the new layer
+      const transparentImage = await sharp({
+        create: {
+          width: 1024,
+          height: 1024,
+          channels: 4,
+          background: { r: 0, g: 0, b: 0, alpha: 0 }
+        }
+      }).png().toBuffer();
+
+      // Edit the image with the new layer
+      response = await openai.images.edit({
+        model: "dall-e-2",
+        image: new File([transparentImage], 'image.png', { type: 'image/png' }),
+        mask: new File([transparentImage], 'mask.png', { type: 'image/png' }),
+        prompt: layer.prompt,
+        n: 1,
+        size: "1024x1024",
+        response_format: "b64_json",
+      });
+
+      layerBuffers.push(Buffer.from(response.data[0].b64_json || '', 'base64'));
+    }
+
+    // Save each layer image
+    const layerOutputPath = path.join(process.cwd(), 'generated', `layer_${Date.now()}.png`);
+    await sharp(layerBuffers[i]).png().toFile(layerOutputPath);
+    layerUrls.push(`${baseUrl}/generated/${path.basename(layerOutputPath)}`);
+  }
+
+  // Compose the final image by merging all layers
+  let composedImage = sharp(layerBuffers[0]);
+  for (let i = 1; i < layerBuffers.length; i++) {
+    composedImage = composedImage.composite([
+      {
+        input: await sharp(layerBuffers[i])
+          .ensureAlpha()
+          .raw()
+          .toBuffer(),
+        raw: {
+          width: 1024,
+          height: 1024,
+          channels: 4
+        },
+        blend: 'over'
+      }
+    ]);
+  }
+
+  // Save the final composed image
+  const composedOutputPath = path.join(process.cwd(), 'generated', `composed_${Date.now()}.png`);
+  await composedImage.png().toFile(composedOutputPath);
+  const composedUrl = `${baseUrl}/generated/${path.basename(composedOutputPath)}`;
+
+  return { layerUrls, composedUrl };
 }
 
 async function generateAdRequest(userPrompt: string, includeFaces: boolean, includeBrandLogo: boolean, includeHandsFingers: boolean): Promise<AdRequest> {
   try {
     const brandInfo = await parsePDF();
 
-    const imagesDir = path.join(process.cwd(), 'public', 'refimages', 'beekeeper');
+    const imagesDir = path.join(process.cwd(), 'refimages', 'nike');
     let imageFiles: string[];
     try {
-      imageFiles = await fs.readdir(imagesDir);
+      imageFiles = await fs.promises.readdir(imagesDir);
     } catch (error) {
       console.error('Error reading images directory:', error);
       imageFiles = [];
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const imageUrls = imageFiles
+    const imagePaths = imageFiles
       .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
-      .map(file => `${baseUrl}/refimages/beekeeper/${file}`);
+      .map(file => path.join(imagesDir, file));
 
-    const imageSummaries = await summarizeReferenceImages(imageUrls);
+    const imageSummaries = await summarizeReferenceImages(imagePaths);
 
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o",
@@ -127,20 +222,14 @@ export async function POST(request: Request) {
     }
 
     const adRequest = await generateAdRequest(userPrompt, includeFaces, includeBrandLogo, includeHandsFingers);
-    const adPrompt = await generateAdPrompt(adRequest);
+    const layerPrompts = await generateLayeredAdPrompts(adRequest);
+    const { layerUrls, composedUrl } = await generateAndComposeImage(layerPrompts);
 
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-        prompt: adPrompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-        style: "natural"
-      });
-
-    const imageUrl = response.data[0].url;
-
-    return NextResponse.json({ imageUrl, generatedPrompt: adPrompt });
+    return NextResponse.json({
+      layerUrls,
+      composedUrl,
+      generatedPrompts: layerPrompts
+    });
   } catch (error) {
     console.error('Error generating ad image:', error);
     return NextResponse.json({ error: 'Failed to generate ad image' }, { status: 500 });

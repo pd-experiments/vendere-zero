@@ -1,35 +1,37 @@
 import { groq } from "@/lib/ai";
+import fs from 'fs/promises';
 
-export async function summarizeImage(imageUrl: string): Promise<string> {
-  const chatCompletion = await groq.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "Summarize the key visual elements, style, and overall impression of this image. Focus on aspects that could be relevant for advertising, such as color scheme, composition, and emotional impact.",
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: imageUrl,
-            },
-          },
-        ],
-      },
-    ],
-    model: "llava-v1.5-7b-4096-preview",
-    max_tokens: 300,
-    temperature: 0.2,
-    top_p: 1,
-    stream: false,
-  });
+async function summarizeImage(imagePath: string): Promise<string> {
+  try {
+    const imageBuffer = await fs.readFile(imagePath);
+    const base64Image = imageBuffer.toString('base64');
 
-  return chatCompletion.choices[0].message.content || "";
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Summarize this image in one sentence:" },
+            { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}` } },
+          ],
+        },
+      ],
+      model: "mixtral-8x7b-32768",
+    });
+
+    return completion.choices[0]?.message?.content || "Unable to summarize image.";
+  } catch (error) {
+    console.error('Error summarizing image:', error);
+    return "Error summarizing image.";
+  }
 }
 
-export async function summarizeReferenceImages(imageUrls: string[]): Promise<string> {
-  const summaries = await Promise.all(imageUrls.map(summarizeImage));
-  return summaries.join("\n\n");
+export async function summarizeReferenceImages(imagePaths: string[]): Promise<string> {
+  try {
+    const summaries = await Promise.all(imagePaths.map(summarizeImage));
+    return summaries.join('\n');
+  } catch (error) {
+    console.error('Error summarizing reference images:', error);
+    return "Error summarizing reference images.";
+  }
 }
