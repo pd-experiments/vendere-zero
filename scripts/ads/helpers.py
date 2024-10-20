@@ -1,6 +1,8 @@
+from collections import defaultdict
 import os
 from typing import Any, Generator
 from dotenv import load_dotenv
+from pydantic import UUID4
 from selenium import webdriver
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.service import Service
@@ -12,9 +14,11 @@ from tqdm import tqdm
 
 from models import (
     AdAnalysis,
+    AdMetric,
     AdStructuredOutput,
     Feature,
     GoogleAd,
+    JoinedFeatureMetric,
     SentimentAnalysis,
     VisualAttribute,
 )
@@ -102,3 +106,60 @@ def get_ad_analyses_from_db() -> list[AdAnalysis]:
             break
         offset += batch_size
     return analyses
+
+
+def get_features_and_metrics_from_db() -> list[JoinedFeatureMetric]:
+    supabase_client = get_supabase_client()
+    offset, batch_size = 0, 1000
+    features: list[Feature] = []
+    metrics: list[AdMetric] = []
+    while True:
+        new_features: list[Feature] = [
+            Feature.model_validate(feature)
+            for feature in supabase_client.table("features")
+            .select("*")
+            .range(offset, offset + batch_size)
+            .execute()
+            .data
+        ]
+        features.extend(new_features)
+        if len(new_features) < batch_size:
+            break
+        offset += batch_size
+    offset = 0
+    while True:
+        new_metrics: list[AdMetric] = [
+            AdMetric.model_validate(metric)
+            for metric in supabase_client.table("ad_metrics")
+            .select("*")
+            .range(offset, offset + batch_size)
+            .execute()
+            .data
+        ]
+        metrics.extend(new_metrics)
+        if len(new_metrics) < batch_size:
+            break
+        offset += batch_size
+
+    print(len(features), len(metrics))
+
+    grouped_features: dict[UUID4, list[Feature]] = defaultdict(list)
+    for feature in features:
+        grouped_features[feature.ad_output_id].append(feature)
+
+    joined_features: list[JoinedFeatureMetric] = []
+    for metric in metrics:
+        for feature in grouped_features[metric.ad_id]:
+            joined_features.append(
+                JoinedFeatureMetric(
+                    ad_output_id=metric.ad_id,
+                    clicks=metric.clicks,
+                    impressions=metric.impressions,
+                    ctr=metric.ctr,
+                    keyword=feature.keyword,
+                    confidence_score=feature.confidence_score,
+                    category=feature.category,
+                    location=feature.location,
+                )
+            )
+    return joined_features

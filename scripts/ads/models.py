@@ -65,3 +65,25 @@ class AdMetric(BaseModel):
     impressions: int = Field(0, ge=0)  # Non-negative integer
     clicks: int = Field(0, ge=0)  # Non-negative integer
     ctr: float | None = None
+
+
+class JoinedFeatureMetric(BaseModel):
+    ad_output_id: UUID4
+    keyword: str
+    confidence_score: float
+    category: str
+    location: Literal[
+        "top-left",
+        "top-center",
+        "top-right",
+        "middle-left",
+        "middle-center",
+        "middle-right",
+        "bottom-left",
+        "bottom-center",
+        "bottom-right",
+        "unknown",
+    ]
+    impressions: int
+    clicks: int
+    ctr: float

@@ -1,0 +1,1152 @@
+ad_output_id,keyword,confidence_score,category,location,impressions,clicks,ctr
+9beb9e87-6cd1-4016-987b-1436aa0c18a8,man,0.95,object,middle-center,726,22,0.0303
+9beb9e87-6cd1-4016-987b-1436aa0c18a8,room,0.9,background,unknown,726,22,0.0303
+9beb9e87-6cd1-4016-987b-1436aa0c18a8,posture,0.85,emotion,middle-center,726,22,0.0303
+9beb9e87-6cd1-4016-987b-1436aa0c18a8,comfort,0.8,emotion,unknown,726,22,0.0303
+210ac032-ada6-47fc-9ff9-318597b45c98,Nike shoes,0.9,object,bottom-center,605,15,0.0248
+210ac032-ada6-47fc-9ff9-318597b45c98,man,0.85,object,middle-center,605,15,0.0248
+210ac032-ada6-47fc-9ff9-318597b45c98,sidewalk,0.8,background,middle-left,605,15,0.0248
+210ac032-ada6-47fc-9ff9-318597b45c98,urban environment,0.75,background,top-right,605,15,0.0248
+ec1869d5-dcb6-4138-821c-b5f75bcbba01,Nike sneakers,0.95,object,middle-center,1370,92,0.0672
+ec1869d5-dcb6-4138-821c-b5f75bcbba01,lace-up closure,0.88,object,middle-center,1370,92,0.0672
+ec1869d5-dcb6-4138-821c-b5f75bcbba01,white background,0.92,background,middle-center,1370,92,0.0672
+e847afe3-1131-4712-abdb-31bf6f8c1d2d,woman,0.95,object,middle-center,438,12,0.0274
+e847afe3-1131-4712-abdb-31bf6f8c1d2d,Nike shoes,0.9,object,bottom-left,438,12,0.0274
+e847afe3-1131-4712-abdb-31bf6f8c1d2d,bench,0.85,object,middle-left,438,12,0.0274
+e847afe3-1131-4712-abdb-31bf6f8c1d2d,color scheme,0.8,background,unknown,438,12,0.0274
+2c72b015-a069-4ba5-a86b-faadde75a454,sneakers,0.95,object,middle-center,628,14,0.0223
+2c72b015-a069-4ba5-a86b-faadde75a454,shoe laces,0.9,object,middle-left,628,14,0.0223
+2c72b015-a069-4ba5-a86b-faadde75a454,shoe tongue,0.9,object,middle-right,628,14,0.0223
+2c72b015-a069-4ba5-a86b-faadde75a454,shoe sole,0.85,object,middle-center,628,14,0.0223
+92a4cd64-7898-4e20-aa7f-c0166b466ec8,woman,0.95,object,middle-center,1151,32,0.0278
+92a4cd64-7898-4e20-aa7f-c0166b466ec8,push-up,0.9,action,middle-center,1151,32,0.0278
+92a4cd64-7898-4e20-aa7f-c0166b466ec8,blue workout outfit,0.85,object,middle-center,1151,32,0.0278
+92a4cd64-7898-4e20-aa7f-c0166b466ec8,background,0.85,background,unknown,1151,32,0.0278
+92a4cd64-7898-4e20-aa7f-c0166b466ec8,determination,0.8,emotion,middle-center,1151,32,0.0278
+2290f6e4-4aa5-451a-a7ee-06f5418d617a,women,0.95,object,middle-center,1125,39,0.0347
+2290f6e4-4aa5-451a-a7ee-06f5418d617a,athletic clothing,0.9,object,middle-center,1125,39,0.0347
+2290f6e4-4aa5-451a-a7ee-06f5418d617a,background,0.89,background,unknown,1125,39,0.0347
+2290f6e4-4aa5-451a-a7ee-06f5418d617a,strength,0.85,emotion,middle-center,1125,39,0.0347
+2290f6e4-4aa5-451a-a7ee-06f5418d617a,unity,0.84,emotion,middle-center,1125,39,0.0347
+9f182b3d-4d47-4b68-9091-3ff5ab6c4206,young man,0.95,object,middle-center,500,11,0.022
+9f182b3d-4d47-4b68-9091-3ff5ab6c4206,city street,0.9,background,unknown,500,11,0.022
+9f182b3d-4d47-4b68-9091-3ff5ab6c4206,Nike Air Force,0.92,object,bottom-center,500,11,0.022
+9f182b3d-4d47-4b68-9091-3ff5ab6c4206,vehicles,0.85,object,unknown,500,11,0.022
+9f182b3d-4d47-4b68-9091-3ff5ab6c4206,traffic lights,0.88,object,unknown,500,11,0.022
+28ef2a28-c1fb-45f0-8846-cf373d036c33,woman,0.95,object,middle-center,389,5,0.0129
+28ef2a28-c1fb-45f0-8846-cf373d036c33,sports bra,0.9,object,unknown,389,5,0.0129
+28ef2a28-c1fb-45f0-8846-cf373d036c33,yoga pose,0.93,action,unknown,389,5,0.0129
+28ef2a28-c1fb-45f0-8846-cf373d036c33,white room,0.85,background,unknown,389,5,0.0129
+28ef2a28-c1fb-45f0-8846-cf373d036c33,sports balls,0.88,object,bottom-left,389,5,0.0129
+73c70c20-f566-4b77-a891-51f7eaf23575,Nike shoe,0.95,object,middle-center,662,13,0.0196
+73c70c20-f566-4b77-a891-51f7eaf23575,white sole,0.9,object,middle-center,662,13,0.0196
+73c70c20-f566-4b77-a891-51f7eaf23575,black and white,0.85,background,unknown,662,13,0.0196
+73c70c20-f566-4b77-a891-51f7eaf23575,advertisement,0.8,object,bottom-left,662,13,0.0196
+5128e96b-4fc6-4630-8d07-0ab60a9148ec,basketball player,0.9,object,middle-center,566,10,0.0177
+5128e96b-4fc6-4630-8d07-0ab60a9148ec,purple shoe,0.95,object,middle-left,566,10,0.0177
+5128e96b-4fc6-4630-8d07-0ab60a9148ec,basketball,0.85,object,middle-right,566,10,0.0177
+5128e96b-4fc6-4630-8d07-0ab60a9148ec,basketball court,0.8,background,bottom-center,566,10,0.0177
+5128e96b-4fc6-4630-8d07-0ab60a9148ec,bench,0.75,background,bottom-right,566,10,0.0177
+3e14885b-2ece-480a-9cdd-f920bc94bcbc,Nike shoes,0.95,object,middle-center,836,26,0.0311
+3e14885b-2ece-480a-9cdd-f920bc94bcbc,person's legs,0.85,object,middle-center,836,26,0.0311
+3e14885b-2ece-480a-9cdd-f920bc94bcbc,wooden wall,0.9,background,unknown,836,26,0.0311
+daaa5ecd-140e-47f0-ab14-57ca6a4d460e,Nike Basketball PG 1,0.95,object,middle-center,488,8,0.0164
+daaa5ecd-140e-47f0-ab14-57ca6a4d460e,Logo,0.9,object,middle-right,488,8,0.0164
+daaa5ecd-140e-47f0-ab14-57ca6a4d460e,Background,0.85,background,unknown,488,8,0.0164
+acd4a117-996b-403a-a8d8-a7b7a5d6503b,Nike Metcon 5,0.95,object,middle-center,1320,65,0.0492
+acd4a117-996b-403a-a8d8-a7b7a5d6503b,person,0.85,object,middle-center,1320,65,0.0492
+acd4a117-996b-403a-a8d8-a7b7a5d6503b,wooden floor,0.9,background,bottom-center,1320,65,0.0492
+8248ac5a-39a5-4761-98c5-77f6dfd83231,woman,0.95,object,middle-center,738,20,0.0271
+8248ac5a-39a5-4761-98c5-77f6dfd83231,black outfit,0.9,object,middle-center,738,20,0.0271
+8248ac5a-39a5-4761-98c5-77f6dfd83231,dimly lit room,0.85,background,unknown,738,20,0.0271
+8248ac5a-39a5-4761-98c5-77f6dfd83231,arms outstretched,0.92,object,middle-center,738,20,0.0271
+8248ac5a-39a5-4761-98c5-77f6dfd83231,contrast,0.88,emotion,unknown,738,20,0.0271
+1eba2a4a-883f-4f0a-9746-d955b00d4d2f,woman,0.95,object,middle-center,715,19,0.0266
+1eba2a4a-883f-4f0a-9746-d955b00d4d2f,orange background,0.9,background,unknown,715,19,0.0266
+1eba2a4a-883f-4f0a-9746-d955b00d4d2f,sneakers,0.85,object,unknown,715,19,0.0266
+1eba2a4a-883f-4f0a-9746-d955b00d4d2f,athleticism,0.92,emotion,middle-center,715,19,0.0266
+48ea9e0d-bb04-4dff-b824-06bc039757f4,sneaker,0.95,object,middle-center,1044,30,0.0287
+48ea9e0d-bb04-4dff-b824-06bc039757f4,Nike,0.9,brand,top-center,1044,30,0.0287
+48ea9e0d-bb04-4dff-b824-06bc039757f4,basketball,0.85,emotion,bottom-center,1044,30,0.0287
+48ea9e0d-bb04-4dff-b824-06bc039757f4,clean composition,0.8,background,unknown,1044,30,0.0287
+9f32a4a3-d3ee-456f-8e92-aabc157d9c85,shoe,0.95,object,middle-center,1366,54,0.0395
+9f32a4a3-d3ee-456f-8e92-aabc157d9c85,colors,0.92,object,middle-center,1366,54,0.0395
+9f32a4a3-d3ee-456f-8e92-aabc157d9c85,design,0.88,object,middle-center,1366,54,0.0395
+27370685-1cdc-4331-bc78-7a80c29bc669,Nike shoes,0.9,object,middle-center,558,9,0.0161
+27370685-1cdc-4331-bc78-7a80c29bc669,basketball court,0.85,background,bottom-center,558,9,0.0161
+27370685-1cdc-4331-bc78-7a80c29bc669,person's feet,0.8,object,middle-left,558,9,0.0161
+27370685-1cdc-4331-bc78-7a80c29bc669,black socks,0.75,object,middle-left,558,9,0.0161
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,confidence,0.9,emotion,middle-center,868,25,0.0288
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,Nike swoosh,0.95,object,middle-center,868,25,0.0288
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,red jacket,0.9,object,middle-center,868,25,0.0288
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,red shirt,0.9,object,middle-center,868,25,0.0288
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,ponytail,0.8,object,top-right,868,25,0.0288
+8ba7fa5f-6049-4f8c-89ab-d375ea6e4d2b,necklace,0.7,object,middle-left,868,25,0.0288
+df09c058-57cd-41f9-9366-2151c59ae02a,Nike shoes,0.95,object,middle-center,784,17,0.0217
+df09c058-57cd-41f9-9366-2151c59ae02a,purple background,0.9,background,middle-left,784,17,0.0217
+df09c058-57cd-41f9-9366-2151c59ae02a,red background,0.9,background,middle-right,784,17,0.0217
+df09c058-57cd-41f9-9366-2151c59ae02a,arrangement,0.85,emotion,middle-center,784,17,0.0217
+df09c058-57cd-41f9-9366-2151c59ae02a,unique features,0.85,object,middle-center,784,17,0.0217
+a9b97bd0-40df-48d4-99c6-497cbdd50ac8,sneaker,0.95,object,middle-center,702,21,0.0299
+a9b97bd0-40df-48d4-99c6-497cbdd50ac8,lacing system,0.9,object,middle-center,702,21,0.0299
+a9b97bd0-40df-48d4-99c6-497cbdd50ac8,sophistication,0.85,emotion,unknown,702,21,0.0299
+a9b97bd0-40df-48d4-99c6-497cbdd50ac8,comfort,0.8,emotion,unknown,702,21,0.0299
+e7095c35-f5cf-4a24-b9eb-0b48bc0a8dbf,Nike basketball shoes,0.9,object,middle-center,785,24,0.0306
+e7095c35-f5cf-4a24-b9eb-0b48bc0a8dbf,Nike swoosh logo,0.95,object,middle-right,785,24,0.0306
+e7095c35-f5cf-4a24-b9eb-0b48bc0a8dbf,white surface,0.85,background,bottom-center,785,24,0.0306
+5d298a75-a871-49fa-8d81-83ae924790f5,shoes,0.95,object,middle-center,473,7,0.0148
+5d298a75-a871-49fa-8d81-83ae924790f5,background,0.9,background,unknown,473,7,0.0148
+5d298a75-a871-49fa-8d81-83ae924790f5,logo,0.85,object,middle-right,473,7,0.0148
+25a69ed0-a9d1-4d5c-91e1-6c0e0cea9421,young people,0.85,object,middle-center,903,20,0.0221
+25a69ed0-a9d1-4d5c-91e1-6c0e0cea9421,black and white sneakers,0.9,object,middle-center,903,20,0.0221
+25a69ed0-a9d1-4d5c-91e1-6c0e0cea9421,green surface,0.8,background,bottom-center,903,20,0.0221
+25a69ed0-a9d1-4d5c-91e1-6c0e0cea9421,couch,0.75,object,top-right,903,20,0.0221
+7a760ff7-c17f-4405-8bcf-e2e08c7a4ba1,Nike Air Force 1 sneaker,0.95,object,middle-center,449,7,0.0156
+7a760ff7-c17f-4405-8bcf-e2e08c7a4ba1,black background,0.9,background,unknown,449,7,0.0156
+7a760ff7-c17f-4405-8bcf-e2e08c7a4ba1,speaker,0.8,object,middle-right,449,7,0.0156
+7a760ff7-c17f-4405-8bcf-e2e08c7a4ba1,microphone,0.8,object,middle-left,449,7,0.0156
+68deb710-4050-4711-8641-c6ded490aa2e,sneakers,0.95,object,middle-center,1292,43,0.0333
+68deb710-4050-4711-8641-c6ded490aa2e,road,0.9,background,bottom-center,1292,43,0.0333
+9bf9387e-f496-45e3-966d-8a697922f631,young woman,0.95,object,middle-center,715,12,0.0168
+9bf9387e-f496-45e3-966d-8a697922f631,white shirt,0.9,object,top-center,715,12,0.0168
+9bf9387e-f496-45e3-966d-8a697922f631,grey sweatpants,0.92,object,bottom-center,715,12,0.0168
+9bf9387e-f496-45e3-966d-8a697922f631,white background,0.98,background,unknown,715,12,0.0168
+9bf9387e-f496-45e3-966d-8a697922f631,confidence,0.85,emotion,unknown,715,12,0.0168
+9d619173-8e62-4554-89a7-b5c3c85a510b,young woman,0.9,object,middle-center,619,13,0.021
+9d619173-8e62-4554-89a7-b5c3c85a510b,white pedestal,0.85,object,middle-center,619,13,0.021
+9d619173-8e62-4554-89a7-b5c3c85a510b,blue sky,0.8,background,unknown,619,13,0.021
+9d619173-8e62-4554-89a7-b5c3c85a510b,bright colors,0.7,emotion,unknown,619,13,0.021
+f7fd1a63-fda3-43ff-893a-3ce0812b87cc,sneakers,0.95,object,middle-center,446,6,0.0135
+f7fd1a63-fda3-43ff-893a-3ce0812b87cc,background,0.9,background,unknown,446,6,0.0135
+f7fd1a63-fda3-43ff-893a-3ce0812b87cc,contrast,0.85,emotion,unknown,446,6,0.0135
+f7fd1a63-fda3-43ff-893a-3ce0812b87cc,design,0.88,emotion,unknown,446,6,0.0135
+edd1b40e-670a-4076-860f-e8b09c8d3cc8,woman,0.95,object,middle-center,642,11,0.0171
+edd1b40e-670a-4076-860f-e8b09c8d3cc8,sneaker,0.98,object,bottom-center,642,11,0.0171
+edd1b40e-670a-4076-860f-e8b09c8d3cc8,foreground,0.85,background,unknown,642,11,0.0171
+edd1b40e-670a-4076-860f-e8b09c8d3cc8,color scheme,0.9,emotion,unknown,642,11,0.0171
+7becac7e-ed32-41f7-897c-31f11d4d1798,Nike,0.95,brand,top-center,1018,31,0.0305
+7becac7e-ed32-41f7-897c-31f11d4d1798,sportswear,0.9,object,middle-center,1018,31,0.0305
+7becac7e-ed32-41f7-897c-31f11d4d1798,shoes,0.85,object,middle-left,1018,31,0.0305
+7becac7e-ed32-41f7-897c-31f11d4d1798,sports balls,0.8,object,bottom-center,1018,31,0.0305
+2c173a51-6288-4ab2-bd4a-ba87df6a1c82,young woman,0.95,object,middle-center,1005,28,0.0279
+2c173a51-6288-4ab2-bd4a-ba87df6a1c82,black sports bra,0.9,object,middle-center,1005,28,0.0279
+2c173a51-6288-4ab2-bd4a-ba87df6a1c82,black tank top,0.85,object,middle-center,1005,28,0.0279
+2c173a51-6288-4ab2-bd4a-ba87df6a1c82,room wall,0.75,background,unknown,1005,28,0.0279
+538dd5cc-8e14-4117-9136-e5cbd18cc13a,Nike shoe,0.95,object,middle-center,479,8,0.0167
+538dd5cc-8e14-4117-9136-e5cbd18cc13a,pink swoosh,0.9,object,middle-left,479,8,0.0167
+538dd5cc-8e14-4117-9136-e5cbd18cc13a,red background,0.8,background,unknown,479,8,0.0167
+cb0019bb-9512-4e54-b863-4b5fa4a36a61,sneakers,0.95,object,bottom-right,469,3,0.0064
+cb0019bb-9512-4e54-b863-4b5fa4a36a61,Nike Air Max 90,0.9,object,middle-center,469,3,0.0064
+cb0019bb-9512-4e54-b863-4b5fa4a36a61,depth,0.85,emotion,unknown,469,3,0.0064
+cb0019bb-9512-4e54-b863-4b5fa4a36a61,balance,0.8,emotion,unknown,469,3,0.0064
+5e569feb-9309-4df0-9b16-6438f99b3708,person,0.95,object,middle-left,434,7,0.0161
+5e569feb-9309-4df0-9b16-6438f99b3708,sneakers,0.98,object,middle-center,434,7,0.0161
+5e569feb-9309-4df0-9b16-6438f99b3708,close-up,0.9,emotion,unknown,434,7,0.0161
+5e569feb-9309-4df0-9b16-6438f99b3708,black jacket,0.85,object,middle-left,434,7,0.0161
+d06c1546-47e1-47e9-b5b2-a1a2c4f5740d,Nike shoe,0.95,object,middle-center,656,9,0.0137
+d06c1546-47e1-47e9-b5b2-a1a2c4f5740d,white sole,0.9,object,bottom-center,656,9,0.0137
+d06c1546-47e1-47e9-b5b2-a1a2c4f5740d,white swoosh logo,0.85,object,middle-right,656,9,0.0137
+d06c1546-47e1-47e9-b5b2-a1a2c4f5740d,modern aesthetic,0.8,emotion,unknown,656,9,0.0137
+3ea1c76b-12f5-4dad-8a4a-6effbd1ec8d4,shoes,0.95,object,middle-center,1274,51,0.04
+3ea1c76b-12f5-4dad-8a4a-6effbd1ec8d4,person,0.9,object,middle-center,1274,51,0.04
+3ea1c76b-12f5-4dad-8a4a-6effbd1ec8d4,trail,0.85,background,bottom-center,1274,51,0.04
+54d918ec-79c9-46c3-9fbf-d6d23b774096,white sneakers,0.95,object,middle-center,1399,55,0.0393
+54d918ec-79c9-46c3-9fbf-d6d23b774096,green stripe,0.9,object,middle-center,1399,55,0.0393
+54d918ec-79c9-46c3-9fbf-d6d23b774096,white surface,0.85,background,middle-center,1399,55,0.0393
+ecf8e6f3-20cf-413c-be1b-48490a2d1e9a,black and white shoes,0.95,object,middle-center,494,12,0.0243
+ecf8e6f3-20cf-413c-be1b-48490a2d1e9a,brown surface,0.9,background,unknown,494,12,0.0243
+ecf8e6f3-20cf-413c-be1b-48490a2d1e9a,For the kids,0.85,emotion,top-left,494,12,0.0243
+37c03724-cd83-4a13-a7f9-ee0fcfdaad8b,young man,0.9,object,middle-center,1048,29,0.0277
+37c03724-cd83-4a13-a7f9-ee0fcfdaad8b,Nike hat,0.95,object,top-center,1048,29,0.0277
+37c03724-cd83-4a13-a7f9-ee0fcfdaad8b,Nike shirt,0.95,object,middle-center,1048,29,0.0277
+37c03724-cd83-4a13-a7f9-ee0fcfdaad8b,stool,0.85,object,middle-center,1048,29,0.0277
+37c03724-cd83-4a13-a7f9-ee0fcfdaad8b,athletic attire,0.9,emotion,unknown,1048,29,0.0277
+bd978370-d514-45c9-81bc-9b7d89383d95,Nike sneakers,0.9,object,middle-center,534,6,0.0112
+bd978370-d514-45c9-81bc-9b7d89383d95,soccer ball,0.85,object,bottom-right,534,6,0.0112
+bd978370-d514-45c9-81bc-9b7d89383d95,soccer field,0.8,background,unknown,534,6,0.0112
+b176d5ef-843d-449b-8b44-8da40dc8351e,Nike shoes,0.95,object,middle-center,1355,45,0.0332
+b176d5ef-843d-449b-8b44-8da40dc8351e,brown pants,0.85,object,middle-center,1355,45,0.0332
+b176d5ef-843d-449b-8b44-8da40dc8351e,white surface,0.9,background,bottom-center,1355,45,0.0332
+a250e4f7-9554-4373-84b9-36146dc8e942,woman,0.95,object,middle-center,483,5,0.0104
+a250e4f7-9554-4373-84b9-36146dc8e942,handbag,0.85,object,bottom-left,483,5,0.0104
+a250e4f7-9554-4373-84b9-36146dc8e942,background,0.9,background,unknown,483,5,0.0104
+5a267281-4362-4a88-bd01-bbea822749b8,sneaker,0.95,object,middle-center,933,25,0.0268
+5a267281-4362-4a88-bd01-bbea822749b8,color scheme,0.9,background,unknown,933,25,0.0268
+5a267281-4362-4a88-bd01-bbea822749b8,sporty appearance,0.85,emotion,middle-center,933,25,0.0268
+e7749c02-03c9-42dc-944c-87b4aaa7b6b8,young man,0.95,object,middle-center,1403,59,0.0421
+e7749c02-03c9-42dc-944c-87b4aaa7b6b8,athletic wear,0.9,object,middle-center,1403,59,0.0421
+e7749c02-03c9-42dc-944c-87b4aaa7b6b8,sneakers,0.85,object,middle-center,1403,59,0.0421
+e7749c02-03c9-42dc-944c-87b4aaa7b6b8,building,0.8,background,middle-center,1403,59,0.0421
+c2cd5467-cd2d-4ee0-a1be-f37796a273a2,purple hoodies,0.95,object,middle-center,1072,37,0.0345
+c2cd5467-cd2d-4ee0-a1be-f37796a273a2,unique designs,0.9,object,middle-center,1072,37,0.0345
+c2cd5467-cd2d-4ee0-a1be-f37796a273a2,various positions,0.85,object,top-center,1072,37,0.0345
+c2cd5467-cd2d-4ee0-a1be-f37796a273a2,cohesive look,0.8,emotion,bottom-center,1072,37,0.0345
+c2cd5467-cd2d-4ee0-a1be-f37796a273a2,visually appealing,0.87,emotion,unknown,1072,37,0.0345
+9edc9e75-ba3e-4a48-880c-0c3fe6aa8f39,shoes,0.9,object,middle-center,549,12,0.0219
+9edc9e75-ba3e-4a48-880c-0c3fe6aa8f39,clothing items,0.85,object,middle-center,549,12,0.0219
+9edc9e75-ba3e-4a48-880c-0c3fe6aa8f39,white,0.8,color,unknown,549,12,0.0219
+9edc9e75-ba3e-4a48-880c-0c3fe6aa8f39,black,0.8,color,unknown,549,12,0.0219
+9edc9e75-ba3e-4a48-880c-0c3fe6aa8f39,organization,0.9,emotion,unknown,549,12,0.0219
+cf8cb835-39a4-48c2-8078-74c611c8cb39,jacket,0.9,object,top-left,552,6,0.0109
+cf8cb835-39a4-48c2-8078-74c611c8cb39,sweater,0.85,object,top-center,552,6,0.0109
+cf8cb835-39a4-48c2-8078-74c611c8cb39,pants,0.8,object,top-right,552,6,0.0109
+5cbd2779-3115-4794-8516-c1a3049401c8,sneakers,0.95,object,middle-center,496,11,0.0222
+5cbd2779-3115-4794-8516-c1a3049401c8,pink background,0.9,background,unknown,496,11,0.0222
+5cbd2779-3115-4794-8516-c1a3049401c8,Nike logo,0.85,object,middle-left,496,11,0.0222
+3904a9f5-6336-43db-8183-1be71810408b,white and blue shoe,0.95,object,middle-center,1408,57,0.0405
+3904a9f5-6336-43db-8183-1be71810408b,red stripe,0.9,object,middle-center,1408,57,0.0405
+3904a9f5-6336-43db-8183-1be71810408b,Nike logo,0.93,object,middle-center,1408,57,0.0405
+0669c9ff-3df1-4cf0-9f8a-ac36a52afc4e,Nike shoes,0.95,object,middle-center,864,27,0.0313
+0669c9ff-3df1-4cf0-9f8a-ac36a52afc4e,background,0.9,background,unknown,864,27,0.0313
+0669c9ff-3df1-4cf0-9f8a-ac36a52afc4e,shoe laces,0.85,object,middle-center,864,27,0.0313
+1fe92a6b-1b90-4529-be09-c73432b0693f,red dress,0.9,object,top-left,419,7,0.0167
+1fe92a6b-1b90-4529-be09-c73432b0693f,red jacket,0.85,object,middle-center,419,7,0.0167
+1fe92a6b-1b90-4529-be09-c73432b0693f,red skirt,0.8,object,bottom-right,419,7,0.0167
+1fe92a6b-1b90-4529-be09-c73432b0693f,vibrant colors,0.9,emotion,unknown,419,7,0.0167
+1fe92a6b-1b90-4529-be09-c73432b0693f,stylish,0.88,emotion,unknown,419,7,0.0167
+9f6936e9-c2fa-4764-a108-0057030d2adc,Nike sneakers,0.95,object,bottom-right,517,10,0.0193
+9f6936e9-c2fa-4764-a108-0057030d2adc,blue jean jacket,0.92,object,middle-left,517,10,0.0193
+9f6936e9-c2fa-4764-a108-0057030d2adc,casual vibe,0.88,emotion,middle-center,517,10,0.0193
+e71b0e45-eddc-449e-93e9-4b30718cc42d,sneakers,0.95,object,middle-center,476,4,0.0084
+e71b0e45-eddc-449e-93e9-4b30718cc42d,price tag,0.85,object,middle-left,476,4,0.0084
+e71b0e45-eddc-449e-93e9-4b30718cc42d,white background,0.9,background,unknown,476,4,0.0084
+0507e74b-bde4-4336-b5b8-493b33f04a90,soccer shoe,0.95,object,middle-center,510,9,0.0176
+0507e74b-bde4-4336-b5b8-493b33f04a90,contrast,0.9,emotion,unknown,510,9,0.0176
+0507e74b-bde4-4336-b5b8-493b33f04a90,appealing design,0.85,emotion,unknown,510,9,0.0176
+4506794a-1a60-4f9e-b170-be44aa2bf5c5,Nike Air Force 1 sneaker,0.9,object,middle-center,509,8,0.0157
+4506794a-1a60-4f9e-b170-be44aa2bf5c5,blue background,0.85,background,unknown,509,8,0.0157
+4506794a-1a60-4f9e-b170-be44aa2bf5c5,distinctive design,0.8,emotion,unknown,509,8,0.0157
+8abb0320-3378-4144-bcec-1f9c713e54ed,young boy,0.95,object,middle-center,1096,36,0.0328
+8abb0320-3378-4144-bcec-1f9c713e54ed,blue shirt,0.9,object,middle-center,1096,36,0.0328
+8abb0320-3378-4144-bcec-1f9c713e54ed,yellow shoes,0.88,object,middle-center,1096,36,0.0328
+8abb0320-3378-4144-bcec-1f9c713e54ed,grassy field,0.92,background,middle-center,1096,36,0.0328
+8abb0320-3378-4144-bcec-1f9c713e54ed,blue sky,0.85,background,top-center,1096,36,0.0328
+8abb0320-3378-4144-bcec-1f9c713e54ed,fence,0.8,background,bottom-left,1096,36,0.0328
+ac4a3bf7-16fd-4046-b5ba-89c985bc89de,sneakers,0.95,object,middle-center,872,16,0.0183
+ac4a3bf7-16fd-4046-b5ba-89c985bc89de,white sole,0.9,object,middle-center,872,16,0.0183
+ac4a3bf7-16fd-4046-b5ba-89c985bc89de,pink background,0.85,background,unknown,872,16,0.0183
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,woman,0.95,object,middle-center,612,15,0.0245
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,white tank top,0.9,object,middle-center,612,15,0.0245
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,curves,0.85,emotion,unknown,612,15,0.0245
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,elegance,0.88,emotion,unknown,612,15,0.0245
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,hair pulled back,0.92,object,middle-center,612,15,0.0245
+bb0c51d0-bbb9-45a1-9fda-7c00d8593821,balanced composition,0.93,background,unknown,612,15,0.0245
+bb50a2c4-a996-4fe8-acbf-97409aaeebf6,sneaker,0.95,object,middle-center,466,13,0.0279
+bb50a2c4-a996-4fe8-acbf-97409aaeebf6,brand,0.9,object,unknown,466,13,0.0279
+bb50a2c4-a996-4fe8-acbf-97409aaeebf6,style,0.85,emotion,unknown,466,13,0.0279
+6131638a-e37d-4d5c-bf02-6c41ac538b56,young boy,0.95,object,middle-center,621,10,0.0161
+6131638a-e37d-4d5c-bf02-6c41ac538b56,sweatsuit,0.9,object,middle-center,621,10,0.0161
+6131638a-e37d-4d5c-bf02-6c41ac538b56,soccer ball,0.85,object,bottom-left,621,10,0.0161
+6131638a-e37d-4d5c-bf02-6c41ac538b56,room,0.7,background,unknown,621,10,0.0161
+55acd44c-697e-41ec-bad0-2313cd2ab38a,sneakers,0.95,object,middle-center,427,4,0.0094
+55acd44c-697e-41ec-bad0-2313cd2ab38a,stool,0.85,object,bottom-left,427,4,0.0094
+55acd44c-697e-41ec-bad0-2313cd2ab38a,fence,0.8,background,unknown,427,4,0.0094
+55acd44c-697e-41ec-bad0-2313cd2ab38a,composition,0.9,emotion,unknown,427,4,0.0094
+e3b5f5ef-8e39-4eaf-9a51-e3f2282d7344,young man,0.85,object,middle-center,1051,40,0.0381
+e3b5f5ef-8e39-4eaf-9a51-e3f2282d7344,Nike Tech Fleece jacket,0.95,object,middle-center,1051,40,0.0381
+e3b5f5ef-8e39-4eaf-9a51-e3f2282d7344,dark background,0.9,background,unknown,1051,40,0.0381
+e3b5f5ef-8e39-4eaf-9a51-e3f2282d7344,white shirt,0.8,object,bottom-center,1051,40,0.0381
+e3b5f5ef-8e39-4eaf-9a51-e3f2282d7344,styled hair,0.75,object,top-center,1051,40,0.0381
+62dcdd14-1da0-4c3b-bd46-68ea7f2459f8,white sneakers,0.95,object,middle-center,852,26,0.0305
+62dcdd14-1da0-4c3b-bd46-68ea7f2459f8,yellow socks,0.9,object,middle-center,852,26,0.0305
+62dcdd14-1da0-4c3b-bd46-68ea7f2459f8,clean composition,0.85,background,unknown,852,26,0.0305
+5fd538b3-5fea-4079-b8d4-0ac596280506,Nike shoes,0.95,object,middle-center,951,29,0.0305
+5fd538b3-5fea-4079-b8d4-0ac596280506,green carpet,0.85,background,unknown,951,29,0.0305
+5fd538b3-5fea-4079-b8d4-0ac596280506,white socks,0.8,object,middle-center,951,29,0.0305
+5fd538b3-5fea-4079-b8d4-0ac596280506,person,0.75,object,middle-center,951,29,0.0305
+fad801dd-327b-46cd-8637-5ec32f633470,Nike Dunk shoes,0.95,object,middle-center,801,19,0.0237
+fad801dd-327b-46cd-8637-5ec32f633470,wooden surface,0.9,background,bottom-center,801,19,0.0237
+fad801dd-327b-46cd-8637-5ec32f633470,balance,0.85,emotion,unknown,801,19,0.0237
+495c8243-4c50-4d87-b7d3-42ec910b6c2e,Nike shoes,0.9,object,middle-center,1368,65,0.0475
+495c8243-4c50-4d87-b7d3-42ec910b6c2e,blue jeans,0.8,object,middle-center,1368,65,0.0475
+495c8243-4c50-4d87-b7d3-42ec910b6c2e,hardwood floor,0.7,background,bottom-center,1368,65,0.0475
+1a889039-7e65-4fd1-9d7d-65249625f406,Nike Air Max shoe,0.95,object,middle-center,458,8,0.0175
+1a889039-7e65-4fd1-9d7d-65249625f406,modern design,0.9,emotion,unknown,458,8,0.0175
+1a889039-7e65-4fd1-9d7d-65249625f406,stylish appearance,0.88,emotion,unknown,458,8,0.0175
+1a889039-7e65-4fd1-9d7d-65249625f406,blue sole,0.85,object,bottom-right,458,8,0.0175
+0494d20a-4b94-4199-97cd-4b21722d2b65,man,0.95,object,middle-center,752,13,0.0173
+0494d20a-4b94-4199-97cd-4b21722d2b65,sneakers,0.98,object,bottom-center,752,13,0.0173
+0494d20a-4b94-4199-97cd-4b21722d2b65,wooden deck,0.9,background,unknown,752,13,0.0173
+0494d20a-4b94-4199-97cd-4b21722d2b65,step,0.85,object,middle-center,752,13,0.0173
+0494d20a-4b94-4199-97cd-4b21722d2b65,bench,0.8,object,bottom-right,752,13,0.0173
+f318a649-85e5-432f-9eb2-1e5ec0259e20,Nike shoes,0.9,object,middle-center,836,14,0.0167
+f318a649-85e5-432f-9eb2-1e5ec0259e20,carpeted surface,0.85,background,middle-center,836,14,0.0167
+f318a649-85e5-432f-9eb2-1e5ec0259e20,black swoosh logo,0.95,object,middle-left,836,14,0.0167
+6f68ea8a-6f36-49c5-b2df-5a3d79837565,white sneaker,0.9,object,middle-left,314,1,0.0032
+6f68ea8a-6f36-49c5-b2df-5a3d79837565,brown sneaker,0.9,object,middle-right,314,1,0.0032
+6f68ea8a-6f36-49c5-b2df-5a3d79837565,sneaker logo,0.8,object,bottom-right,314,1,0.0032
+6f68ea8a-6f36-49c5-b2df-5a3d79837565,color contrast,0.85,emotion,unknown,314,1,0.0032
+086eefba-d231-4be8-901c-a8ee1c99b256,young man,0.9,object,middle-center,859,20,0.0233
+086eefba-d231-4be8-901c-a8ee1c99b256,basketball,0.8,object,bottom-right,859,20,0.0233
+086eefba-d231-4be8-901c-a8ee1c99b256,gym,0.7,background,top-center,859,20,0.0233
+ff0b434a-92d7-4760-9edb-364b5eb17e88,man,0.95,object,middle-center,702,11,0.0157
+ff0b434a-92d7-4760-9edb-364b5eb17e88,athletic ability,0.9,emotion,middle-center,702,11,0.0157
+ff0b434a-92d7-4760-9edb-364b5eb17e88,clothing,0.92,object,unknown,702,11,0.0157
+ff0b434a-92d7-4760-9edb-364b5eb17e88,vibrant colors,0.88,background,unknown,702,11,0.0157
+b65fcfb2-a115-45f0-bb43-a6cb40d9a2a9,young girl,0.95,object,middle-center,1010,24,0.0238
+b65fcfb2-a115-45f0-bb43-a6cb40d9a2a9,white shirt,0.9,object,middle-center,1010,24,0.0238
+b65fcfb2-a115-45f0-bb43-a6cb40d9a2a9,black shorts,0.85,object,middle-center,1010,24,0.0238
+b65fcfb2-a115-45f0-bb43-a6cb40d9a2a9,jumping,0.92,action,middle-center,1010,24,0.0238
+b65fcfb2-a115-45f0-bb43-a6cb40d9a2a9,white wall,0.88,background,unknown,1010,24,0.0238
+8ea65fa3-ed38-4311-aeb9-eedab7d89fc3,man,0.9,object,middle-center,534,12,0.0225
+8ea65fa3-ed38-4311-aeb9-eedab7d89fc3,rooftop,0.85,object,middle-center,534,12,0.0225
+8ea65fa3-ed38-4311-aeb9-eedab7d89fc3,plants,0.7,object,unknown,534,12,0.0225
+8ea65fa3-ed38-4311-aeb9-eedab7d89fc3,city view,0.8,background,unknown,534,12,0.0225
+8ea65fa3-ed38-4311-aeb9-eedab7d89fc3,relaxed atmosphere,0.9,emotion,unknown,534,12,0.0225
+1d13d702-1d66-477d-aefe-b03af9125d31,girl,0.95,object,middle-center,922,29,0.0315
+1d13d702-1d66-477d-aefe-b03af9125d31,emotion,0.9,emotion,middle-center,922,29,0.0315
+1d13d702-1d66-477d-aefe-b03af9125d31,background,0.85,background,unknown,922,29,0.0315
+e42714f6-199e-4f4d-85b2-7532c0ef5136,sneakers,0.95,object,middle-center,535,14,0.0262
+e42714f6-199e-4f4d-85b2-7532c0ef5136,lacing system,0.9,object,middle-left,535,14,0.0262
+e42714f6-199e-4f4d-85b2-7532c0ef5136,nike swoosh logo,0.85,object,middle-right,535,14,0.0262
+e42714f6-199e-4f4d-85b2-7532c0ef5136,white surface,0.93,background,bottom-center,535,14,0.0262
+e42714f6-199e-4f4d-85b2-7532c0ef5136,lighting,0.92,visual,unknown,535,14,0.0262
+093ae8a8-7e2f-4ee9-8505-5dcadee104af,Nike shoe,0.95,object,middle-center,740,23,0.0311
+093ae8a8-7e2f-4ee9-8505-5dcadee104af,green surface,0.85,background,bottom-center,740,23,0.0311
+093ae8a8-7e2f-4ee9-8505-5dcadee104af,contrast,0.8,emotion,unknown,740,23,0.0311
+a3413662-bda0-4f63-963c-ca129d4e5f6c,young woman,0.95,object,middle-center,951,32,0.0336
+a3413662-bda0-4f63-963c-ca129d4e5f6c,black tank top,0.9,object,middle-center,951,32,0.0336
+a3413662-bda0-4f63-963c-ca129d4e5f6c,black and white sneakers,0.88,object,bottom-center,951,32,0.0336
+a3413662-bda0-4f63-963c-ca129d4e5f6c,bench,0.92,object,middle-center,951,32,0.0336
+a3413662-bda0-4f63-963c-ca129d4e5f6c,depth,0.85,background,unknown,951,32,0.0336
+8ca06ada-1f13-4bb3-8f10-04b838b91bfb,smiling man,0.95,object,middle-center,434,2,0.0046
+8ca06ada-1f13-4bb3-8f10-04b838b91bfb,brown jacket,0.9,object,unknown,434,2,0.0046
+8ca06ada-1f13-4bb3-8f10-04b838b91bfb,brown beanie,0.85,object,unknown,434,2,0.0046
+8ca06ada-1f13-4bb3-8f10-04b838b91bfb,positive moment,0.8,emotion,unknown,434,2,0.0046
+204ce7ea-89ff-44f2-922d-6b4e16e588de,shirts,0.95,object,middle-center,507,8,0.0158
+204ce7ea-89ff-44f2-922d-6b4e16e588de,close-up,0.9,object,unknown,507,8,0.0158
+204ce7ea-89ff-44f2-922d-6b4e16e588de,texture,0.85,background,unknown,507,8,0.0158
+ced3d955-32de-4f75-909b-8558ff42f1e8,young boy,0.95,object,middle-center,502,9,0.0179
+ced3d955-32de-4f75-909b-8558ff42f1e8,black shirt,0.9,object,top-center,502,9,0.0179
+ced3d955-32de-4f75-909b-8558ff42f1e8,basketball,0.9,object,middle-right,502,9,0.0179
+ced3d955-32de-4f75-909b-8558ff42f1e8,white sneakers,0.85,object,bottom-left,502,9,0.0179
+ced3d955-32de-4f75-909b-8558ff42f1e8,darkened room,0.9,background,unknown,502,9,0.0179
+ced3d955-32de-4f75-909b-8558ff42f1e8,sports theme,0.95,emotion,unknown,502,9,0.0179
+292501f9-7269-4f77-93bb-4507428e0b36,woman,0.95,object,middle-center,522,4,0.0077
+292501f9-7269-4f77-93bb-4507428e0b36,athleticism,0.9,emotion,unknown,522,4,0.0077
+292501f9-7269-4f77-93bb-4507428e0b36,brick wall,0.85,background,unknown,522,4,0.0077
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,young girl,0.95,object,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,blue shirt,0.9,object,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,green pants,0.85,object,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,black box,0.92,object,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,confident demeanor,0.88,emotion,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,playful pose,0.87,emotion,middle-center,1554,68,0.0438
+5b73dd7c-f528-4e3a-882d-f52ebcec5c1e,blue hat,0.89,object,middle-center,1554,68,0.0438
+1b863ddb-faf7-4885-ad61-65374edb0f53,Nike shoes,0.9,object,middle-center,1349,50,0.0371
+1b863ddb-faf7-4885-ad61-65374edb0f53,man,0.85,object,middle-center,1349,50,0.0371
+1b863ddb-faf7-4885-ad61-65374edb0f53,step,0.75,object,bottom-center,1349,50,0.0371
+e5dd0b92-61f8-4e75-bd27-1eb0dd46a52a,blue and yellow tennis shoes,0.95,object,middle-center,451,6,0.0133
+e5dd0b92-61f8-4e75-bd27-1eb0dd46a52a,yellow swoosh,0.9,object,middle-left,451,6,0.0133
+e5dd0b92-61f8-4e75-bd27-1eb0dd46a52a,tennis court background,0.85,background,unknown,451,6,0.0133
+e5dd0b92-61f8-4e75-bd27-1eb0dd46a52a,striking contrast,0.88,emotion,unknown,451,6,0.0133
+34e083e9-fd1c-4e19-93f9-195f974a67de,young man,0.85,object,middle-center,1396,53,0.038
+34e083e9-fd1c-4e19-93f9-195f974a67de,green jacket,0.9,object,middle-center,1396,53,0.038
+34e083e9-fd1c-4e19-93f9-195f974a67de,white wall,0.8,background,middle-center,1396,53,0.038
+57a433a8-0957-403f-a9c6-c6d6ae5b6bd1,Nike Air Force 1,0.95,object,middle-center,1387,68,0.049
+57a433a8-0957-403f-a9c6-c6d6ae5b6bd1,brick surface,0.9,background,middle-center,1387,68,0.049
+99250f40-276e-4a41-a373-3d3651b0a5e6,sportswear,0.95,object,unknown,434,4,0.0092
+99250f40-276e-4a41-a373-3d3651b0a5e6,tops,0.9,object,top-left,434,4,0.0092
+99250f40-276e-4a41-a373-3d3651b0a5e6,skirts,0.88,object,middle-center,434,4,0.0092
+99250f40-276e-4a41-a373-3d3651b0a5e6,collage,0.85,background,unknown,434,4,0.0092
+99250f40-276e-4a41-a373-3d3651b0a5e6,variety,0.92,emotion,unknown,434,4,0.0092
+e4c8554c-0e34-4f47-9f5c-801e232e916d,sneaker,0.95,object,middle-center,606,17,0.0281
+e4c8554c-0e34-4f47-9f5c-801e232e916d,white sole,0.85,object,middle-center,606,17,0.0281
+e4c8554c-0e34-4f47-9f5c-801e232e916d,green background,0.9,background,unknown,606,17,0.0281
+e4c8554c-0e34-4f47-9f5c-801e232e916d,Nike swoosh,0.8,object,middle-right,606,17,0.0281
+51afb965-7e82-4de5-af65-1a8d5dab7791,shorts,0.95,object,middle-center,488,6,0.0123
+51afb965-7e82-4de5-af65-1a8d5dab7791,Nike,0.9,object,unknown,488,6,0.0123
+51afb965-7e82-4de5-af65-1a8d5dab7791,clean composition,0.85,background,unknown,488,6,0.0123
+fdb27790-aad3-4bd0-9c4d-277c4db01182,Nike shoes,0.95,object,bottom-right,414,9,0.0217
+fdb27790-aad3-4bd0-9c4d-277c4db01182,woman's legs,0.9,object,top-left,414,9,0.0217
+fdb27790-aad3-4bd0-9c4d-277c4db01182,white surface,0.85,background,middle-center,414,9,0.0217
+fdb27790-aad3-4bd0-9c4d-277c4db01182,socks,0.8,object,middle-left,414,9,0.0217
+cd648357-dfff-4257-99ae-c986bf3fc0bd,Nike Air Force 1 shoes,0.95,object,middle-center,808,9,0.0111
+cd648357-dfff-4257-99ae-c986bf3fc0bd,model/feet,0.9,object,middle-left,808,9,0.0111
+cd648357-dfff-4257-99ae-c986bf3fc0bd,white surface,0.85,background,bottom-center,808,9,0.0111
+9596bd9a-21b8-493b-8359-12695391f79b,Nike shoe,0.95,object,middle-center,404,5,0.0124
+9596bd9a-21b8-493b-8359-12695391f79b,black swoosh logo,0.9,object,middle-left,404,5,0.0124
+9596bd9a-21b8-493b-8359-12695391f79b,white background,0.98,background,unknown,404,5,0.0124
+9596bd9a-21b8-493b-8359-12695391f79b,contrast,0.85,emotion,unknown,404,5,0.0124
+9596bd9a-21b8-493b-8359-12695391f79b,attention-grabbing,0.8,emotion,unknown,404,5,0.0124
+73e0480c-6d82-44a8-85dd-2c7f03c4e1cb,Nike shoes,0.95,object,middle-center,440,5,0.0114
+73e0480c-6d82-44a8-85dd-2c7f03c4e1cb,red swoosh,0.93,object,middle-right,440,5,0.0114
+73e0480c-6d82-44a8-85dd-2c7f03c4e1cb,white background,0.9,background,unknown,440,5,0.0114
+73e0480c-6d82-44a8-85dd-2c7f03c4e1cb,clean composition,0.92,emotion,unknown,440,5,0.0114
+e60ac12e-b9b8-4547-9372-0a7c3fdd8836,woman,0.95,object,middle-center,451,5,0.0111
+e60ac12e-b9b8-4547-9372-0a7c3fdd8836,sneakers,0.9,object,bottom-left,451,5,0.0111
+e60ac12e-b9b8-4547-9372-0a7c3fdd8836,relaxed posture,0.88,emotion,unknown,451,5,0.0111
+e60ac12e-b9b8-4547-9372-0a7c3fdd8836,ground setting,0.85,background,unknown,451,5,0.0111
+0370d992-494f-47eb-ade8-f1cb5bf6494e,man,0.95,object,middle-center,1405,66,0.047
+0370d992-494f-47eb-ade8-f1cb5bf6494e,brown jacket,0.9,object,middle-center,1405,66,0.047
+0370d992-494f-47eb-ade8-f1cb5bf6494e,brown hat,0.88,object,top-center,1405,66,0.047
+0370d992-494f-47eb-ade8-f1cb5bf6494e,brown shoes,0.97,object,bottom-center,1405,66,0.047
+0370d992-494f-47eb-ade8-f1cb5bf6494e,ledge,0.85,object,middle-center,1405,66,0.047
+1ee8f770-7772-494c-aa93-bd2e3952eb0a,Nike sneakers,0.95,object,middle-center,982,25,0.0255
+1ee8f770-7772-494c-aa93-bd2e3952eb0a,pink background,0.9,background,unknown,982,25,0.0255
+1ee8f770-7772-494c-aa93-bd2e3952eb0a,white sole,0.85,object,middle-center,982,25,0.0255
+1ee8f770-7772-494c-aa93-bd2e3952eb0a,pink laces,0.8,object,middle-center,982,25,0.0255
+5b8c6619-08ea-4e3b-96cd-a8fd0a8b8970,man,0.95,object,middle-left,590,13,0.022
+5b8c6619-08ea-4e3b-96cd-a8fd0a8b8970,white sneakers,0.98,object,middle-left,590,13,0.022
+5b8c6619-08ea-4e3b-96cd-a8fd0a8b8970,black and white ball,0.97,object,middle-center,590,13,0.022
+5b8c6619-08ea-4e3b-96cd-a8fd0a8b8970,carpet,0.9,background,bottom-center,590,13,0.022
+69c60f10-3b12-4d32-9a73-db3725eb176e,sneakers,0.95,object,middle-center,651,13,0.02
+69c60f10-3b12-4d32-9a73-db3725eb176e,background,0.9,background,unknown,651,13,0.02
+6e370e51-4b06-4e67-b550-e6e1f78b5629,bags,0.95,object,middle-center,1393,64,0.0459
+6e370e51-4b06-4e67-b550-e6e1f78b5629,colors,0.9,object,middle-center,1393,64,0.0459
+6e370e51-4b06-4e67-b550-e6e1f78b5629,arrangement,0.85,object,middle-center,1393,64,0.0459
+6e370e51-4b06-4e67-b550-e6e1f78b5629,close-up,0.8,visual feature,middle-center,1393,64,0.0459
+3d723379-0686-42bc-9cdc-96eaaa95c9e2,Nike shoes,0.95,object,middle-center,1352,65,0.0481
+3d723379-0686-42bc-9cdc-96eaaa95c9e2,woman,0.9,object,middle-center,1352,65,0.0481
+3d723379-0686-42bc-9cdc-96eaaa95c9e2,brick walkway,0.85,background,bottom-center,1352,65,0.0481
+e1163c10-8d07-48b9-863e-ca2dedfefea1,woman in blue shirt,0.95,object,middle-left,311,2,0.0064
+e1163c10-8d07-48b9-863e-ca2dedfefea1,Nike logo,0.9,object,middle-left,311,2,0.0064
+e1163c10-8d07-48b9-863e-ca2dedfefea1,black shorts,0.85,object,middle-left,311,2,0.0064
+e1163c10-8d07-48b9-863e-ca2dedfefea1,woman in background,0.8,object,middle-right,311,2,0.0064
+e1163c10-8d07-48b9-863e-ca2dedfefea1,tree,0.75,background,bottom-right,311,2,0.0064
+24269e6e-c098-497e-8b9f-153fb0c534cb,Nike shoes,0.95,object,middle-center,845,13,0.0154
+24269e6e-c098-497e-8b9f-153fb0c534cb,person,0.9,object,middle-center,845,13,0.0154
+24269e6e-c098-497e-8b9f-153fb0c534cb,sidewalk,0.85,background,unknown,845,13,0.0154
+ea349e33-1f5e-4a73-bf46-d0fb28554838,man,0.9,object,middle-right,270,3,0.0111
+ea349e33-1f5e-4a73-bf46-d0fb28554838,bench,0.85,object,middle-left,270,3,0.0111
+ea349e33-1f5e-4a73-bf46-d0fb28554838,background,0.8,background,unknown,270,3,0.0111
+ea349e33-1f5e-4a73-bf46-d0fb28554838,red socks,0.95,object,unknown,270,3,0.0111
+ea349e33-1f5e-4a73-bf46-d0fb28554838,red shoes,0.95,object,unknown,270,3,0.0111
+ea349e33-1f5e-4a73-bf46-d0fb28554838,ring,0.7,object,unknown,270,3,0.0111
+96969790-2624-49ab-bb00-88cd7901240c,sneakers,0.95,object,middle-center,811,9,0.0111
+96969790-2624-49ab-bb00-88cd7901240c,man,0.9,object,middle-right,811,9,0.0111
+96969790-2624-49ab-bb00-88cd7901240c,surface,0.8,object,middle-center,811,9,0.0111
+0e54ee67-be56-42cf-945f-dc4292a1f006,Nike Winflo 10,0.95,object,middle-center,781,18,0.023
+0e54ee67-be56-42cf-945f-dc4292a1f006,white background,0.9,background,unknown,781,18,0.023
+0e54ee67-be56-42cf-945f-dc4292a1f006,blue accents,0.85,object,middle-center,781,18,0.023
+65b1970f-9e22-4854-abd9-888c30b20107,sneaker,0.95,object,middle-center,445,6,0.0135
+65b1970f-9e22-4854-abd9-888c30b20107,Nike,0.9,brand,middle-center,445,6,0.0135
+65b1970f-9e22-4854-abd9-888c30b20107,high-quality,0.85,emotion,unknown,445,6,0.0135
+65b1970f-9e22-4854-abd9-888c30b20107,advertisement,0.8,context,unknown,445,6,0.0135
+8567d82f-fd6d-4a70-9236-b691aed7d5ea,basketball player,0.95,object,middle-center,1445,63,0.0436
+8567d82f-fd6d-4a70-9236-b691aed7d5ea,Nike shoes,0.98,object,middle-center,1445,63,0.0436
+8567d82f-fd6d-4a70-9236-b691aed7d5ea,basketball court,0.9,background,middle-center,1445,63,0.0436
+2b81bae9-7cf6-4313-852b-d8f4dd048071,Nike basketball shoe,0.95,object,middle-center,399,7,0.0175
+2b81bae9-7cf6-4313-852b-d8f4dd048071,white background,0.9,background,unknown,399,7,0.0175
+2b81bae9-7cf6-4313-852b-d8f4dd048071,support and comfort,0.85,emotion,unknown,399,7,0.0175
+2b81bae9-7cf6-4313-852b-d8f4dd048071,black swoosh logo,0.92,object,middle-right,399,7,0.0175
+c315b840-380d-4730-96d4-909440a6de48,sneakers,0.95,object,middle-center,850,21,0.0247
+c315b840-380d-4730-96d4-909440a6de48,Nike logo,0.9,object,middle-center,850,21,0.0247
+c315b840-380d-4730-96d4-909440a6de48,person,0.85,object,middle-left,850,21,0.0247
+317049b3-6d33-4701-9cef-32a135824374,sneaker,0.95,object,middle-center,667,15,0.0225
+317049b3-6d33-4701-9cef-32a135824374,red background,0.9,background,unknown,667,15,0.0225
+8ea9036e-eb0e-4d52-a6a8-e1d846eeb95d,young man,0.9,object,bottom-left,455,4,0.0088
+8ea9036e-eb0e-4d52-a6a8-e1d846eeb95d,Nike basketball shoes,0.95,object,middle-center,455,4,0.0088
+8ea9036e-eb0e-4d52-a6a8-e1d846eeb95d,bench,0.85,object,bottom-left,455,4,0.0088
+8ea9036e-eb0e-4d52-a6a8-e1d846eeb95d,clothing,0.8,object,bottom-left,455,4,0.0088
+aa3da911-cf06-4edd-b135-2f88ee3f6dda,sneaker,0.95,object,middle-center,703,16,0.0228
+aa3da911-cf06-4edd-b135-2f88ee3f6dda,orange background,0.9,background,unknown,703,16,0.0228
+42e527f5-e1dc-4fbb-8f49-e95312703135,tennis shoe,0.9,object,middle-center,624,11,0.0176
+42e527f5-e1dc-4fbb-8f49-e95312703135,clean background,0.85,background,unknown,624,11,0.0176
+42e527f5-e1dc-4fbb-8f49-e95312703135,hard surface,0.8,background,bottom-center,624,11,0.0176
+42e527f5-e1dc-4fbb-8f49-e95312703135,prominent position,0.95,design,unknown,624,11,0.0176
+822f49f0-975c-4281-8fb4-227ddc0bbce6,woman,0.95,object,middle-center,1005,39,0.0388
+822f49f0-975c-4281-8fb4-227ddc0bbce6,confidence,0.9,emotion,middle-center,1005,39,0.0388
+822f49f0-975c-4281-8fb4-227ddc0bbce6,background,0.85,background,unknown,1005,39,0.0388
+822f49f0-975c-4281-8fb4-227ddc0bbce6,tattoo,0.8,object,middle-center,1005,39,0.0388
+b4075fd9-6ee0-4373-9ab5-adad3238f96f,young boy,0.95,object,middle-center,647,14,0.0216
+b4075fd9-6ee0-4373-9ab5-adad3238f96f,blue hoodie,0.97,object,middle-center,647,14,0.0216
+b4075fd9-6ee0-4373-9ab5-adad3238f96f,blue wall,0.9,background,unknown,647,14,0.0216
+b4075fd9-6ee0-4373-9ab5-adad3238f96f,positive atmosphere,0.93,emotion,unknown,647,14,0.0216
+8d2e4780-22b3-439f-a215-8445ddf05ab7,shoes,0.95,object,middle-center,625,9,0.0144
+8d2e4780-22b3-439f-a215-8445ddf05ab7,person,0.9,object,middle-center,625,9,0.0144
+8d2e4780-22b3-439f-a215-8445ddf05ab7,wooded area,0.85,background,unknown,625,9,0.0144
+8d2e4780-22b3-439f-a215-8445ddf05ab7,motion,0.8,emotion,unknown,625,9,0.0144
+22eb598d-3508-41b7-9d3f-4e8f92c509bb,Nike Air Max 90,0.95,object,middle-center,491,5,0.0102
+22eb598d-3508-41b7-9d3f-4e8f92c509bb,white background,0.9,background,unknown,491,5,0.0102
+22eb598d-3508-41b7-9d3f-4e8f92c509bb,red color prominence,0.9,emotion,unknown,491,5,0.0102
+22eb598d-3508-41b7-9d3f-4e8f92c509bb,sporty style,0.85,emotion,unknown,491,5,0.0102
+3addc8dd-fc30-4c71-8d73-bf14e15d4299,young boy,0.95,object,middle-center,716,16,0.0223
+3addc8dd-fc30-4c71-8d73-bf14e15d4299,colorful outfit,0.9,object,middle-center,716,16,0.0223
+3addc8dd-fc30-4c71-8d73-bf14e15d4299,green bench,0.85,object,bottom-left,716,16,0.0223
+3addc8dd-fc30-4c71-8d73-bf14e15d4299,cushions,0.8,object,middle-center,716,16,0.0223
+3addc8dd-fc30-4c71-8d73-bf14e15d4299,playful,0.92,emotion,unknown,716,16,0.0223
+5bc83d0b-31fd-4fa2-a454-ddc5da6286b1,sneakers,0.95,object,middle-right,313,0,0.0
+5bc83d0b-31fd-4fa2-a454-ddc5da6286b1,skateboard,0.9,object,bottom-right,313,0,0.0
+5bc83d0b-31fd-4fa2-a454-ddc5da6286b1,socks,0.85,object,unknown,313,0,0.0
+5bc83d0b-31fd-4fa2-a454-ddc5da6286b1,lifestyle,0.88,emotion,unknown,313,0,0.0
+b54b5e2f-bc1a-494f-b694-45a0b47442ef,young man,0.95,object,middle-left,410,8,0.0195
+b54b5e2f-bc1a-494f-b694-45a0b47442ef,sneakers,0.98,object,middle-center,410,8,0.0195
+b54b5e2f-bc1a-494f-b694-45a0b47442ef,basketball hoop,0.9,object,middle-right,410,8,0.0195
+b54b5e2f-bc1a-494f-b694-45a0b47442ef,urban setting,0.85,background,unknown,410,8,0.0195
+d6fea85b-60aa-4e8c-a759-31a1637cc0ee,Nike Winflo 10 sneaker,0.95,object,middle-center,1429,67,0.0469
+d6fea85b-60aa-4e8c-a759-31a1637cc0ee,color scheme,0.9,object,middle-center,1429,67,0.0469
+d6fea85b-60aa-4e8c-a759-31a1637cc0ee,center positioning,0.85,composition,middle-center,1429,67,0.0469
+47f298e7-8e4f-447e-9836-73d3c2c934f4,white shoe,0.9,object,middle-center,1484,62,0.0418
+47f298e7-8e4f-447e-9836-73d3c2c934f4,concrete stairs,0.85,object,middle-center,1484,62,0.0418
+47f298e7-8e4f-447e-9836-73d3c2c934f4,socks,0.7,object,middle-center,1484,62,0.0418
+47f298e7-8e4f-447e-9836-73d3c2c934f4,sense of movement,0.8,emotion,middle-center,1484,62,0.0418
+088e21ce-9900-4419-9b4f-3f547fc9ffed,sneakers,0.9,object,middle-center,961,33,0.0343
+088e21ce-9900-4419-9b4f-3f547fc9ffed,background,0.95,background,unknown,961,33,0.0343
+088e21ce-9900-4419-9b4f-3f547fc9ffed,arrangement,0.85,composition,middle-center,961,33,0.0343
+088e21ce-9900-4419-9b4f-3f547fc9ffed,design elements,0.88,object,middle-center,961,33,0.0343
+60aab72a-4ac1-4559-8f5f-b63e433a6b59,young man,0.95,object,middle-center,652,13,0.0199
+60aab72a-4ac1-4559-8f5f-b63e433a6b59,basketball,0.9,object,middle-center,652,13,0.0199
+60aab72a-4ac1-4559-8f5f-b63e433a6b59,basketball court,0.92,background,unknown,652,13,0.0199
+60aab72a-4ac1-4559-8f5f-b63e433a6b59,black and white photo,0.85,emotion,unknown,652,13,0.0199
+c499217b-28c1-45aa-b07a-bb5e745763a1,Nike Sneakers,0.95,object,middle-center,574,11,0.0192
+c499217b-28c1-45aa-b07a-bb5e745763a1,Plaid Shirt,0.9,object,middle-left,574,11,0.0192
+c499217b-28c1-45aa-b07a-bb5e745763a1,Sidewalk,0.85,background,bottom-center,574,11,0.0192
+c499217b-28c1-45aa-b07a-bb5e745763a1,City Setting,0.8,background,unknown,574,11,0.0192
+eaa251e4-297c-4298-9863-789c7eeeee89,sneakers,0.95,object,middle-center,498,4,0.008
+eaa251e4-297c-4298-9863-789c7eeeee89,background,0.85,background,unknown,498,4,0.008
+eaa251e4-297c-4298-9863-789c7eeeee89,color scheme,0.9,emotion,unknown,498,4,0.008
+6b6c1408-c45c-4cc1-9889-2618b968779e,sneaker,0.95,object,middle-center,991,31,0.0313
+6b6c1408-c45c-4cc1-9889-2618b968779e,brown surface,0.9,background,middle-center,991,31,0.0313
+6b6c1408-c45c-4cc1-9889-2618b968779e,white sole,0.85,object,middle-center,991,31,0.0313
+6b6c1408-c45c-4cc1-9889-2618b968779e,color scheme,0.8,emotion,unknown,991,31,0.0313
+d3a39eeb-23c0-4107-b356-44b7f08e12f9,Nike Air Force 1 sneakers,0.95,object,middle-center,409,5,0.0122
+d3a39eeb-23c0-4107-b356-44b7f08e12f9,white background,0.9,background,unknown,409,5,0.0122
+d3a39eeb-23c0-4107-b356-44b7f08e12f9,color scheme,0.85,emotion,unknown,409,5,0.0122
+d3a39eeb-23c0-4107-b356-44b7f08e12f9,design features,0.8,object,unknown,409,5,0.0122
+5c6ab5e0-5e13-4712-a480-f4549985e8eb,girl,0.95,object,middle-center,971,12,0.0124
+5c6ab5e0-5e13-4712-a480-f4549985e8eb,hoodie,0.9,object,middle-center,971,12,0.0124
+5c6ab5e0-5e13-4712-a480-f4549985e8eb,background,0.85,background,unknown,971,12,0.0124
+5c6ab5e0-5e13-4712-a480-f4549985e8eb,outfit,0.8,object,middle-center,971,12,0.0124
+7daa2078-93e6-4aca-bd03-4bbaeaedc42c,man,0.95,object,middle-center,577,8,0.0139
+7daa2078-93e6-4aca-bd03-4bbaeaedc42c,watch,0.9,object,middle-left,577,8,0.0139
+7daa2078-93e6-4aca-bd03-4bbaeaedc42c,forest,0.85,background,unknown,577,8,0.0139
+7daa2078-93e6-4aca-bd03-4bbaeaedc42c,motion,0.88,emotion,middle-right,577,8,0.0139
+7daa2078-93e6-4aca-bd03-4bbaeaedc42c,fitness,0.92,emotion,bottom-center,577,8,0.0139
+069e79a0-0c35-4768-a37b-1aa858b69424,Nike Air Max shoe,0.95,object,middle-center,849,27,0.0318
+069e79a0-0c35-4768-a37b-1aa858b69424,yellow and black sole,0.9,object,middle-center,849,27,0.0318
+069e79a0-0c35-4768-a37b-1aa858b69424,grey background,0.85,background,unknown,849,27,0.0318
+c8668a81-32f6-4774-bd1a-5471778aecc2,shoe,0.95,object,middle-center,443,10,0.0226
+c8668a81-32f6-4774-bd1a-5471778aecc2,sole,0.9,object,unknown,443,10,0.0226
+c8668a81-32f6-4774-bd1a-5471778aecc2,color scheme,0.85,background,unknown,443,10,0.0226
+c8668a81-32f6-4774-bd1a-5471778aecc2,design,0.8,emotion,unknown,443,10,0.0226
+8f94f441-3074-4efb-8977-55d1a9be78e8,Nike shoe,0.95,object,middle-center,557,13,0.0233
+8f94f441-3074-4efb-8977-55d1a9be78e8,color scheme,0.9,emotion,unknown,557,13,0.0233
+8f94f441-3074-4efb-8977-55d1a9be78e8,Nike swoosh logo,0.85,object,middle-right,557,13,0.0233
+8f94f441-3074-4efb-8977-55d1a9be78e8,background,0.8,background,unknown,557,13,0.0233
+8f94f441-3074-4efb-8977-55d1a9be78e8,laces,0.75,object,top-center,557,13,0.0233
+dbb9070c-ed59-4e9e-979a-a922d77f9c03,woman,0.95,object,middle-center,472,9,0.0191
+dbb9070c-ed59-4e9e-979a-a922d77f9c03,room,0.87,background,unknown,472,9,0.0191
+dbb9070c-ed59-4e9e-979a-a922d77f9c03,photo style,0.9,object,unknown,472,9,0.0191
+e7fb3226-e327-4e86-b8f2-22de0c2a61d2,smiling,0.95,emotion,middle-center,1601,69,0.0431
+e7fb3226-e327-4e86-b8f2-22de0c2a61d2,green jacket,0.9,object,middle-center,1601,69,0.0431
+e7fb3226-e327-4e86-b8f2-22de0c2a61d2,black tank top,0.88,object,middle-center,1601,69,0.0431
+e7fb3226-e327-4e86-b8f2-22de0c2a61d2,hat,0.85,object,top-center,1601,69,0.0431
+1cd00f4f-c37f-4524-8242-6e43e07d1224,young boy,0.95,object,middle-center,995,30,0.0302
+1cd00f4f-c37f-4524-8242-6e43e07d1224,track suit,0.9,object,middle-center,995,30,0.0302
+1cd00f4f-c37f-4524-8242-6e43e07d1224,jumping,0.85,emotion,middle-center,995,30,0.0302
+1cd00f4f-c37f-4524-8242-6e43e07d1224,vibrant orange background,0.88,background,unknown,995,30,0.0302
+d64163c5-710e-4ba4-82ce-10c66fe1ca68,women,0.95,object,middle-center,759,19,0.025
+d64163c5-710e-4ba4-82ce-10c66fe1ca68,gym,0.9,background,unknown,759,19,0.025
+d64163c5-710e-4ba4-82ce-10c66fe1ca68,fitness,0.88,emotion,unknown,759,19,0.025
+d64163c5-710e-4ba4-82ce-10c66fe1ca68,window,0.85,object,top-center,759,19,0.025
+d64163c5-710e-4ba4-82ce-10c66fe1ca68,sneakers,0.8,object,bottom-center,759,19,0.025
+c28af237-0308-4b9c-a7e8-d15222fdad28,sneakers,0.95,object,middle-center,467,9,0.0193
+c28af237-0308-4b9c-a7e8-d15222fdad28,price tag,0.85,object,bottom-left,467,9,0.0193
+c28af237-0308-4b9c-a7e8-d15222fdad28,background,0.9,background,unknown,467,9,0.0193
+df6ede90-74d8-4303-af19-802b8daeb90c,woman,0.9,object,middle-center,552,10,0.0181
+df6ede90-74d8-4303-af19-802b8daeb90c,cobblestone street,0.85,background,bottom-center,552,10,0.0181
+df6ede90-74d8-4303-af19-802b8daeb90c,trees,0.75,background,middle-left,552,10,0.0181
+df6ede90-74d8-4303-af19-802b8daeb90c,cars,0.8,object,bottom-left,552,10,0.0181
+df6ede90-74d8-4303-af19-802b8daeb90c,movement,0.9,emotion,unknown,552,10,0.0181
+d77b336a-1f48-4191-82f7-10a1de9a84e8,shoe,0.95,object,middle-center,855,26,0.0304
+d77b336a-1f48-4191-82f7-10a1de9a84e8,logo,0.93,object,bottom-right,855,26,0.0304
+d77b336a-1f48-4191-82f7-10a1de9a84e8,centered composition,0.9,emotion,middle-center,855,26,0.0304
+c8456a9a-a79a-4977-9aa6-4836fd9d0b1f,young man,0.95,object,middle-center,649,10,0.0154
+c8456a9a-a79a-4977-9aa6-4836fd9d0b1f,grey sweatshirt,0.9,object,middle-center,649,10,0.0154
+c8456a9a-a79a-4977-9aa6-4836fd9d0b1f,red background,0.93,background,unknown,649,10,0.0154
+c8456a9a-a79a-4977-9aa6-4836fd9d0b1f,energy and movement,0.88,emotion,unknown,649,10,0.0154
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,athletic clothing,0.95,object,middle-center,648,15,0.0231
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,sports shoes,0.98,object,top-center,648,15,0.0231
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,backpacks and handbags,0.9,object,top-left,648,15,0.0231
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,water bottle,0.85,object,bottom-left,648,15,0.0231
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,sports bra,0.87,object,bottom-center,648,15,0.0231
+16688e95-13a9-40fc-8bfc-a4e37fc13ceb,sports bag,0.8,object,bottom-right,648,15,0.0231
+d46d91c2-93ec-46bc-b1b0-aff2c831cfa5,shoe,0.95,object,middle-center,490,9,0.0184
+d46d91c2-93ec-46bc-b1b0-aff2c831cfa5,swoosh logo,0.9,object,middle-right,490,9,0.0184
+d46d91c2-93ec-46bc-b1b0-aff2c831cfa5,color scheme,0.85,background,unknown,490,9,0.0184
+a2727dba-5556-4e30-8d6c-c0c762d0d2e6,sneakers,0.98,object,middle-center,531,5,0.0094
+a2727dba-5556-4e30-8d6c-c0c762d0d2e6,pink background,0.95,background,unknown,531,5,0.0094
+a2727dba-5556-4e30-8d6c-c0c762d0d2e6,minimalistic design,0.9,emotion,unknown,531,5,0.0094
+7f1b9cc0-2dee-4d17-9a25-854f7eea2099,young man,0.95,object,middle-center,663,13,0.0196
+7f1b9cc0-2dee-4d17-9a25-854f7eea2099,convertible car,0.98,object,middle-center,663,13,0.0196
+7f1b9cc0-2dee-4d17-9a25-854f7eea2099,enjoyment,0.9,emotion,unknown,663,13,0.0196
+7f1b9cc0-2dee-4d17-9a25-854f7eea2099,street,0.85,background,unknown,663,13,0.0196
+d92c9bf1-3778-4c4d-be1d-692bde2f64ce,sneaker,0.95,object,middle-center,657,11,0.0167
+d92c9bf1-3778-4c4d-be1d-692bde2f64ce,blue sole,0.9,object,middle-center,657,11,0.0167
+d92c9bf1-3778-4c4d-be1d-692bde2f64ce,white background,0.85,background,unknown,657,11,0.0167
+d92c9bf1-3778-4c4d-be1d-692bde2f64ce,blue swoosh logo,0.88,object,middle-left,657,11,0.0167
+cf280006-3c13-4022-ab4c-605fe666b670,white sneakers,0.95,object,middle-center,814,19,0.0233
+cf280006-3c13-4022-ab4c-605fe666b670,black sole,0.9,object,bottom-center,814,19,0.0233
+cf280006-3c13-4022-ab4c-605fe666b670,white background,0.85,background,unknown,814,19,0.0233
+bd92f955-2988-4869-9593-3e273f47dbd6,young woman,0.95,object,middle-center,637,14,0.022
+bd92f955-2988-4869-9593-3e273f47dbd6,grey sweat suit,0.9,object,middle-center,637,14,0.022
+bd92f955-2988-4869-9593-3e273f47dbd6,studio room,0.85,background,unknown,637,14,0.022
+bd92f955-2988-4869-9593-3e273f47dbd6,athletic wear,0.88,emotion,unknown,637,14,0.022
+89826edb-298b-4e9b-ab97-237b635fe466,woman,0.95,object,middle-center,761,26,0.0342
+89826edb-298b-4e9b-ab97-237b635fe466,black tank top,0.9,object,middle-center,761,26,0.0342
+89826edb-298b-4e9b-ab97-237b635fe466,black pants,0.9,object,middle-center,761,26,0.0342
+89826edb-298b-4e9b-ab97-237b635fe466,gray background,0.85,background,unknown,761,26,0.0342
+89826edb-298b-4e9b-ab97-237b635fe466,confidence,0.8,emotion,unknown,761,26,0.0342
+7767a380-75ec-4a71-96cd-a205f1a61f3a,shoes,0.95,object,middle-center,627,16,0.0255
+7767a380-75ec-4a71-96cd-a205f1a61f3a,circular pattern,0.85,object,middle-center,627,16,0.0255
+7767a380-75ec-4a71-96cd-a205f1a61f3a,vibrant colors,0.9,emotion,unknown,627,16,0.0255
+7767a380-75ec-4a71-96cd-a205f1a61f3a,balance,0.8,emotion,unknown,627,16,0.0255
+b58ba8da-fba8-400a-969c-0bb1c46e7d61,Nike shoes,0.95,object,middle-center,454,5,0.011
+b58ba8da-fba8-400a-969c-0bb1c46e7d61,black shoe,0.9,object,middle-left,454,5,0.011
+b58ba8da-fba8-400a-969c-0bb1c46e7d61,white shoe,0.9,object,middle-right,454,5,0.011
+b58ba8da-fba8-400a-969c-0bb1c46e7d61,white background,0.85,background,unknown,454,5,0.011
+69055c44-2b45-4424-a9cb-6120f61a0eb4,young man,0.95,object,middle-center,1529,48,0.0314
+69055c44-2b45-4424-a9cb-6120f61a0eb4,black shirt,0.9,object,middle-center,1529,48,0.0314
+69055c44-2b45-4424-a9cb-6120f61a0eb4,soccer shoes,0.93,object,middle-center,1529,48,0.0314
+69055c44-2b45-4424-a9cb-6120f61a0eb4,smiling,0.85,emotion,middle-center,1529,48,0.0314
+69055c44-2b45-4424-a9cb-6120f61a0eb4,enthusiasm,0.88,emotion,middle-center,1529,48,0.0314
+7176b051-312c-4a9a-a892-c991c4baf404,Nike shoes,0.95,object,middle-center,762,15,0.0197
+7176b051-312c-4a9a-a892-c991c4baf404,Vomero 17,0.9,object,middle-center,762,15,0.0197
+7176b051-312c-4a9a-a892-c991c4baf404,white background,0.85,background,unknown,762,15,0.0197
+7176b051-312c-4a9a-a892-c991c4baf404,green and blue accents,0.8,object,middle-center,762,15,0.0197
+7176b051-312c-4a9a-a892-c991c4baf404,swoosh logo,0.95,object,middle-right,762,15,0.0197
+702b21c0-dd8c-43fe-8e4b-04a883f82e3d,woman,0.95,object,middle-center,1128,39,0.0346
+702b21c0-dd8c-43fe-8e4b-04a883f82e3d,black shirt,0.9,object,middle-center,1128,39,0.0346
+702b21c0-dd8c-43fe-8e4b-04a883f82e3d,black dress,0.9,object,middle-center,1128,39,0.0346
+702b21c0-dd8c-43fe-8e4b-04a883f82e3d,pose,0.85,emotion,middle-center,1128,39,0.0346
+702b21c0-dd8c-43fe-8e4b-04a883f82e3d,composition,0.8,background,unknown,1128,39,0.0346
+b10585a7-c55b-4ac5-bc07-d4601012fc97,basketball uniform,0.95,object,middle-center,788,19,0.0241
+b10585a7-c55b-4ac5-bc07-d4601012fc97,basketball,0.9,object,middle-center,788,19,0.0241
+b10585a7-c55b-4ac5-bc07-d4601012fc97,basketball court,0.85,background,unknown,788,19,0.0241
+b10585a7-c55b-4ac5-bc07-d4601012fc97,athleticism,0.92,emotion,unknown,788,19,0.0241
+b10585a7-c55b-4ac5-bc07-d4601012fc97,blue headband,0.8,object,top-center,788,19,0.0241
+4a2b7ab2-1944-4e85-8739-a7a0a98074a0,Nike shoes,0.95,object,bottom-center,1246,62,0.0498
+4a2b7ab2-1944-4e85-8739-a7a0a98074a0,red pants,0.9,object,middle-center,1246,62,0.0498
+4a2b7ab2-1944-4e85-8739-a7a0a98074a0,white surface,0.85,background,bottom-center,1246,62,0.0498
+3d73d64e-01ff-425e-a8a8-a9f539a27b23,man,0.8,object,middle-center,633,12,0.019
+3d73d64e-01ff-425e-a8a8-a9f539a27b23,background,0.85,background,unknown,633,12,0.019
+3d73d64e-01ff-425e-a8a8-a9f539a27b23,staircase,0.7,object,top-left,633,12,0.019
+3d73d64e-01ff-425e-a8a8-a9f539a27b23,sneakers,0.9,object,middle-center,633,12,0.019
+1dd4cc4a-ad2a-4860-8048-436db89aca15,sneakers,0.95,object,middle-center,502,7,0.0139
+1dd4cc4a-ad2a-4860-8048-436db89aca15,white background,0.9,background,unknown,502,7,0.0139
+1dd4cc4a-ad2a-4860-8048-436db89aca15,motion,0.85,emotion,unknown,502,7,0.0139
+e296ed03-f424-40fd-b8a1-e64d9ced6fc8,sneakers,0.95,object,middle-center,616,11,0.0179
+e296ed03-f424-40fd-b8a1-e64d9ced6fc8,Nike,0.9,object,middle-center,616,11,0.0179
+e296ed03-f424-40fd-b8a1-e64d9ced6fc8,price tag,0.85,object,middle-right,616,11,0.0179
+e296ed03-f424-40fd-b8a1-e64d9ced6fc8,white background,0.9,background,unknown,616,11,0.0179
+d0e2b546-20d1-4900-854a-2c9184220a86,young man,0.95,object,middle-center,457,12,0.0263
+d0e2b546-20d1-4900-854a-2c9184220a86,Nike Air Force,0.9,object,unknown,457,12,0.0263
+d0e2b546-20d1-4900-854a-2c9184220a86,black and white color scheme,0.85,background,middle-left,457,12,0.0263
+d0e2b546-20d1-4900-854a-2c9184220a86,sneakers,0.88,object,middle-right,457,12,0.0263
+ea592adf-377e-4c79-a509-21c828e22008,young man,0.95,object,middle-center,426,7,0.0164
+ea592adf-377e-4c79-a509-21c828e22008,basketball,0.98,object,top-left,426,7,0.0164
+ea592adf-377e-4c79-a509-21c828e22008,blue wall,0.85,background,unknown,426,7,0.0164
+ea592adf-377e-4c79-a509-21c828e22008,dynamic action,0.9,emotion,unknown,426,7,0.0164
+b04b0f49-437d-4ba9-ac41-3d0d4db1b9e3,Nike shoe,0.95,object,middle-center,587,12,0.0204
+b04b0f49-437d-4ba9-ac41-3d0d4db1b9e3,blue surface,0.9,background,bottom-center,587,12,0.0204
+b04b0f49-437d-4ba9-ac41-3d0d4db1b9e3,white sole,0.85,object,middle-right,587,12,0.0204
+b04b0f49-437d-4ba9-ac41-3d0d4db1b9e3,lacing,0.8,object,middle-left,587,12,0.0204
+63a5b4e4-ac2c-46ee-9707-a03248590fe0,Nike shoe,0.95,object,middle-center,535,8,0.015
+63a5b4e4-ac2c-46ee-9707-a03248590fe0,black swoosh logo,0.9,object,middle-left,535,8,0.015
+63a5b4e4-ac2c-46ee-9707-a03248590fe0,white background,0.85,background,unknown,535,8,0.015
+e968c504-0348-4fdc-8382-ec8b4e55937e,Nike Air Force 1 shoes,0.95,object,middle-center,654,14,0.0214
+e968c504-0348-4fdc-8382-ec8b4e55937e,white surface,0.9,background,unknown,654,14,0.0214
+6d70d6a4-d201-48fd-858e-52add01d844e,man,0.9,object,middle-center,989,33,0.0334
+6d70d6a4-d201-48fd-858e-52add01d844e,yellow shirt,0.95,object,middle-center,989,33,0.0334
+6d70d6a4-d201-48fd-858e-52add01d844e,hat,0.85,object,middle-center,989,33,0.0334
+6d70d6a4-d201-48fd-858e-52add01d844e,white wall,0.9,background,middle-center,989,33,0.0334
+6d70d6a4-d201-48fd-858e-52add01d844e,square format,0.8,other,unknown,989,33,0.0334
+1df7a884-e0d6-4336-82f8-292153d2e30a,Nike shoes,0.95,object,middle-center,1336,51,0.0382
+1df7a884-e0d6-4336-82f8-292153d2e30a,man,0.9,object,middle-center,1336,51,0.0382
+1df7a884-e0d6-4336-82f8-292153d2e30a,white surface,0.85,background,bottom-center,1336,51,0.0382
+2bb96e31-47ae-4794-94c9-b702bf3e0050,young man,0.95,object,middle-center,801,24,0.03
+2bb96e31-47ae-4794-94c9-b702bf3e0050,Nike Air Force 1 shoes,0.9,object,middle-center,801,24,0.03
+2bb96e31-47ae-4794-94c9-b702bf3e0050,wall,0.85,background,unknown,801,24,0.03
+38b1da12-b60b-41c0-a585-d332c963c528,green shoes,0.9,object,middle-center,1561,73,0.0468
+38b1da12-b60b-41c0-a585-d332c963c528,grey sweatpants,0.85,object,middle-center,1561,73,0.0468
+38b1da12-b60b-41c0-a585-d332c963c528,motorcycle,0.95,object,middle-center,1561,73,0.0468
+38b1da12-b60b-41c0-a585-d332c963c528,casual posture,0.8,emotion,middle-center,1561,73,0.0468
+ca819e5f-9b2b-473f-8a2a-890455da67ec,woman,0.95,object,middle-center,1102,20,0.0181
+ca819e5f-9b2b-473f-8a2a-890455da67ec,background,0.9,background,unknown,1102,20,0.0181
+ca819e5f-9b2b-473f-8a2a-890455da67ec,smile,0.85,emotion,middle-center,1102,20,0.0181
+ca819e5f-9b2b-473f-8a2a-890455da67ec,confidence,0.88,emotion,middle-center,1102,20,0.0181
+48cb6127-79f8-4fb6-aa3e-0a00950eb0fc,young girl,0.95,object,middle-center,1069,38,0.0355
+48cb6127-79f8-4fb6-aa3e-0a00950eb0fc,Nike shirt,0.9,object,middle-center,1069,38,0.0355
+48cb6127-79f8-4fb6-aa3e-0a00950eb0fc,red and white Nike shoes,0.92,object,middle-center,1069,38,0.0355
+48cb6127-79f8-4fb6-aa3e-0a00950eb0fc,red chair,0.93,object,bottom-left,1069,38,0.0355
+48cb6127-79f8-4fb6-aa3e-0a00950eb0fc,relaxed position,0.88,emotion,middle-center,1069,38,0.0355
+3fa1a04e-91d9-4eff-8d9a-5d2f18f619aa,woman,0.95,object,middle-center,806,22,0.0273
+3fa1a04e-91d9-4eff-8d9a-5d2f18f619aa,Nike Air Max shoes,0.98,object,middle-center,806,22,0.0273
+3fa1a04e-91d9-4eff-8d9a-5d2f18f619aa,style,0.9,emotion,unknown,806,22,0.0273
+4e7e0964-743f-40d1-ab20-d765a612b417,Nike Air Max shoe,0.95,object,middle-center,884,22,0.0249
+4e7e0964-743f-40d1-ab20-d765a612b417,blue and white color scheme,0.9,color,top-center,884,22,0.0249
+4e7e0964-743f-40d1-ab20-d765a612b417,air cushioning technology,0.85,object,bottom-right,884,22,0.0249
+d40bd3b9-a7c9-4cd2-ae3d-5b4415ba639a,Nike shoes,0.9,object,middle-center,499,7,0.014
+d40bd3b9-a7c9-4cd2-ae3d-5b4415ba639a,red background,0.85,background,unknown,499,7,0.014
+d40bd3b9-a7c9-4cd2-ae3d-5b4415ba639a,Nike swoosh,0.8,object,middle-right,499,7,0.014
+bd2d9cdd-238e-4dd7-96b9-0247e8cb16ce,Nike shoe,0.95,object,middle-center,863,22,0.0255
+bd2d9cdd-238e-4dd7-96b9-0247e8cb16ce,black and white sole,0.9,object,middle-center,863,22,0.0255
+bd2d9cdd-238e-4dd7-96b9-0247e8cb16ce,close-up,0.85,visual style,unknown,863,22,0.0255
+f2362471-5922-4a02-91ae-8d41e941a30c,Nike shoes,0.95,object,middle-center,796,16,0.0201
+f2362471-5922-4a02-91ae-8d41e941a30c,sidewalk,0.85,background,bottom-center,796,16,0.0201
+f2362471-5922-4a02-91ae-8d41e941a30c,close-up,0.9,emotion,unknown,796,16,0.0201
+483d837c-1ee0-49ab-b4dc-d652688f3b01,Nike brand,0.9,object,middle-center,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,new model of sneakers,0.85,object,middle-center,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,cushioning system,0.8,object,middle-center,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,black and white color scheme,0.95,background,middle-center,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,blue and red sole,0.9,object,bottom-center,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,elegance,0.85,emotion,unknown,864,25,0.0289
+483d837c-1ee0-49ab-b4dc-d652688f3b01,performance and style,0.88,emotion,unknown,864,25,0.0289
+a2941c6a-6eb3-42b3-ac4f-5e63e04b39d3,Nike sneakers,0.95,object,bottom-center,877,26,0.0296
+a2941c6a-6eb3-42b3-ac4f-5e63e04b39d3,black jacket,0.85,object,top-center,877,26,0.0296
+a2941c6a-6eb3-42b3-ac4f-5e63e04b39d3,close-up,0.75,background,unknown,877,26,0.0296
+e914ff49-2110-421d-ba05-bf0d864ef76b,Nike Force 1 sneakers,0.95,object,middle-center,442,5,0.0113
+e914ff49-2110-421d-ba05-bf0d864ef76b,concrete surface,0.9,background,unknown,442,5,0.0113
+e914ff49-2110-421d-ba05-bf0d864ef76b,clean composition,0.85,emotion,unknown,442,5,0.0113
+e914ff49-2110-421d-ba05-bf0d864ef76b,grey swoosh,0.8,object,unknown,442,5,0.0113
+1e79a4c5-03c0-4eab-ab2f-b45392192857,Nike shoes,0.95,object,middle-center,444,6,0.0135
+1e79a4c5-03c0-4eab-ab2f-b45392192857,brown surface,0.85,background,unknown,444,6,0.0135
+1e79a4c5-03c0-4eab-ab2f-b45392192857,contrast,0.9,emotion,unknown,444,6,0.0135
+1e79a4c5-03c0-4eab-ab2f-b45392192857,comfort,0.8,emotion,unknown,444,6,0.0135
+9ec0b13b-da49-4867-8dc5-39847e9f0389,Nike shoes,0.95,object,middle-center,953,26,0.0273
+9ec0b13b-da49-4867-8dc5-39847e9f0389,white surface,0.9,background,bottom-center,953,26,0.0273
+9ec0b13b-da49-4867-8dc5-39847e9f0389,man,0.92,object,middle-center,953,26,0.0273
+9ec0b13b-da49-4867-8dc5-39847e9f0389,color scheme,0.89,emotion,unknown,953,26,0.0273
+3dfbc92b-f459-4717-a9ae-4726b84e9f82,sneaker,0.95,object,middle-center,1292,44,0.0341
+3dfbc92b-f459-4717-a9ae-4726b84e9f82,word 'bored',0.9,text,bottom-center,1292,44,0.0341
+2bf6b51b-a6c7-481b-aab2-c789b4c3836b,young child,0.95,object,middle-center,650,13,0.02
+2bf6b51b-a6c7-481b-aab2-c789b4c3836b,Nike sweat suit,0.9,object,middle-center,650,13,0.02
+2bf6b51b-a6c7-481b-aab2-c789b4c3836b,smiling,0.85,emotion,unknown,650,13,0.02
+2bf6b51b-a6c7-481b-aab2-c789b4c3836b,brightly lit room,0.8,background,unknown,650,13,0.02
+6a241627-d400-4dc5-abda-fb96b89bb650,young woman,0.95,object,middle-center,1365,49,0.0359
+6a241627-d400-4dc5-abda-fb96b89bb650,yellow tank top,0.9,object,middle-center,1365,49,0.0359
+6a241627-d400-4dc5-abda-fb96b89bb650,green socks,0.85,object,bottom-center,1365,49,0.0359
+6a241627-d400-4dc5-abda-fb96b89bb650,bench,0.8,background,middle-center,1365,49,0.0359
+6a241627-d400-4dc5-abda-fb96b89bb650,necklace,0.75,object,middle-center,1365,49,0.0359
+c99abb17-6fcb-483e-a8ae-e601b50ca3de,man,0.95,object,middle-center,1089,33,0.0303
+c99abb17-6fcb-483e-a8ae-e601b50ca3de,determination,0.9,emotion,middle-center,1089,33,0.0303
+c99abb17-6fcb-483e-a8ae-e601b50ca3de,street,0.85,background,bottom-center,1089,33,0.0303
+c99abb17-6fcb-483e-a8ae-e601b50ca3de,chairs,0.8,object,bottom-left,1089,33,0.0303
+c99abb17-6fcb-483e-a8ae-e601b50ca3de,handbag,0.75,object,middle-center,1089,33,0.0303
+3a4f3bd5-d245-400e-8884-bc2953d25df6,athletic shoes,0.95,object,unknown,313,6,0.0192
+3a4f3bd5-d245-400e-8884-bc2953d25df6,arrangement,0.9,object,unknown,313,6,0.0192
+3a4f3bd5-d245-400e-8884-bc2953d25df6,visual appeal,0.85,emotion,unknown,313,6,0.0192
+86e83203-a95e-4003-aeea-bdc93f832a49,woman,0.95,object,middle-center,835,20,0.024
+86e83203-a95e-4003-aeea-bdc93f832a49,chair,0.8,object,middle-center,835,20,0.024
+86e83203-a95e-4003-aeea-bdc93f832a49,atmosphere,0.85,emotion,unknown,835,20,0.024
+52488193-b4b8-446f-afd8-26e957804dc7,Nike shoes,0.95,object,middle-center,832,16,0.0192
+52488193-b4b8-446f-afd8-26e957804dc7,platform,0.85,object,bottom-center,832,16,0.0192
+52488193-b4b8-446f-afd8-26e957804dc7,close-up,0.9,object,unknown,832,16,0.0192
+2b9a193b-38fa-4389-8c6a-34112322f1a3,man,0.95,object,middle-center,565,10,0.0177
+2b9a193b-38fa-4389-8c6a-34112322f1a3,shoe,0.9,object,top-left,565,10,0.0177
+2b9a193b-38fa-4389-8c6a-34112322f1a3,jump,0.85,action,middle-center,565,10,0.0177
+2b9a193b-38fa-4389-8c6a-34112322f1a3,athleticism,0.88,emotion,unknown,565,10,0.0177
+2b9a193b-38fa-4389-8c6a-34112322f1a3,background,0.7,background,unknown,565,10,0.0177
+2bf1a1d2-a082-42d5-aee3-b8a7a76d22c5,Nike Air Max 90,0.9,object,middle-center,796,17,0.0214
+2bf1a1d2-a082-42d5-aee3-b8a7a76d22c5,skateboard,0.85,object,bottom-right,796,17,0.0214
+2bf1a1d2-a082-42d5-aee3-b8a7a76d22c5,wooden platform,0.75,background,bottom-center,796,17,0.0214
+2bf1a1d2-a082-42d5-aee3-b8a7a76d22c5,athletic lifestyle,0.8,emotion,top-center,796,17,0.0214
+2bf1a1d2-a082-42d5-aee3-b8a7a76d22c5,movement,0.8,emotion,middle-right,796,17,0.0214
+b93a1e4d-90f6-417f-beed-f9fe98942401,Nike Air Max 1 shoes,0.95,object,middle-center,631,8,0.0127
+b93a1e4d-90f6-417f-beed-f9fe98942401,white surface,0.9,background,bottom-center,631,8,0.0127
+b93a1e4d-90f6-417f-beed-f9fe98942401,swoosh logo,0.92,object,middle-left,631,8,0.0127
+b93a1e4d-90f6-417f-beed-f9fe98942401,lacing system,0.85,object,middle-right,631,8,0.0127
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,young woman,0.95,object,middle-center,655,9,0.0137
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,tattoos,0.9,object,middle-left,655,9,0.0137
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,black tank top,0.85,object,middle-center,655,9,0.0137
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,black shorts,0.85,object,bottom-right,655,9,0.0137
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,bench,0.8,object,bottom-left,655,9,0.0137
+f554a5a2-59c2-4f7e-978e-105c6f2b8464,relaxed posture,0.92,emotion,middle-center,655,9,0.0137
+93ec99fa-e68c-4e8a-9a70-1b0520663926,sneakers,0.9,object,middle-center,471,7,0.0149
+93ec99fa-e68c-4e8a-9a70-1b0520663926,white sole,0.85,object,middle-left,471,7,0.0149
+93ec99fa-e68c-4e8a-9a70-1b0520663926,blue background,0.9,background,unknown,471,7,0.0149
+cd37364e-0d18-4fb7-85c3-7f9b1e7108cb,Nike shoe,0.95,object,middle-center,460,11,0.0239
+cd37364e-0d18-4fb7-85c3-7f9b1e7108cb,blue background,0.9,background,unknown,460,11,0.0239
+cd37364e-0d18-4fb7-85c3-7f9b1e7108cb,white sole,0.85,object,unknown,460,11,0.0239
+cd37364e-0d18-4fb7-85c3-7f9b1e7108cb,white laces,0.8,object,top-right,460,11,0.0239
+d1c4a7b2-5e2e-4fc6-b64a-55229adc1c93,colorful sneakers,0.95,object,bottom-center,535,6,0.0112
+d1c4a7b2-5e2e-4fc6-b64a-55229adc1c93,nike logo,0.9,object,bottom-center,535,6,0.0112
+d1c4a7b2-5e2e-4fc6-b64a-55229adc1c93,skateboard platform,0.85,object,unknown,535,6,0.0112
+d1c4a7b2-5e2e-4fc6-b64a-55229adc1c93,comfortable,0.8,emotion,unknown,535,6,0.0112
+d1c4a7b2-5e2e-4fc6-b64a-55229adc1c93,visually appealing composition,0.9,emotion,unknown,535,6,0.0112
+3b3d8242-f64a-495e-a5e8-409ea54bc63a,Nike sneaker,0.95,object,middle-center,1433,61,0.0426
+3b3d8242-f64a-495e-a5e8-409ea54bc63a,pink background,0.9,background,middle-center,1433,61,0.0426
+0b3dc886-b7c5-4476-ac15-56622aede78b,young man,0.95,object,middle-center,845,20,0.0237
+0b3dc886-b7c5-4476-ac15-56622aede78b,blue jacket,0.9,object,middle-center,845,20,0.0237
+0b3dc886-b7c5-4476-ac15-56622aede78b,tennis court,0.85,background,unknown,845,20,0.0237
+0b3dc886-b7c5-4476-ac15-56622aede78b,casual atmosphere,0.88,emotion,unknown,845,20,0.0237
+0b3dc886-b7c5-4476-ac15-56622aede78b,relaxed position,0.8,emotion,middle-center,845,20,0.0237
+6e872601-c7d1-43a4-9757-122cc86c32ae,Nike Air Force sneakers,0.95,object,middle-center,680,13,0.0191
+6e872601-c7d1-43a4-9757-122cc86c32ae,price tag,0.85,object,top-right,680,13,0.0191
+72bd20ae-6dc0-45d8-ab02-3312fe1b9ef2,white shoe,0.95,object,middle-center,403,8,0.0199
+72bd20ae-6dc0-45d8-ab02-3312fe1b9ef2,red stripe,0.9,object,middle-right,403,8,0.0199
+72bd20ae-6dc0-45d8-ab02-3312fe1b9ef2,white background,0.85,background,unknown,403,8,0.0199
+72bd20ae-6dc0-45d8-ab02-3312fe1b9ef2,lace,0.8,object,middle-left,403,8,0.0199
+8b7cd6ec-700d-431e-a8fb-5fae8407b0a2,sneakers,0.95,object,middle-center,650,17,0.0262
+8b7cd6ec-700d-431e-a8fb-5fae8407b0a2,background,0.9,background,unknown,650,17,0.0262
+162367a6-f415-495f-a504-7678dff948d7,Shoe,0.95,object,middle-center,409,7,0.0171
+162367a6-f415-495f-a504-7678dff948d7,Nike Logo,0.9,object,unknown,409,7,0.0171
+162367a6-f415-495f-a504-7678dff948d7,Color Scheme,0.85,emotion,unknown,409,7,0.0171
+162367a6-f415-495f-a504-7678dff948d7,Athletic Design,0.88,object,unknown,409,7,0.0171
+3926d012-f4b4-4103-b604-42c12c000445,shoe,0.95,object,middle-center,606,14,0.0231
+3926d012-f4b4-4103-b604-42c12c000445,Nike,0.9,brand,unknown,606,14,0.0231
+3926d012-f4b4-4103-b604-42c12c000445,yellow sole,0.85,object feature,middle-center,606,14,0.0231
+3926d012-f4b4-4103-b604-42c12c000445,background,0.8,background,unknown,606,14,0.0231
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,sportswear,0.95,object,middle-center,656,15,0.0229
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,athletic footwear,0.92,object,middle-center,656,15,0.0229
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,functionality,0.85,emotion,unknown,656,15,0.0229
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,comfort,0.88,emotion,unknown,656,15,0.0229
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,arrangement,0.9,object,middle-center,656,15,0.0229
+d66dc9e7-01da-4bc9-aa5a-d52deb7c213e,colors,0.94,background,unknown,656,15,0.0229
+4d8cd3dd-e14f-4620-af49-d1938d89aa2a,Nike Air Max shoes,0.95,object,middle-center,639,13,0.0203
+4d8cd3dd-e14f-4620-af49-d1938d89aa2a,white sole,0.9,object,middle-center,639,13,0.0203
+4d8cd3dd-e14f-4620-af49-d1938d89aa2a,black swoosh logo,0.85,object,middle-right,639,13,0.0203
+4d8cd3dd-e14f-4620-af49-d1938d89aa2a,surface background,0.8,background,unknown,639,13,0.0203
+19bff20f-c440-4955-972a-c76adebdf50b,Nike shoe,0.95,object,middle-center,437,8,0.0183
+19bff20f-c440-4955-972a-c76adebdf50b,blue background,0.9,background,unknown,437,8,0.0183
+19bff20f-c440-4955-972a-c76adebdf50b,vibrant color scheme,0.85,emotion,unknown,437,8,0.0183
+19bff20f-c440-4955-972a-c76adebdf50b,Nike swoosh,0.92,object,middle-left,437,8,0.0183
+735dabd6-686c-4672-9b74-2e259a212b2f,Nike shoe,0.95,object,middle-center,429,6,0.014
+735dabd6-686c-4672-9b74-2e259a212b2f,Nike logo,0.9,object,middle-right,429,6,0.014
+735dabd6-686c-4672-9b74-2e259a212b2f,black background,0.85,background,unknown,429,6,0.014
+735dabd6-686c-4672-9b74-2e259a212b2f,close-up,0.88,context,unknown,429,6,0.014
+03102841-40a3-4a14-98bb-ea8405d4cb41,Nike shoe,0.95,object,middle-center,459,5,0.0109
+03102841-40a3-4a14-98bb-ea8405d4cb41,swoosh logo,0.9,object,middle-left,459,5,0.0109
+03102841-40a3-4a14-98bb-ea8405d4cb41,price tag,0.85,object,middle-right,459,5,0.0109
+03102841-40a3-4a14-98bb-ea8405d4cb41,white background,0.92,background,unknown,459,5,0.0109
+6a2d921d-f044-4346-be19-84af5bcb73ca,man,0.95,object,middle-center,840,12,0.0143
+6a2d921d-f044-4346-be19-84af5bcb73ca,black box,0.9,object,middle-center,840,12,0.0143
+6a2d921d-f044-4346-be19-84af5bcb73ca,relaxed pose,0.92,emotion,unknown,840,12,0.0143
+a4f440d2-16db-487c-8b72-22bcb7b0e6c8,sneakers,0.95,object,middle-center,628,11,0.0175
+a4f440d2-16db-487c-8b72-22bcb7b0e6c8,pyramid formation,0.85,object,middle-center,628,11,0.0175
+a4f440d2-16db-487c-8b72-22bcb7b0e6c8,colors,0.8,background,unknown,628,11,0.0175
+a4f440d2-16db-487c-8b72-22bcb7b0e6c8,aesthetically pleasing,0.9,emotion,unknown,628,11,0.0175
+b5e38ad5-a769-426a-9fc4-0bb19d92e0b5,young man,0.95,object,middle-center,567,13,0.0229
+b5e38ad5-a769-426a-9fc4-0bb19d92e0b5,cityscape,0.9,background,unknown,567,13,0.0229
+b5e38ad5-a769-426a-9fc4-0bb19d92e0b5,tan jacket,0.92,object,middle-center,567,13,0.0229
+b5e38ad5-a769-426a-9fc4-0bb19d92e0b5,clock tower,0.85,background,top-left,567,13,0.0229
+b5e38ad5-a769-426a-9fc4-0bb19d92e0b5,tall building,0.88,background,top-right,567,13,0.0229
+caf74c21-f47c-4532-bd26-8e052095ff8e,sneakers,0.95,object,middle-left,296,2,0.0068
+caf74c21-f47c-4532-bd26-8e052095ff8e,swoosh logo,0.9,object,middle-left,296,2,0.0068
+caf74c21-f47c-4532-bd26-8e052095ff8e,background,0.85,background,unknown,296,2,0.0068
+b1e051fc-8275-499b-811c-e1df8e56b8af,white sneaker,0.95,object,middle-center,504,10,0.0198
+b1e051fc-8275-499b-811c-e1df8e56b8af,black swoosh,0.9,object,middle-left,504,10,0.0198
+b1e051fc-8275-499b-811c-e1df8e56b8af,white background,0.92,background,unknown,504,10,0.0198
+7ab43778-70b7-4deb-a940-e0cd707421cd,white Nike shoes,0.95,object,middle-center,902,41,0.0455
+7ab43778-70b7-4deb-a940-e0cd707421cd,green laces,0.9,object,middle-center,902,41,0.0455
+7ab43778-70b7-4deb-a940-e0cd707421cd,blue surface,0.85,background,middle-center,902,41,0.0455
+7ab43778-70b7-4deb-a940-e0cd707421cd,color scheme,0.8,emotion,unknown,902,41,0.0455
+08107c58-8364-46f5-8a92-2342ee5f35af,young man,0.95,object,middle-center,987,33,0.0334
+08107c58-8364-46f5-8a92-2342ee5f35af,brown outfit,0.9,object,middle-center,987,33,0.0334
+08107c58-8364-46f5-8a92-2342ee5f35af,backpack,0.85,object,middle-center,987,33,0.0334
+08107c58-8364-46f5-8a92-2342ee5f35af,sidewalk,0.8,background,bottom-center,987,33,0.0334
+08107c58-8364-46f5-8a92-2342ee5f35af,body of water,0.75,background,bottom-right,987,33,0.0334
+bad31b09-0b61-4d80-aaeb-6169155622e4,young man,0.95,object,middle-center,627,16,0.0255
+bad31b09-0b61-4d80-aaeb-6169155622e4,chain-link fence,0.9,object,unknown,627,16,0.0255
+bad31b09-0b61-4d80-aaeb-6169155622e4,sidewalk,0.85,background,bottom-center,627,16,0.0255
+bad31b09-0b61-4d80-aaeb-6169155622e4,city environment,0.8,background,unknown,627,16,0.0255
+4be942b8-f2e3-419c-b025-40a65767f614,Nike shoe,0.95,object,middle-left,407,6,0.0147
+4be942b8-f2e3-419c-b025-40a65767f614,sock,0.85,object,middle-left,407,6,0.0147
+4be942b8-f2e3-419c-b025-40a65767f614,sidewalk,0.9,background,bottom-center,407,6,0.0147
+4be942b8-f2e3-419c-b025-40a65767f614,person,0.8,emotion,middle-right,407,6,0.0147
+5e49ad68-ab19-454f-83ca-924ac05353cf,woman,0.95,object,middle-center,581,9,0.0155
+5e49ad68-ab19-454f-83ca-924ac05353cf,white shoes,0.9,object,middle-center,581,9,0.0155
+5e49ad68-ab19-454f-83ca-924ac05353cf,benches,0.85,object,unknown,581,9,0.0155
+5e49ad68-ab19-454f-83ca-924ac05353cf,urban life,0.8,emotion,unknown,581,9,0.0155
+5e49ad68-ab19-454f-83ca-924ac05353cf,leisure,0.75,emotion,unknown,581,9,0.0155
+4b1bd503-4919-4cdb-8ab6-c9f968ac3f31,boy,0.95,object,middle-center,576,10,0.0174
+4b1bd503-4919-4cdb-8ab6-c9f968ac3f31,smiling,0.9,emotion,middle-center,576,10,0.0174
+4b1bd503-4919-4cdb-8ab6-c9f968ac3f31,soccer ball,0.88,object,bottom-left,576,10,0.0174
+4b1bd503-4919-4cdb-8ab6-c9f968ac3f31,large ball,0.85,object,bottom-right,576,10,0.0174
+4b1bd503-4919-4cdb-8ab6-c9f968ac3f31,green background,0.92,background,unknown,576,10,0.0174
+6fca19de-6c69-43c3-b4b5-4b2e1aea8814,bright red sole,0.95,object,middle-center,902,27,0.0299
+6fca19de-6c69-43c3-b4b5-4b2e1aea8814,black background,0.9,background,unknown,902,27,0.0299
+6fca19de-6c69-43c3-b4b5-4b2e1aea8814,white grey shoe,0.9,object,middle-center,902,27,0.0299
+6fca19de-6c69-43c3-b4b5-4b2e1aea8814,red accent,0.85,object,middle-center,902,27,0.0299
+c52779d3-264b-48eb-8f20-3d5f21ee5dad,Nike shoe,0.95,object,middle-center,540,8,0.0148
+c52779d3-264b-48eb-8f20-3d5f21ee5dad,white background,0.9,background,unknown,540,8,0.0148
+c52779d3-264b-48eb-8f20-3d5f21ee5dad,black sole,0.85,object,bottom-center,540,8,0.0148
+c52779d3-264b-48eb-8f20-3d5f21ee5dad,elegance,0.8,emotion,unknown,540,8,0.0148
+c52779d3-264b-48eb-8f20-3d5f21ee5dad,clean appearance,0.75,emotion,unknown,540,8,0.0148
+dac72dd0-2b63-4b13-89a6-f10e3dd2114b,hoodie,0.95,object,top-right,362,6,0.0166
+dac72dd0-2b63-4b13-89a6-f10e3dd2114b,pants,0.9,object,middle-center,362,6,0.0166
+dac72dd0-2b63-4b13-89a6-f10e3dd2114b,sneakers,0.92,object,middle-left,362,6,0.0166
+dac72dd0-2b63-4b13-89a6-f10e3dd2114b,diversity,0.85,emotion,unknown,362,6,0.0166
+dac72dd0-2b63-4b13-89a6-f10e3dd2114b,variety,0.88,emotion,unknown,362,6,0.0166
+a27a68c3-8103-4155-aef9-0cb115338cbb,woman,0.95,object,middle-right,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,chair,0.85,object,bottom-left,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,confidence,0.9,emotion,unknown,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,sophistication,0.88,emotion,unknown,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,jacket,0.8,object,top-left,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,necklace,0.75,object,unknown,311,1,0.0032
+a27a68c3-8103-4155-aef9-0cb115338cbb,earrings,0.78,object,top-right,311,1,0.0032
+af8a7eef-cc37-40fc-be1d-0407e47798bb,man,0.95,object,middle-center,1446,64,0.0443
+af8a7eef-cc37-40fc-be1d-0407e47798bb,blue pants,0.9,object,middle-center,1446,64,0.0443
+af8a7eef-cc37-40fc-be1d-0407e47798bb,blue jacket,0.9,object,middle-center,1446,64,0.0443
+af8a7eef-cc37-40fc-be1d-0407e47798bb,white stripe,0.85,object,middle-center,1446,64,0.0443
+c11ce7d2-ab8f-4a18-a1ea-27de1fee7ef1,Nike shoes,0.95,object,middle-center,635,15,0.0236
+c11ce7d2-ab8f-4a18-a1ea-27de1fee7ef1,cement block,0.9,object,middle-center,635,15,0.0236
+c11ce7d2-ab8f-4a18-a1ea-27de1fee7ef1,casual environment,0.85,background,unknown,635,15,0.0236
+c11ce7d2-ab8f-4a18-a1ea-27de1fee7ef1,comfortable,0.8,emotion,unknown,635,15,0.0236
+1be366d9-5bbd-4fa2-ba15-10c6de835cbe,man,0.95,object,middle-center,513,6,0.0117
+1be366d9-5bbd-4fa2-ba15-10c6de835cbe,posture,0.85,emotion,unknown,513,6,0.0117
+1be366d9-5bbd-4fa2-ba15-10c6de835cbe,background,0.9,background,unknown,513,6,0.0117
+1ef549b3-0bb4-474d-976f-a986d7ccb29d,Nike shoes,0.95,object,middle-center,1326,48,0.0362
+1ef549b3-0bb4-474d-976f-a986d7ccb29d,wooden floor,0.9,background,bottom-center,1326,48,0.0362
+1ef549b3-0bb4-474d-976f-a986d7ccb29d,green accents,0.85,object,middle-center,1326,48,0.0362
+1ef549b3-0bb4-474d-976f-a986d7ccb29d,legs and feet,0.8,object,middle-center,1326,48,0.0362
+c94e6dc4-5aa5-4927-8db8-a76748de6bea,sunglasses,0.95,object,middle-center,1257,60,0.0477
+c94e6dc4-5aa5-4927-8db8-a76748de6bea,rainbow pattern,0.9,object,middle-center,1257,60,0.0477
+c94e6dc4-5aa5-4927-8db8-a76748de6bea,white surface,0.85,background,bottom-center,1257,60,0.0477
+9a428ee0-eeec-4592-beb2-ffd4bb5e6777,Nike sneakers,0.95,object,middle-center,493,5,0.0101
+9a428ee0-eeec-4592-beb2-ffd4bb5e6777,contrast,0.9,visual feature,unknown,493,5,0.0101
+9a428ee0-eeec-4592-beb2-ffd4bb5e6777,foreground,0.85,background,unknown,493,5,0.0101
+c9c3f11b-067e-45f4-ae53-cfce28ec944b,sneaker,0.95,object,middle-center,491,8,0.0163
+c9c3f11b-067e-45f4-ae53-cfce28ec944b,yellow laces,0.9,object,middle-right,491,8,0.0163
+c9c3f11b-067e-45f4-ae53-cfce28ec944b,yellow sole,0.85,object,bottom-right,491,8,0.0163
+7e9577ef-20e1-408d-af65-c3816f75e422,Nike shoes,0.95,object,middle-center,791,21,0.0265
+7e9577ef-20e1-408d-af65-c3816f75e422,grey sock,0.9,object,middle-left,791,21,0.0265
+7e9577ef-20e1-408d-af65-c3816f75e422,sidewalk,0.85,background,bottom-center,791,21,0.0265
+717c07eb-0d61-4c6e-98f1-2a0fc4dbbb43,Nike Air Force 1 sneakers,0.95,object,middle-center,1410,54,0.0383
+717c07eb-0d61-4c6e-98f1-2a0fc4dbbb43,patterned surface,0.85,background,middle-center,1410,54,0.0383
+b6e95347-b278-4931-812d-c829dcdba18e,Nike shoes,0.95,object,middle-center,1003,29,0.0289
+b6e95347-b278-4931-812d-c829dcdba18e,black background,0.9,background,unknown,1003,29,0.0289
+b6e95347-b278-4931-812d-c829dcdba18e,shoe laces,0.85,object,top-center,1003,29,0.0289
+b6e95347-b278-4931-812d-c829dcdba18e,basketball court,0.8,background,bottom-center,1003,29,0.0289
+0bc0440f-1299-4fa0-ab4f-573173f75b54,Nike shoe,0.95,object,middle-center,508,6,0.0118
+0bc0440f-1299-4fa0-ab4f-573173f75b54,swoosh logo,0.9,object,middle-right,508,6,0.0118
+0bc0440f-1299-4fa0-ab4f-573173f75b54,color scheme,0.85,background,unknown,508,6,0.0118
+44b094d7-40dd-4852-8518-7a404ccc9dd3,Nike shoes,0.95,object,middle-center,674,11,0.0163
+44b094d7-40dd-4852-8518-7a404ccc9dd3,pink background,0.9,background,unknown,674,11,0.0163
+0d7940c6-1e6c-43e8-b4b7-93b8453436c6,Nike shoes,0.95,object,middle-center,649,11,0.0169
+0d7940c6-1e6c-43e8-b4b7-93b8453436c6,water droplets,0.9,object,top-center,649,11,0.0169
+0d7940c6-1e6c-43e8-b4b7-93b8453436c6,black and white photograph,0.85,background,unknown,649,11,0.0169
+0d7940c6-1e6c-43e8-b4b7-93b8453436c6,motion,0.8,emotion,unknown,649,11,0.0169
+ae9f099e-d361-46e2-be83-bbdf2d8e3063,Nike shoe,0.95,object,middle-center,498,9,0.0181
+ae9f099e-d361-46e2-be83-bbdf2d8e3063,lightning bolt symbol,0.9,object,middle-left,498,9,0.0181
+ae9f099e-d361-46e2-be83-bbdf2d8e3063,black background,0.85,background,unknown,498,9,0.0181
+6c13b495-3c48-423b-8f3f-5f8cc3f969b5,young girl,0.95,object,middle-center,1469,47,0.032
+6c13b495-3c48-423b-8f3f-5f8cc3f969b5,black box,0.9,object,middle-center,1469,47,0.032
+6c13b495-3c48-423b-8f3f-5f8cc3f969b5,blue shirt,0.85,object,middle-center,1469,47,0.032
+6c13b495-3c48-423b-8f3f-5f8cc3f969b5,green pants,0.85,object,middle-center,1469,47,0.032
+6c13b495-3c48-423b-8f3f-5f8cc3f969b5,posing,0.8,emotion,middle-center,1469,47,0.032
+fd852840-7bd7-4161-a87d-f7469c7c62b3,young man,0.95,object,middle-center,653,11,0.0168
+fd852840-7bd7-4161-a87d-f7469c7c62b3,skateboard,0.9,object,middle-center,653,11,0.0168
+fd852840-7bd7-4161-a87d-f7469c7c62b3,background people,0.85,object,unknown,653,11,0.0168
+fd852840-7bd7-4161-a87d-f7469c7c62b3,skateboarding theme,0.8,emotion,unknown,653,11,0.0168
+eef4a48e-c3f2-4035-ae6a-8ae22860c041,Nike shoes,0.95,object,top-left,280,6,0.0214
+eef4a48e-c3f2-4035-ae6a-8ae22860c041,legs,0.9,object,middle-right,280,6,0.0214
+eef4a48e-c3f2-4035-ae6a-8ae22860c041,stairwell,0.85,background,middle-right,280,6,0.0214
+eef4a48e-c3f2-4035-ae6a-8ae22860c041,socks,0.88,object,middle-right,280,6,0.0214
+1630791a-7ec6-4f52-84c2-e3e552052e77,man,0.95,object,middle-center,677,20,0.0295
+1630791a-7ec6-4f52-84c2-e3e552052e77,skateboard,0.9,object,bottom-left,677,20,0.0295
+1630791a-7ec6-4f52-84c2-e3e552052e77,background building,0.85,background,unknown,677,20,0.0295
+1630791a-7ec6-4f52-84c2-e3e552052e77,skateboard trick,0.92,emotion,middle-center,677,20,0.0295
+dd6a08d2-48d5-4041-b670-88620f1286d6,woman,0.95,object,middle-center,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,Nike shoes,0.9,object,bottom-center,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,handbag,0.85,object,middle-left,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,sidewalk,0.8,background,bottom-center,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,urban environment,0.88,background,unknown,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,fence,0.7,background,bottom-right,537,6,0.0112
+dd6a08d2-48d5-4041-b670-88620f1286d6,graffiti-covered wall,0.75,background,top-left,537,6,0.0112
+1c7ad414-0ac8-40bc-8e9a-3b5f2abc8549,sneakers,0.95,object,middle-center,736,13,0.0177
+1c7ad414-0ac8-40bc-8e9a-3b5f2abc8549,Nike shoes,0.92,object,middle-center,736,13,0.0177
+1c7ad414-0ac8-40bc-8e9a-3b5f2abc8549,red surface,0.85,background,unknown,736,13,0.0177
+1c7ad414-0ac8-40bc-8e9a-3b5f2abc8549,black and white sole,0.88,object,bottom-center,736,13,0.0177
+1c7ad414-0ac8-40bc-8e9a-3b5f2abc8549,black and white laces,0.82,object,middle-left,736,13,0.0177
+3cb19b36-63f3-47b8-82eb-b7559b9a7ba1,sneaker,0.9,object,middle-center,500,10,0.02
+3cb19b36-63f3-47b8-82eb-b7559b9a7ba1,swoosh logo,0.85,object,middle-right,500,10,0.02
+3cb19b36-63f3-47b8-82eb-b7559b9a7ba1,background,0.95,background,unknown,500,10,0.02
+0f659a84-34b7-47d2-a206-69fd6dbba409,Nike shoe,0.95,object,middle-center,630,14,0.0222
+0f659a84-34b7-47d2-a206-69fd6dbba409,black background,0.9,background,unknown,630,14,0.0222
+0f659a84-34b7-47d2-a206-69fd6dbba409,waste-free lifestyle,0.85,emotion,unknown,630,14,0.0222
+0f659a84-34b7-47d2-a206-69fd6dbba409,Nike swoosh,0.92,object,middle-center,630,14,0.0222
+8e58e8de-10af-44dc-bad6-2247946bd755,shoe,0.95,object,middle-center,451,7,0.0155
+8e58e8de-10af-44dc-bad6-2247946bd755,Nike swoosh logo,0.9,object,middle-left,451,7,0.0155
+8e58e8de-10af-44dc-bad6-2247946bd755,color scheme,0.85,background,unknown,451,7,0.0155
+8e58e8de-10af-44dc-bad6-2247946bd755,background,0.88,background,unknown,451,7,0.0155
+635ae4d3-eb97-42fd-a13a-62723c98b280,sneakers,0.95,object,middle-center,611,9,0.0147
+635ae4d3-eb97-42fd-a13a-62723c98b280,nike logo,0.9,object,middle-left,611,9,0.0147
+635ae4d3-eb97-42fd-a13a-62723c98b280,contrast,0.85,emotion,unknown,611,9,0.0147
+635ae4d3-eb97-42fd-a13a-62723c98b280,details,0.88,object,middle-center,611,9,0.0147
+5260c51b-3742-4c00-8bb5-856965849658,woman,0.95,object,middle-center,620,16,0.0258
+5260c51b-3742-4c00-8bb5-856965849658,Nike shoes,0.9,object,middle-left,620,16,0.0258
+5260c51b-3742-4c00-8bb5-856965849658,bus,0.85,object,middle-center,620,16,0.0258
+5260c51b-3742-4c00-8bb5-856965849658,handbag,0.8,object,bottom-left,620,16,0.0258
+c979cd93-5442-4b31-aaae-98660bdc081a,Nike shoes,0.9,object,middle-center,1400,70,0.05
+c979cd93-5442-4b31-aaae-98660bdc081a,cushioning midsole,0.85,object,middle-center,1400,70,0.05
+c979cd93-5442-4b31-aaae-98660bdc081a,red background,0.8,background,middle-center,1400,70,0.05
+630c14f4-9b09-48b6-b5e2-45ce04ff68e6,Nike shoes,0.95,object,middle-center,613,11,0.0179
+630c14f4-9b09-48b6-b5e2-45ce04ff68e6,basketball,0.9,object,unknown,613,11,0.0179
+630c14f4-9b09-48b6-b5e2-45ce04ff68e6,black sole,0.85,object,bottom-center,613,11,0.0179
+630c14f4-9b09-48b6-b5e2-45ce04ff68e6,white surface,0.8,background,unknown,613,11,0.0179
+f1446da6-864e-4ded-bb64-408c54d458a2,sneakers,0.95,object,middle-center,599,14,0.0234
+f1446da6-864e-4ded-bb64-408c54d458a2,Nike,0.9,object,middle-center,599,14,0.0234
+f1446da6-864e-4ded-bb64-408c54d458a2,person,0.85,object,middle-left,599,14,0.0234
+f1446da6-864e-4ded-bb64-408c54d458a2,background,0.8,background,unknown,599,14,0.0234
+d4ed2a6b-f712-46ec-8068-51a2fca9c1f5,Nike Air Force 1 sneakers,0.95,object,middle-center,412,7,0.017
+d4ed2a6b-f712-46ec-8068-51a2fca9c1f5,white background,0.9,background,unknown,412,7,0.017
+d4ed2a6b-f712-46ec-8068-51a2fca9c1f5,pink swoosh logo,0.85,object,unknown,412,7,0.017
+d4ed2a6b-f712-46ec-8068-51a2fca9c1f5,white shoe laces,0.8,object,unknown,412,7,0.017
+8a43fc3f-ae21-4d5d-900d-d69bf319ee50,sneakers,0.95,object,middle-center,1513,67,0.0443
+8a43fc3f-ae21-4d5d-900d-d69bf319ee50,Nike,0.9,object,middle-center,1513,67,0.0443
+8a43fc3f-ae21-4d5d-900d-d69bf319ee50,surface,0.85,background,middle-center,1513,67,0.0443
+8a43fc3f-ae21-4d5d-900d-d69bf319ee50,color scheme,0.8,emotion,middle-center,1513,67,0.0443
+7a0e21b4-067a-4a8b-8ae1-dd3c0c91ec80,Nike shoes,0.95,object,middle-center,568,10,0.0176
+7a0e21b4-067a-4a8b-8ae1-dd3c0c91ec80,black surface,0.9,background,unknown,568,10,0.0176
+7a0e21b4-067a-4a8b-8ae1-dd3c0c91ec80,white sock,0.85,object,bottom-center,568,10,0.0176
+7a0e21b4-067a-4a8b-8ae1-dd3c0c91ec80,person,0.8,object,middle-right,568,10,0.0176
+7a0e21b4-067a-4a8b-8ae1-dd3c0c91ec80,casual lifestyle,0.75,emotion,unknown,568,10,0.0176
+68728282-1dbb-4fd2-bedd-47c879c35709,unique designs,0.85,object,middle-right,257,5,0.0195
+68728282-1dbb-4fd2-bedd-47c879c35709,vertical arrangement,0.8,background,bottom-left,257,5,0.0195
+68728282-1dbb-4fd2-bedd-47c879c35709,eye-catching display,0.88,emotion,bottom-right,257,5,0.0195
+68728282-1dbb-4fd2-bedd-47c879c35709,sneakers,0.95,object,top-left,257,5,0.0195
+68728282-1dbb-4fd2-bedd-47c879c35709,colorful patterns,0.9,object,middle-left,257,5,0.0195
+54d081f2-2ef1-47eb-8fb9-3c4b13acd195,basketball player,0.95,object,middle-center,692,22,0.0318
+54d081f2-2ef1-47eb-8fb9-3c4b13acd195,Nike shoes,0.9,object,bottom-center,692,22,0.0318
+54d081f2-2ef1-47eb-8fb9-3c4b13acd195,basketball,0.85,object,middle-center,692,22,0.0318
+54d081f2-2ef1-47eb-8fb9-3c4b13acd195,athleticism,0.8,emotion,unknown,692,22,0.0318
+54d081f2-2ef1-47eb-8fb9-3c4b13acd195,action,0.88,emotion,unknown,692,22,0.0318
+dfcb37e2-004a-4b51-8aba-6f32971687d7,sneakers,0.95,object,middle-center,409,4,0.0098
+dfcb37e2-004a-4b51-8aba-6f32971687d7,Nike swoosh,0.9,object,middle-right,409,4,0.0098
+dfcb37e2-004a-4b51-8aba-6f32971687d7,white background,0.85,background,unknown,409,4,0.0098
+dfcb37e2-004a-4b51-8aba-6f32971687d7,minimalist appearance,0.8,emotion,unknown,409,4,0.0098
+dfcb37e2-004a-4b51-8aba-6f32971687d7,comfortable design,0.88,emotion,unknown,409,4,0.0098
+0efd5269-4b53-4077-aae8-0a43d2eaa1eb,woman,0.9,object,middle-center,1302,34,0.0261
+0efd5269-4b53-4077-aae8-0a43d2eaa1eb,Nike shoes,0.95,object,middle-center,1302,34,0.0261
+0efd5269-4b53-4077-aae8-0a43d2eaa1eb,checkered floor,0.85,background,bottom-center,1302,34,0.0261
+d92c4f9c-e31d-403d-9fba-5fbbc70a8d93,sneakers,0.95,object,middle-center,1341,51,0.038
+d92c4f9c-e31d-403d-9fba-5fbbc70a8d93,grassy field,0.9,background,bottom-center,1341,51,0.038
+d92c4f9c-e31d-403d-9fba-5fbbc70a8d93,man,0.85,object,middle-center,1341,51,0.038
+d92c4f9c-e31d-403d-9fba-5fbbc70a8d93,socks,0.8,object,middle-center,1341,51,0.038
+7451cfbd-64c8-4b31-a716-f73e270db372,Jordan 4 Retro shoes,0.95,object,middle-center,828,15,0.0181
+7451cfbd-64c8-4b31-a716-f73e270db372,cement surface,0.9,background,bottom-center,828,15,0.0181
+7451cfbd-64c8-4b31-a716-f73e270db372,dark background,0.85,background,unknown,828,15,0.0181
+64de40df-0613-4ab6-8c2e-341f89d0cd79,man,0.95,object,middle-center,957,28,0.0293
+64de40df-0613-4ab6-8c2e-341f89d0cd79,sneakers,0.9,object,middle-center,957,28,0.0293
+64de40df-0613-4ab6-8c2e-341f89d0cd79,umbrella,0.85,object,middle-center,957,28,0.0293
+64de40df-0613-4ab6-8c2e-341f89d0cd79,cityscape,0.92,background,unknown,957,28,0.0293
+57d5bdbc-42b4-405a-a07d-b9d08e8b0529,Nike Air Max Excce,0.9,object,middle-center,494,12,0.0243
+57d5bdbc-42b4-405a-a07d-b9d08e8b0529,white background,0.95,background,unknown,494,12,0.0243
+57d5bdbc-42b4-405a-a07d-b9d08e8b0529,minimalist design,0.8,emotion,unknown,494,12,0.0243
+581fe0e5-416e-40b3-9d89-065745dac7be,white surface,0.9,background,unknown,533,7,0.0131
+581fe0e5-416e-40b3-9d89-065745dac7be,group of people,0.85,object,unknown,533,7,0.0131
+581fe0e5-416e-40b3-9d89-065745dac7be,sneakers,0.8,object,middle-center,533,7,0.0131
+581fe0e5-416e-40b3-9d89-065745dac7be,purple socks,0.75,object,bottom-left,533,7,0.0131
+581fe0e5-416e-40b3-9d89-065745dac7be,white socks,0.7,object,bottom-center,533,7,0.0131
+29003bdd-4b4c-46e3-ac2f-d307515dca36,Nike,0.9,object,middle-center,760,18,0.0237
+29003bdd-4b4c-46e3-ac2f-d307515dca36,shoe,0.95,object,middle-center,760,18,0.0237
+29003bdd-4b4c-46e3-ac2f-d307515dca36,white background,0.8,background,unknown,760,18,0.0237
+29003bdd-4b4c-46e3-ac2f-d307515dca36,foreground,0.85,visual composition,middle-center,760,18,0.0237
+29003bdd-4b4c-46e3-ac2f-d307515dca36,lacing system,0.7,object feature,top-right,760,18,0.0237
+b43fd0a5-cd81-48b7-8a76-023155110cab,sneakers,0.95,object,middle-center,488,10,0.0205
+b43fd0a5-cd81-48b7-8a76-023155110cab,price tag,0.85,object,bottom-right,488,10,0.0205
+b43fd0a5-cd81-48b7-8a76-023155110cab,background,0.9,background,unknown,488,10,0.0205
+e4d262c5-8907-42b8-9b08-538f0ef1c293,Nike shoes,0.95,object,middle-center,835,19,0.0228
+e4d262c5-8907-42b8-9b08-538f0ef1c293,socks,0.85,object,middle-center,835,19,0.0228
+e4d262c5-8907-42b8-9b08-538f0ef1c293,sidewalk,0.8,background,unknown,835,19,0.0228
+5cfe71f6-067d-4639-a812-a2b74425dbe8,green and white Nike shoes,0.95,object,middle-center,900,18,0.02
+5cfe71f6-067d-4639-a812-a2b74425dbe8,dirt surface,0.9,background,bottom-center,900,18,0.02
+5cfe71f6-067d-4639-a812-a2b74425dbe8,movement,0.85,emotion,unknown,900,18,0.02
+5cfe71f6-067d-4639-a812-a2b74425dbe8,socks,0.8,object,middle-center,900,18,0.02
+f7fea13b-99ce-4dae-b724-24dff80780b7,woman,0.8,object,middle-center,1052,21,0.02
+f7fea13b-99ce-4dae-b724-24dff80780b7,red shirt,0.9,object,middle-center,1052,21,0.02
+f7fea13b-99ce-4dae-b724-24dff80780b7,yellow sneakers,0.95,object,middle-center,1052,21,0.02
+f7fea13b-99ce-4dae-b724-24dff80780b7,building,0.7,background,top-center,1052,21,0.02
+f7fea13b-99ce-4dae-b724-24dff80780b7,style,0.85,emotion,unknown,1052,21,0.02
+6b1c1465-7464-451c-be17-302384613153,young man,0.95,object,middle-center,822,26,0.0316
+6b1c1465-7464-451c-be17-302384613153,black hoodie,0.98,object,middle-center,822,26,0.0316
+6b1c1465-7464-451c-be17-302384613153,casual sporty vibe,0.9,emotion,unknown,822,26,0.0316
+99b20441-2f14-4c98-aa86-adeb4683fe95,people,0.95,object,middle-center,927,26,0.028
+99b20441-2f14-4c98-aa86-adeb4683fe95,white jackets,0.9,object,middle-center,927,26,0.028
+99b20441-2f14-4c98-aa86-adeb4683fe95,white pants,0.9,object,middle-center,927,26,0.028
+99b20441-2f14-4c98-aa86-adeb4683fe95,blue sky,0.8,background,unknown,927,26,0.028
+7515d71d-7e6a-4dc4-9c02-ae857b2329cf,Nike shoes,0.95,object,middle-center,481,6,0.0125
+7515d71d-7e6a-4dc4-9c02-ae857b2329cf,contrast,0.85,emotion,unknown,481,6,0.0125
+7515d71d-7e6a-4dc4-9c02-ae857b2329cf,background,0.9,background,unknown,481,6,0.0125
+9d675af0-e5a4-42e3-bd3a-76f84980852c,children,0.95,object,middle-center,892,23,0.0258
+9d675af0-e5a4-42e3-bd3a-76f84980852c,sports attire,0.9,object,middle-center,892,23,0.0258
+9d675af0-e5a4-42e3-bd3a-76f84980852c,sports ball,0.85,object,middle-left,892,23,0.0258
+9d675af0-e5a4-42e3-bd3a-76f84980852c,black box,0.75,object,middle-right,892,23,0.0258
+9d675af0-e5a4-42e3-bd3a-76f84980852c,archway,0.8,background,top-center,892,23,0.0258
+9d675af0-e5a4-42e3-bd3a-76f84980852c,museum,0.7,background,top-center,892,23,0.0258
+afbf12d8-6dab-4c3f-a06e-0ec1df90c6c1,young man,0.95,object,middle-center,897,22,0.0245
+afbf12d8-6dab-4c3f-a06e-0ec1df90c6c1,sneakers,0.9,object,middle-center,897,22,0.0245
+afbf12d8-6dab-4c3f-a06e-0ec1df90c6c1,stylish,0.85,emotion,unknown,897,22,0.0245
+26e95867-c7db-4241-b54d-81f3dfb02ed8,man,0.95,object,middle-center,716,10,0.014
+26e95867-c7db-4241-b54d-81f3dfb02ed8,hoodie,0.9,object,middle-center,716,10,0.014
+26e95867-c7db-4241-b54d-81f3dfb02ed8,sneakers,0.85,object,middle-center,716,10,0.014
+26e95867-c7db-4241-b54d-81f3dfb02ed8,room,0.88,background,unknown,716,10,0.014
+26e95867-c7db-4241-b54d-81f3dfb02ed8,color scheme,0.92,emotion,unknown,716,10,0.014
+26e95867-c7db-4241-b54d-81f3dfb02ed8,posture,0.89,emotion,unknown,716,10,0.014
+42955dbf-1bd9-451d-86af-898564110422,man,0.9,object,middle-center,937,27,0.0288
+42955dbf-1bd9-451d-86af-898564110422,athletic clothing,0.85,object,middle-center,937,27,0.0288
+42955dbf-1bd9-451d-86af-898564110422,sneakers,0.95,object,bottom-center,937,27,0.0288
+42955dbf-1bd9-451d-86af-898564110422,motion,0.88,emotion,unknown,937,27,0.0288
+5672d7e2-7884-42f5-8408-e2451c0c97ab,young woman,0.9,object,middle-center,954,15,0.0157
+5672d7e2-7884-42f5-8408-e2451c0c97ab,small dog,0.95,object,middle-center,954,15,0.0157
+5672d7e2-7884-42f5-8408-e2451c0c97ab,grassy field,0.85,background,unknown,954,15,0.0157
+5672d7e2-7884-42f5-8408-e2451c0c97ab,black jacket,0.88,object,middle-center,954,15,0.0157
+50576b3c-95f5-4221-8803-afb41d08e8e6,woman,0.95,object,middle-center,826,24,0.0291
+50576b3c-95f5-4221-8803-afb41d08e8e6,car,0.9,object,middle-center,826,24,0.0291
+50576b3c-95f5-4221-8803-afb41d08e8e6,street,0.85,background,unknown,826,24,0.0291
+9a62112b-5601-44ac-8cf4-c142ae77c666,young man,0.95,object,middle-center,1081,29,0.0268
+9a62112b-5601-44ac-8cf4-c142ae77c666,Nike shirt,0.9,object,middle-center,1081,29,0.0268
+9a62112b-5601-44ac-8cf4-c142ae77c666,bench,0.85,object,bottom-left,1081,29,0.0268
+9a62112b-5601-44ac-8cf4-c142ae77c666,cap,0.8,object,top-center,1081,29,0.0268
+9a62112b-5601-44ac-8cf4-c142ae77c666,outfit,0.87,object,middle-center,1081,29,0.0268
+a5e10961-afdb-49b0-8c2e-3c3c3a34bd2c,Nike shoe,0.95,object,middle-center,504,9,0.0179
+a5e10961-afdb-49b0-8c2e-3c3c3a34bd2c,purple background,0.9,background,unknown,504,9,0.0179
+a5e10961-afdb-49b0-8c2e-3c3c3a34bd2c,contrast,0.85,emotion,unknown,504,9,0.0179
+56dc560d-8145-46df-86cf-08473c3dd857,man,0.95,object,middle-center,1347,60,0.0445
+56dc560d-8145-46df-86cf-08473c3dd857,uniform,0.9,object,middle-center,1347,60,0.0445
+56dc560d-8145-46df-86cf-08473c3dd857,jump,0.85,action,middle-center,1347,60,0.0445
+56dc560d-8145-46df-86cf-08473c3dd857,sneakers,0.8,object,middle-center,1347,60,0.0445
+56dc560d-8145-46df-86cf-08473c3dd857,soccer field,0.75,background,bottom-center,1347,60,0.0445
+56dc560d-8145-46df-86cf-08473c3dd857,spotlight,0.7,background,top-center,1347,60,0.0445
+ad509f41-d28b-4f76-af42-95c8db898ce5,Nike sneakers,0.95,object,middle-center,524,6,0.0115
+ad509f41-d28b-4f76-af42-95c8db898ce5,grassy field,0.9,background,unknown,524,6,0.0115
+ad509f41-d28b-4f76-af42-95c8db898ce5,casual atmosphere,0.85,emotion,unknown,524,6,0.0115
+9c6a39bc-f9ac-4f1c-a489-fa94ffff69a9,Nike Air Force 1 sneakers,0.95,object,middle-center,1371,54,0.0394
+9c6a39bc-f9ac-4f1c-a489-fa94ffff69a9,white surface,0.9,background,middle-center,1371,54,0.0394
+bcde2466-30e7-4ff7-8600-16e12cad2d45,woman,0.95,object,middle-center,1420,53,0.0373
+bcde2466-30e7-4ff7-8600-16e12cad2d45,black sports bra,0.9,object,middle-center,1420,53,0.0373
+bcde2466-30e7-4ff7-8600-16e12cad2d45,grey jacket,0.85,object,middle-center,1420,53,0.0373
+bcde2466-30e7-4ff7-8600-16e12cad2d45,grey wall,0.8,background,middle-center,1420,53,0.0373
+28ed4095-d869-4cfa-a7d0-eb8dfc3a555f,young woman,0.95,object,middle-center,800,13,0.0163
+28ed4095-d869-4cfa-a7d0-eb8dfc3a555f,blue tank top,0.9,object,middle-center,800,13,0.0163
+28ed4095-d869-4cfa-a7d0-eb8dfc3a555f,basketball,0.85,object,middle-center,800,13,0.0163
+28ed4095-d869-4cfa-a7d0-eb8dfc3a555f,blue wall,0.8,background,unknown,800,13,0.0163
+28ed4095-d869-4cfa-a7d0-eb8dfc3a555f,athleticism,0.92,emotion,unknown,800,13,0.0163
+ef242851-ecc7-40bd-ae09-8394a4441cbf,sneakers,0.95,object,bottom-center,537,11,0.0205
+ef242851-ecc7-40bd-ae09-8394a4441cbf,background,0.9,background,unknown,537,11,0.0205
+ef242851-ecc7-40bd-ae09-8394a4441cbf,composition,0.85,emotion,unknown,537,11,0.0205
+7685c1e4-2e3e-4d08-875e-bc49302048ee,blue shirt,0.95,object,middle-center,881,18,0.0204
+7685c1e4-2e3e-4d08-875e-bc49302048ee,black and white logo,0.9,object,middle-center,881,18,0.0204
+7685c1e4-2e3e-4d08-875e-bc49302048ee,plain background,0.85,background,unknown,881,18,0.0204
+26958c2a-68f6-491f-b141-acd7946b8dd9,man,0.9,object,middle-center,995,27,0.0271
+26958c2a-68f6-491f-b141-acd7946b8dd9,brown jacket,0.95,object,middle-center,995,27,0.0271
+26958c2a-68f6-491f-b141-acd7946b8dd9,black chair,0.8,object,middle-center,995,27,0.0271
+26958c2a-68f6-491f-b141-acd7946b8dd9,room,0.85,background,unknown,995,27,0.0271
+26958c2a-68f6-491f-b141-acd7946b8dd9,hat,0.7,object,middle-center,995,27,0.0271
+0d05d30d-de7d-4b37-8c93-5d3702969798,woman,0.95,object,middle-center,979,22,0.0225
+0d05d30d-de7d-4b37-8c93-5d3702969798,black top,0.9,object,middle-center,979,22,0.0225
+0d05d30d-de7d-4b37-8c93-5d3702969798,leggings,0.85,object,middle-center,979,22,0.0225
+0d05d30d-de7d-4b37-8c93-5d3702969798,headband,0.8,object,middle-center,979,22,0.0225
+0d05d30d-de7d-4b37-8c93-5d3702969798,confidence,0.92,emotion,unknown,979,22,0.0225
+9f528d32-cbe6-4fd2-a8ec-d8ebfa110f06,woman,0.9,object,middle-center,1566,60,0.0383
+9f528d32-cbe6-4fd2-a8ec-d8ebfa110f06,pedestal,0.85,object,middle-center,1566,60,0.0383
+9f528d32-cbe6-4fd2-a8ec-d8ebfa110f06,pose,0.88,emotion,middle-center,1566,60,0.0383
+9f528d32-cbe6-4fd2-a8ec-d8ebfa110f06,elegance,0.8,emotion,middle-center,1566,60,0.0383
+9f528d32-cbe6-4fd2-a8ec-d8ebfa110f06,background,0.75,object,middle-center,1566,60,0.0383
+1c34dc6a-8219-40ef-817b-3db5bc52e581,sneakers,0.95,object,middle-center,829,23,0.0277
+1c34dc6a-8219-40ef-817b-3db5bc52e581,person,0.9,object,middle-center,829,23,0.0277
+1c34dc6a-8219-40ef-817b-3db5bc52e581,wooden door,0.85,background,middle-right,829,23,0.0277
+71940375-6cd7-42d2-b7d8-5e8a3ffa5638,woman,0.95,object,middle-center,809,27,0.0334
+71940375-6cd7-42d2-b7d8-5e8a3ffa5638,box,0.85,object,middle-center,809,27,0.0334
+71940375-6cd7-42d2-b7d8-5e8a3ffa5638,boxing pose,0.9,emotion,unknown,809,27,0.0334
+8a974137-fcce-46d2-b95f-44fd18821e09,Nike,0.95,object,top-center,1100,37,0.0336
+8a974137-fcce-46d2-b95f-44fd18821e09,people,0.9,object,middle-center,1100,37,0.0336
+8a974137-fcce-46d2-b95f-44fd18821e09,arrangement,0.85,object,middle-center,1100,37,0.0336
+8a974137-fcce-46d2-b95f-44fd18821e09,connection,0.8,emotion,middle-center,1100,37,0.0336
+8a974137-fcce-46d2-b95f-44fd18821e09,background,0.75,background,top-right,1100,37,0.0336
+d068a8c5-f542-4ba6-a33c-37efa287e0d6,woman,0.95,object,middle-center,769,9,0.0117
+d068a8c5-f542-4ba6-a33c-37efa287e0d6,sports bra,0.9,object,middle-center,769,9,0.0117
+d068a8c5-f542-4ba6-a33c-37efa287e0d6,leggings,0.9,object,middle-center,769,9,0.0117
+d068a8c5-f542-4ba6-a33c-37efa287e0d6,room,0.85,background,unknown,769,9,0.0117
+d068a8c5-f542-4ba6-a33c-37efa287e0d6,pose,0.92,emotion,unknown,769,9,0.0117
