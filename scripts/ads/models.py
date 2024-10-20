@@ -37,6 +37,7 @@ class Feature(BaseModel):
     keyword: str
     confidence_score: float = Field(ge=0.0, le=1.0)
     category: str
+    # Category (e.g., "emotion", "product", "brand", "person", "setting", "text", "call-to-action")
     location: Literal[
         "top-left",
         "top-center",
