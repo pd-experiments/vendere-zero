@@ -49,7 +49,7 @@ async function insertAdEvaluation(
         throw featureError;
     }
 
-    const featureIds = featureData.map((feature) => feature.id);
+    const featureIds = featureData.map((feature: Feature) => feature.id);
 
     const visualAttributeData = adEvaluation.features.flatMap((
         feature,

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { openai } from '@/lib/ai';
 import { z } from 'zod';
 import { zodResponseFormat } from "openai/helpers/zod";
 import { parsePDF } from '@/app/utils/pdfParser';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { summarizeReferenceImages } from '@/app/utils/imageSummarizer';
+import fs from 'fs/promises';
+import path from 'path';
 
 const CompanyProfileSchema = z.object({
   name: z.string(),
@@ -21,12 +20,16 @@ const AdFeaturesSchema = z.object({
   colors: z.array(z.string()),
   text: z.string(),
   goal: z.string(),
+  includeFaces: z.boolean(),
+  includeBrandLogo: z.boolean(),
+  includeHandsFingers: z.boolean(),
   additionalElements: z.array(z.string()).optional(),
 });
 
 const AdRequestSchema = z.object({
   companyProfile: CompanyProfileSchema,
   adFeatures: AdFeaturesSchema,
+  userPrompt: z.string(), 
 });
 
 type AdRequest = z.infer<typeof AdRequestSchema>;
@@ -38,33 +41,52 @@ async function generateAdPrompt(request: AdRequest): Promise<string> {
     messages: [
       {
         role: "system",
-        content: "You are an expert advertising creative director. Given details about a company and specific ad requirements, create a detailed and compelling prompt for DALL-E to generate an advertisement image."
+        content: "You are an expert advertising creative director. Given details about a company, specific ad requirements, and a user prompt, create a detailed and compelling prompt for DALL-E to generate an advertisement image. Pay special attention to requests for including faces, brand logos, and hands/fingers in the image."
       },
       {
         role: "user",
-        content: `Generate a creative and detailed ad image prompt based on this company profile and ad features: ${requestString}`
+        content: `Generate a creative and detailed ad image prompt based on this company profile, ad features, and user prompt: ${requestString}. Be sure to explicitly mention the inclusion or exclusion of faces, brand logo, and hands/fingers as specified in the ad features.`
       }
     ],
-    max_tokens: 200
+    max_tokens: 300
   });
 
   return response.choices[0].message.content || "A compelling advertisement image";
 }
 
-async function generateAdRequest(): Promise<AdRequest> {
+async function generateAdRequest(userPrompt: string, includeFaces: boolean, includeBrandLogo: boolean, includeHandsFingers: boolean): Promise<AdRequest> {
   try {
     const brandInfo = await parsePDF();
+
+    // Get reference image URLs
+    const nikeImagesDir = path.join(process.cwd(), 'public', 'nike');
+    const imageFiles = await fs.readdir(nikeImagesDir);
+    const imageUrls = imageFiles
+      .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
+      .map(file => `${process.env.BASE_URL}/nike/${file}`);
+
+    // Summarize reference images
+    const imageSummaries = await summarizeReferenceImages(imageUrls);
 
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are an expert in creating structured ad requests based on brand information. Generate a company profile and ad features based on the provided brand information."
+          content: "You are an expert in creating structured ad requests based on brand information, user prompts, and reference images. Generate a company profile and ad features based on the provided information."
         },
         {
           role: "user",
-          content: `Based on the following brand information, create a structured ad request with a company profile and ad features: ${brandInfo}`
+          content: `Based on the following information, create a structured ad request with a company profile and ad features:
+          Brand Information: ${brandInfo}
+          User Prompt: ${userPrompt}
+          Include Faces: ${includeFaces}
+          Include Brand Logo: ${includeBrandLogo}
+          Include Hands/Fingers: ${includeHandsFingers}
+          Reference Image Summaries:
+          ${imageSummaries}
+          
+          Use the reference image summaries to inform your decisions about style, color schemes, and overall aesthetic for the ad features.`
         }
       ],
       response_format: zodResponseFormat(AdRequestSchema, "ad_request"),
@@ -81,19 +103,25 @@ async function generateAdRequest(): Promise<AdRequest> {
   }
 }
 
-export async function POST() {  
+export async function POST(request: Request) {  
   try {
-    const adRequest = await generateAdRequest();
+    const { userPrompt, includeFaces, includeBrandLogo, includeHandsFingers } = await request.json();
+    
+    if (!userPrompt) {
+      return NextResponse.json({ error: 'User prompt is required' }, { status: 400 });
+    }
+
+    const adRequest = await generateAdRequest(userPrompt, includeFaces, includeBrandLogo, includeHandsFingers);
     const adPrompt = await generateAdPrompt(adRequest);
 
     const response = await openai.images.generate({
       model: "dall-e-3",
-      prompt: adPrompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "standard",
-      style: "natural"
-    });
+        prompt: adPrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        style: "natural"
+      });
 
     const imageUrl = response.data[0].url;
 
