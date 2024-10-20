@@ -58,19 +58,19 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
   try {
     const brandInfo = await parsePDF();
 
-    const nikeImagesDir = path.join(process.cwd(), 'public', 'refimages', 'nike');
+    const imagesDir = path.join(process.cwd(), 'public', 'refimages', 'beekeeper');
     let imageFiles: string[];
     try {
-      imageFiles = await fs.readdir(nikeImagesDir);
+      imageFiles = await fs.readdir(imagesDir);
     } catch (error) {
-      console.error('Error reading Nike images directory:', error);
+      console.error('Error reading images directory:', error);
       imageFiles = [];
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const imageUrls = imageFiles
       .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
-      .map(file => `${baseUrl}/refimages/nike/${file}`);
+      .map(file => `${baseUrl}/refimages/beekeeper/${file}`);
 
     const imageSummaries = await summarizeReferenceImages(imageUrls);
 
@@ -79,7 +79,7 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
       messages: [
         {
           role: "system",
-          content: "You are an expert in creating innovative and creative ad requests based on brand information, user prompts, and reference images. Generate a company profile and ad features that push the boundaries of conventional advertising while ensuring brand recognition."
+          content: "You are an expert in creating innovative yet clean ad requests based on brand information, user prompts, and reference images. Generate a company profile and ad features that align with the brand's aesthetic while ensuring brand recognition."
         },
         {
           role: "user",
@@ -92,14 +92,16 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
           Reference Image Summaries:
           ${imageSummaries}
           
-          Use the reference image summaries as creative inspiration, not as direct instructions. Think about the emotions, themes, and abstract concepts they evoke, and use these to inform your ad features in unexpected ways. Be bold and innovative in your approach.
+          Use the reference image summaries as creative inspiration, not as direct instructions. Consider the emotions, themes, and abstract concepts they evoke, and use these to inform your ad features in a way that aligns with the brand's aesthetic.
           
           IMPORTANT REQUIREMENTS:
-          1. The brand logo MUST be included in the ad. Ensure it's incorporated in a visually striking and integral way.
+          1. The brand logo MUST be included in the ad. Incorporate it in a way that feels natural and integral to the design.
           2. Limit any text in the ad features to a maximum of 4 words.
-          3. Focus on creating a visually striking and emotionally impactful ad concept that maintains strong brand identity.
+          3. Focus on creating a clean, simple, and visually appealing ad concept that maintains strong brand identity.
+          4. Keep the design elegant and not overly complex. It should fit the vibe of the brand without being gaudy or overly elaborate.
+          5. Prioritize a minimalist approach that effectively communicates the brand message.
           
-          Remember, while being creative, the brand logo is a non-negotiable element that must be present in the ad concept.`
+          Remember, the goal is to create an ad that is clean, simple, and true to the brand's aesthetic while still being impactful.`
         }
       ],
       response_format: zodResponseFormat(AdRequestSchema, "ad_request"),
