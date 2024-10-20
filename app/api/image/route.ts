@@ -58,14 +58,20 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
   try {
     const brandInfo = await parsePDF();
 
-    // Get reference image URLs
-    const nikeImagesDir = path.join(process.cwd(), 'public', 'nike');
-    const imageFiles = await fs.readdir(nikeImagesDir);
+    const nikeImagesDir = path.join(process.cwd(), 'public', 'refimages', 'nike');
+    let imageFiles: string[];
+    try {
+      imageFiles = await fs.readdir(nikeImagesDir);
+    } catch (error) {
+      console.error('Error reading Nike images directory:', error);
+      imageFiles = [];
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const imageUrls = imageFiles
       .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
-      .map(file => `${process.env.BASE_URL}/nike/${file}`);
+      .map(file => `${baseUrl}/refimages/nike/${file}`);
 
-    // Summarize reference images
     const imageSummaries = await summarizeReferenceImages(imageUrls);
 
     const completion = await openai.beta.chat.completions.parse({
@@ -73,11 +79,11 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
       messages: [
         {
           role: "system",
-          content: "You are an expert in creating structured ad requests based on brand information, user prompts, and reference images. Generate a company profile and ad features based on the provided information."
+          content: "You are an expert in creating innovative and creative ad requests based on brand information, user prompts, and reference images. Generate a company profile and ad features that push the boundaries of conventional advertising while ensuring brand recognition."
         },
         {
           role: "user",
-          content: `Based on the following information, create a structured ad request with a company profile and ad features:
+          content: `Create a structured ad request with a company profile and ad features based on the following information:
           Brand Information: ${brandInfo}
           User Prompt: ${userPrompt}
           Include Faces: ${includeFaces}
@@ -86,7 +92,14 @@ async function generateAdRequest(userPrompt: string, includeFaces: boolean, incl
           Reference Image Summaries:
           ${imageSummaries}
           
-          Use the reference image summaries to inform your decisions about style, color schemes, and overall aesthetic for the ad features.`
+          Use the reference image summaries as creative inspiration, not as direct instructions. Think about the emotions, themes, and abstract concepts they evoke, and use these to inform your ad features in unexpected ways. Be bold and innovative in your approach.
+          
+          IMPORTANT REQUIREMENTS:
+          1. The brand logo MUST be included in the ad. Ensure it's incorporated in a visually striking and integral way.
+          2. Limit any text in the ad features to a maximum of 4 words.
+          3. Focus on creating a visually striking and emotionally impactful ad concept that maintains strong brand identity.
+          
+          Remember, while being creative, the brand logo is a non-negotiable element that must be present in the ad concept.`
         }
       ],
       response_format: zodResponseFormat(AdRequestSchema, "ad_request"),
