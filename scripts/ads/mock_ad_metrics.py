@@ -1,3 +1,4 @@
+import asyncio
 import numpy as np
 from tqdm import tqdm
 from models import AdAnalysis, AdMetric
@@ -7,18 +8,18 @@ from helpers import (
 )
 
 
-def mock_ad_metric(ad_analysis: AdAnalysis):
+async def mock_ad_metric(ad_analysis: AdAnalysis):
     supabase_client = get_supabase_client()
 
     # Define combined category-location multipliers
     category_location_multipliers = {
-        "emotion": {"top-center": 2.0, "middle-center": 1.8, "bottom-center": 1.5},
-        "product": {"middle-center": 2.2, "top-center": 1.8, "middle-right": 1.6},
-        "brand": {"top-left": 1.8, "top-right": 1.8, "top-center": 2.0},
-        "person": {"middle-right": 2.5, "middle-left": 2.2, "middle-center": 2.0},
-        "setting": {"top-center": 1.6, "middle-center": 1.8, "bottom-center": 1.4},
-        "text": {"top-center": 1.6, "middle-center": 1.4, "bottom-center": 1.2},
-        "call-to-action": {"bottom-center": 2.5, "top-left": 2.0, "bottom-right": 1.8},
+        "emotion": {"top-center": 3.5, "middle-center": 3.0, "bottom-center": 2.5},
+        "product": {"middle-center": 4.0, "top-center": 3.2, "middle-right": 2.8},
+        "brand": {"top-left": 3.2, "top-right": 3.2, "top-center": 3.5},
+        "person": {"middle-right": 4.5, "middle-left": 4.0, "middle-center": 3.5},
+        "setting": {"top-center": 2.8, "middle-center": 3.2, "bottom-center": 2.5},
+        "text": {"top-center": 2.8, "middle-center": 2.5, "bottom-center": 2.2},
+        "call-to-action": {"bottom-center": 4.5, "top-left": 3.5, "bottom-right": 3.2},
     }
 
     # Calculate combined multiplier based on all features
@@ -38,7 +39,7 @@ def mock_ad_metric(ad_analysis: AdAnalysis):
             feature_multiplier = category_location_multipliers[category][location]
         else:
             # Default multiplier if the specific location is not defined for the category
-            feature_multiplier = 0.3
+            feature_multiplier = 0.2
 
         combined_multiplier *= feature_multiplier
         feature_count += 1
@@ -64,15 +65,23 @@ def mock_ad_metric(ad_analysis: AdAnalysis):
     dict_metric = {
         k: v for k, v in metric.model_dump(mode="json").items() if v is not None
     }
-    supabase_client.table("ad_metrics").upsert(dict_metric).execute()
+
+    # Use asyncio.to_thread for the database operation
+    await asyncio.to_thread(
+        lambda: supabase_client.table("ad_metrics").upsert(dict_metric).execute()
+    )
 
 
-def main():
-    ad_analyses = get_ad_analyses_from_db()
+async def main():
+    ad_analyses = await asyncio.to_thread(get_ad_analyses_from_db)
 
-    for ad_analysis in tqdm(ad_analyses, desc="Mocking ad metrics"):
-        mock_ad_metric(ad_analysis)
+    tasks = [mock_ad_metric(ad_analysis) for ad_analysis in ad_analyses]
+
+    for task in tqdm(
+        asyncio.as_completed(tasks), total=len(tasks), desc="Mocking ad metrics"
+    ):
+        await task
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
