@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ad_metrics: {
+        Row: {
+          ad_id: string
+          clicks: number
+          ctr: number | null
+          id: string
+          impressions: number
+        }
+        Insert: {
+          ad_id: string
+          clicks?: number
+          ctr?: number | null
+          id?: string
+          impressions?: number
+        }
+        Update: {
+          ad_id?: string
+          clicks?: number
+          ctr?: number | null
+          id?: string
+          impressions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_metrics_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ad_structured_output"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_structured_output: {
         Row: {
           id: string
@@ -61,6 +93,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      google_image_ads: {
+        Row: {
+          advertisement_url: string
+          advertiser_name: string | null
+          advertiser_url: string | null
+          created_at: string | null
+          image_url: string | null
+          last_shown: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          advertisement_url: string
+          advertiser_name?: string | null
+          advertiser_url?: string | null
+          created_at?: string | null
+          image_url?: string | null
+          last_shown?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          advertisement_url?: string
+          advertiser_name?: string | null
+          advertiser_url?: string | null
+          created_at?: string | null
+          image_url?: string | null
+          last_shown?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       sentiment_analysis: {
         Row: {
