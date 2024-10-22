@@ -9,7 +9,7 @@ const VisualAttributeSchema = z.object({
 });
 
 // Define the schema for features
-const FeatureSchema = z.object({
+export const FeatureSchema = z.object({
     keyword: z.string(), // The feature (e.g., "smiling person")
     confidence_score: z.number(), // Confidence score (between 0.0 and 1.0)
     category: z.string(), // Category (e.g., "emotion", "product", "brand", "person", "setting", "text", "call-to-action")
