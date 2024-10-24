@@ -23,7 +23,7 @@ import { blobToBase64 } from "@/lib/utils";
 import { AdStructuredOutputSchema } from "../api/evaluate/schemas";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDebounce } from "use-debounce";
+// import { useDebounce } from "use-debounce";
 
 type SelectedAdType =
   | AdVisualWithMetric
@@ -40,20 +40,23 @@ export default function Home() {
     useState<z.infer<typeof AdStructuredOutputSchema> | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
+  // const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchMode, setSearchMode] = useState(false); // New state for search mode
 
   const fetchData = useCallback(
     async (offset: number) => {
-      const res = await fetch(`/api/metrics?offset=${offset}&count=${count}`);
-      const fetchedData = await res.json();
-      setData(fetchedData);
-      setFilteredData(fetchedData);
-      if (!selectedAd && fetchedData.length > 0) {
-        setSelectedAd(fetchedData[0]);
+      if (!searchMode) { // Prevent fetchData if searchMode is active
+        const res = await fetch(`/api/metrics?offset=${offset}&count=${count}`);
+        const fetchedData = await res.json();
+        setData(fetchedData);
+        setFilteredData(fetchedData);
+        if (!selectedAd && fetchedData.length > 0) {
+          setSelectedAd(fetchedData[0]);
+        }
       }
     },
-    [count, selectedAd]
+    [count, selectedAd, searchMode]
   );
 
   useEffect(() => {
@@ -63,6 +66,7 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     setIsSearching(true);
     if (query) {
+      setSearchMode(true); // Enable search mode
       const res = await fetch("/api/search", {
         method: "POST",
         headers: {
@@ -71,17 +75,12 @@ export default function Home() {
         body: JSON.stringify({ query }),
       });
       const searchResults = await res.json();
-      const filteredIds = new Set(searchResults);
-      setFilteredData(data.filter((item) => filteredIds.has(item.id)));
+      setFilteredData(searchResults);
     } else {
       setFilteredData(data);
     }
     setIsSearching(false);
   };
-
-  useEffect(() => {
-    handleSearch(debouncedSearchQuery);
-  }, [debouncedSearchQuery, data]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -92,6 +91,7 @@ export default function Home() {
       setUploadedImage(base64Image);
       setIsEvaluating(true);
       setUploadedImageEvaluation(null);
+      setIsSearching(true);
 
       const response = await fetch("/api/evaluate", {
         method: "POST",
@@ -109,13 +109,23 @@ export default function Home() {
           image_url: base64Image,
         });
 
-        // Use image description as search query
-        handleSearch(evaluationResult.ad_description.image_description);
+        await handleSearch(evaluationResult.ad_description.image_description);
       } else {
         console.error("Failed to evaluate image");
       }
       setIsEvaluating(false);
+      setIsSearching(false);
     }
+  };
+
+  const handleRowClick = (row: SelectedAdType) => {
+    setSelectedAd(row);
+  };
+
+  const clearSearch = () => {
+    setSearchMode(false);
+    setFilteredData(data);
+    setSearchQuery("");
   };
 
   return (
@@ -128,6 +138,11 @@ export default function Home() {
           The following are visual features and sample analytics taken from Nike
           ads. The visual features have been extracted using our AI model.
         </p>
+        {searchMode && (
+          <Button onClick={clearSearch} variant="outline" className="mb-4">
+            Clear Search
+          </Button>
+        )}
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="flex-grow pb-2">
@@ -298,7 +313,7 @@ export default function Home() {
                     : filteredData.map((row) => (
                         <TableRow
                           key={row.id}
-                          onClick={() => setSelectedAd(row)}
+                          onClick={() => handleRowClick(row)}
                           className="cursor-pointer"
                         >
                           <TableCell className="w-1/4">
@@ -319,10 +334,10 @@ export default function Home() {
                             </div>
                           </TableCell>
                           <TableCell className="w-1/4">
-                            {row.ad_metrics[0].impressions}
+                            {row.ad_metrics && row.ad_metrics.length > 0 ? row.ad_metrics[0].impressions : "N/A"}
                           </TableCell>
                           <TableCell className="w-1/4">
-                            {row.ad_metrics[0].ctr}
+                            {row.ad_metrics && row.ad_metrics.length > 0 ? row.ad_metrics[0].ctr : "N/A"}
                           </TableCell>
                         </TableRow>
                       ))}
