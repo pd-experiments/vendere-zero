@@ -15,6 +15,7 @@ class AdStructuredOutput(BaseModel):
     id: UUID4 = Field(default_factory=UUID4)
     image_url: str
     image_description: str
+    description_embeddings: list[float] | None = None
 
 
 class SentimentAnalysis(BaseModel):

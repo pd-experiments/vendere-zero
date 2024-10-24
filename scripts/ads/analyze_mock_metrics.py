@@ -26,7 +26,7 @@ def box_plot_ctr_by_category():
     df["category_only"] = df["category_label_pair"].str.split().str[0]
 
     # Set the minimum number of data points required for a category
-    min_data_points = 1
+    min_data_points = 2
 
     # Filter categories with sufficient data
     category_counts = df["category_label_pair"].value_counts()
