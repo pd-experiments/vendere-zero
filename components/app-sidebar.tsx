@@ -22,9 +22,9 @@ import {
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Dinesh Vasireddy",
+    email: "dinesh@example.com",
+    avatar: "/avatars/dinesh.jpg",
   },
   teams: [
     {
@@ -50,10 +50,10 @@ const data = {
       icon: SquareTerminal,
       isActive: true,
       items: [
-        {
-          title: "Assets",
-          url: "/assets",
-        },
+        // {
+        //   title: "Assets",
+        //   url: "/assets",
+        // },
         {
           title: "Data",
           url: "/data",

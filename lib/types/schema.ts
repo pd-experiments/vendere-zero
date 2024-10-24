@@ -43,16 +43,19 @@ export type Database = {
       }
       ad_structured_output: {
         Row: {
+          description_embeddings: string | null
           id: string
           image_description: string
           image_url: string
         }
         Insert: {
+          description_embeddings?: string | null
           id?: string
           image_description: string
           image_url: string
         }
         Update: {
+          description_embeddings?: string | null
           id?: string
           image_description?: string
           image_url?: string
