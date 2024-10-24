@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MatchAdsResponse } from "./schemas";
 import { supabase } from "@/lib/supabase";
 import { openai } from "@/lib/ai";
+import { AdVisualWithMetric } from "../metrics/schemas";
 
 export async function POST(request: NextRequest) {
     const { query }: { query: string } = await request.json();
@@ -21,11 +22,23 @@ export async function POST(request: NextRequest) {
     })
         .returns<MatchAdsResponse[]>();
 
-    console.log(data);
-
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    const ids = data.map((ad) => ad.id);
+
+    const { data: allData, error: aggError } = await supabase
+        .from("ad_structured_output")
+        .select(
+            "id, image_description, image_url, features(keyword, confidence_score, category, location, visual_attributes(attribute, value)), ad_metrics(clicks, impressions, ctr)",
+        )
+        .in("id", ids)
+        .returns<AdVisualWithMetric[]>();
+
+    if (aggError) {
+        return NextResponse.json({ error: aggError.message }, { status: 500 });
+    }
+
+    return NextResponse.json(allData);
 }

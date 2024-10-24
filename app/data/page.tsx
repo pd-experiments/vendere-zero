@@ -11,11 +11,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { AdVisualWithMetric } from "../api/metrics/schemas";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Upload,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload } from "lucide-react";
 import Image from "next/image";
 import {
   ResizableHandle,
@@ -27,9 +23,11 @@ import { blobToBase64 } from "@/lib/utils";
 import { AdStructuredOutputSchema } from "../api/evaluate/schemas";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDebounce } from 'use-debounce';
+import { useDebounce } from "use-debounce";
 
-type SelectedAdType = AdVisualWithMetric | (z.infer<typeof AdStructuredOutputSchema> & { image_url: string });
+type SelectedAdType =
+  | AdVisualWithMetric
+  | (z.infer<typeof AdStructuredOutputSchema> & { image_url: string });
 
 export default function Home() {
   const [data, setData] = useState<AdVisualWithMetric[]>([]);
@@ -38,7 +36,8 @@ export default function Home() {
   const count = 10;
   const [selectedAd, setSelectedAd] = useState<SelectedAdType | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [uploadedImageEvaluation, setUploadedImageEvaluation] = useState<z.infer<typeof AdStructuredOutputSchema> | null>(null);
+  const [uploadedImageEvaluation, setUploadedImageEvaluation] =
+    useState<z.infer<typeof AdStructuredOutputSchema> | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -64,16 +63,16 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     setIsSearching(true);
     if (query) {
-      const res = await fetch('/api/search', {
-        method: 'POST',
+      const res = await fetch("/api/search", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ query }),
       });
       const searchResults = await res.json();
       const filteredIds = new Set(searchResults);
-      setFilteredData(data.filter(item => filteredIds.has(item.id)));
+      setFilteredData(data.filter((item) => filteredIds.has(item.id)));
     } else {
       setFilteredData(data);
     }
@@ -84,7 +83,9 @@ export default function Home() {
     handleSearch(debouncedSearchQuery);
   }, [debouncedSearchQuery, data]);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       const base64Image = await blobToBase64(file);
@@ -92,10 +93,10 @@ export default function Home() {
       setIsEvaluating(true);
       setUploadedImageEvaluation(null);
 
-      const response = await fetch('/api/evaluate', {
-        method: 'POST',
+      const response = await fetch("/api/evaluate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ imageData: base64Image }),
       });
@@ -111,7 +112,7 @@ export default function Home() {
         // Use image description as search query
         handleSearch(evaluationResult.ad_description.image_description);
       } else {
-        console.error('Failed to evaluate image');
+        console.error("Failed to evaluate image");
       }
       setIsEvaluating(false);
     }
@@ -124,9 +125,8 @@ export default function Home() {
           AI-Generated Visual Analytics on Nike Ads
         </h1>
         <p className="mb-4">
-          The following are visual features and sample analytics taken from
-          Nike ads. The visual features have been extracted using our AI
-          model.
+          The following are visual features and sample analytics taken from Nike
+          ads. The visual features have been extracted using our AI model.
         </p>
       </div>
 
@@ -143,7 +143,7 @@ export default function Home() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <Button
-                  onClick={() => document.getElementById('fileInput')?.click()}
+                  onClick={() => document.getElementById("fileInput")?.click()}
                   variant="default"
                   className="flex items-center gap-2"
                 >
@@ -183,7 +183,9 @@ export default function Home() {
 
             {uploadedImage && (
               <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">Uploaded Image Evaluation</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Uploaded Image Evaluation
+                </h3>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -221,7 +223,8 @@ export default function Home() {
                           <div className="max-h-20 overflow-y-auto">
                             {uploadedImageEvaluation?.features?.map((f) => (
                               <div key={f.keyword} className="truncate">
-                                {f.keyword} ({f.category}, {f.confidence_score.toFixed(2)})
+                                {f.keyword} ({f.category},{" "}
+                                {f.confidence_score.toFixed(2)})
                               </div>
                             ))}
                           </div>
@@ -242,8 +245,11 @@ export default function Home() {
                         ) : (
                           uploadedImageEvaluation && (
                             <div className="truncate">
-                              {uploadedImageEvaluation.sentiment_analysis.tone}
-                              ({uploadedImageEvaluation.sentiment_analysis.confidence.toFixed(2)})
+                              {uploadedImageEvaluation.sentiment_analysis.tone}(
+                              {uploadedImageEvaluation.sentiment_analysis.confidence.toFixed(
+                                2
+                              )}
+                              )
                             </div>
                           )
                         )}
@@ -254,7 +260,10 @@ export default function Home() {
               </div>
             )}
 
-            <div className="overflow-auto flex-grow" style={{ maxHeight: "calc(100% - 3rem)" }}>
+            <div
+              className="overflow-auto flex-grow"
+              style={{ maxHeight: "calc(100% - 3rem)" }}
+            >
               {uploadedImage && (
                 <h3 className="text-lg font-semibold mb-2">Results</h3>
               )}
@@ -268,53 +277,55 @@ export default function Home() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isSearching ? (
-                    // Skeleton rows
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="w-1/4">
-                          <Skeleton className="h-[100px] w-[100px]" />
-                        </TableCell>
-                        <TableCell className="w-1/4">
-                          <Skeleton className="h-[100px] w-full" />
-                        </TableCell>
-                        <TableCell className="w-1/4">
-                          <Skeleton className="h-[20px] w-1/2" />
-                        </TableCell>
-                        <TableCell className="w-1/4">
-                          <Skeleton className="h-[20px] w-1/2" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    filteredData.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        onClick={() => setSelectedAd(row)}
-                        className="cursor-pointer"
-                      >
-                        <TableCell className="w-1/4">
-                          <Image
-                            src={row.image_url}
-                            alt={row.image_description}
-                            width={100}
-                            height={100}
-                          />
-                        </TableCell>
-                        <TableCell className="w-1/4">
-                          <div className="max-h-[100px] overflow-y-auto">
-                            {row.features.map((f) => (
-                              <div key={f.keyword}>
-                                {f.keyword} ({f.category}, {f.location})
-                              </div>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="w-1/4">{row.ad_metrics[0].impressions}</TableCell>
-                        <TableCell className="w-1/4">{row.ad_metrics[0].ctr}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  {isSearching
+                    ? // Skeleton rows
+                      Array.from({ length: 5 }).map((_, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="w-1/4">
+                            <Skeleton className="h-[100px] w-[100px]" />
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            <Skeleton className="h-[100px] w-full" />
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            <Skeleton className="h-[20px] w-1/2" />
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            <Skeleton className="h-[20px] w-1/2" />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    : filteredData.map((row) => (
+                        <TableRow
+                          key={row.id}
+                          onClick={() => setSelectedAd(row)}
+                          className="cursor-pointer"
+                        >
+                          <TableCell className="w-1/4">
+                            <Image
+                              src={row.image_url}
+                              alt={row.image_description}
+                              width={100}
+                              height={100}
+                            />
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            <div className="max-h-[100px] overflow-y-auto">
+                              {row.features.map((f) => (
+                                <div key={f.keyword}>
+                                  {f.keyword} ({f.category}, {f.location})
+                                </div>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            {row.ad_metrics[0].impressions}
+                          </TableCell>
+                          <TableCell className="w-1/4">
+                            {row.ad_metrics[0].ctr}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </div>
@@ -352,13 +363,15 @@ export default function Home() {
                       <TableRow key={f.keyword}>
                         <TableCell>{f.keyword}</TableCell>
                         <TableCell>{f.category}</TableCell>
-                        <TableCell>{f.confidence_score?.toFixed(2) || 'N/A'}</TableCell>
+                        <TableCell>
+                          {f.confidence_score?.toFixed(2) || "N/A"}
+                        </TableCell>
                         <TableCell>
                           {f.visual_attributes?.map((a) => (
                             <div key={a.attribute}>
                               {a.attribute}: {a.value}
                             </div>
-                          )) || 'N/A'}
+                          )) || "N/A"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -366,11 +379,14 @@ export default function Home() {
                 </Table>
               </div>
 
-              {('sentiment_analysis' in selectedAd) && (
+              {"sentiment_analysis" in selectedAd && (
                 <div className="border rounded-md p-4">
                   <h4 className="font-semibold mb-2">Sentiment Analysis</h4>
                   <p>Tone: {selectedAd.sentiment_analysis.tone}</p>
-                  <p>Confidence: {selectedAd.sentiment_analysis.confidence.toFixed(2)}</p>
+                  <p>
+                    Confidence:{" "}
+                    {selectedAd.sentiment_analysis.confidence.toFixed(2)}
+                  </p>
                 </div>
               )}
             </div>
