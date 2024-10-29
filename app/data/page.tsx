@@ -82,6 +82,15 @@ export default function Home() {
     setIsSearching(false);
   };
 
+  useEffect(() => {
+    if (searchQuery.trim() !== "") {
+      handleSearch(searchQuery);
+    } else {
+      setFilteredData(data);
+      setSearchMode(false);
+    }
+  }, [searchQuery, data]);
+
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
