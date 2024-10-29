@@ -112,7 +112,8 @@ export default function BatchEvaluate() {
         setSelectedEvaluation(evaluation);
     };
 
-    const columns: ColumnDef<EvaluationResult>[] = [
+    // Define all possible columns
+    const allColumns: ColumnDef<EvaluationResult>[] = [
         {
             accessorKey: "fileName",
             header: "Name",
@@ -154,12 +155,12 @@ export default function BatchEvaluate() {
                 const evaluation = row.original;
                 return (
                     <span className={`
-            inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-            ${evaluation.status === "complete" ? "bg-green-100 text-green-800" : ""}
-            ${evaluation.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
-            ${evaluation.status === "error" ? "bg-red-100 text-red-800" : ""}
-            ${evaluation.status === "pending" ? "bg-gray-100 text-gray-800" : ""}
-          `}>
+                        inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                        ${evaluation.status === "complete" ? "bg-green-100 text-green-800" : ""}
+                        ${evaluation.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
+                        ${evaluation.status === "error" ? "bg-red-100 text-red-800" : ""}
+                        ${evaluation.status === "pending" ? "bg-gray-100 text-gray-800" : ""}
+                    `}>
                         {evaluation.status}
                     </span>
                 );
@@ -220,6 +221,11 @@ export default function BatchEvaluate() {
         },
     ];
 
+    // Get the active columns based on whether details panel is open
+    const activeColumns = selectedEvaluation
+        ? allColumns.slice(0, 3) // Only Name, Description, and Status columns
+        : allColumns;            // All columns
+
     return (
         <div className="min-h-screen bg-background">
             <div className="border-b">
@@ -269,7 +275,7 @@ export default function BatchEvaluate() {
                         className="pr-3"
                     >
                         <DataTable 
-                            columns={columns} 
+                            columns={activeColumns} 
                             data={evaluations} 
                             onRowClick={handleRowClick}
                         />

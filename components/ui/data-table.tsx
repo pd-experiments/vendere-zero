@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full" onClick={(e) => e.stopPropagation()}>
       <div className="flex items-center gap-4 py-4">
         <Input
-          placeholder="Filter files..."
+          placeholder="Search your creative library..."
           value={(table.getColumn("fileName")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("fileName")?.setFilterValue(event.target.value)
