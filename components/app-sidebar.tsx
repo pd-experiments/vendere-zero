@@ -21,13 +21,10 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/lib/auth-context"
+import _ from "lodash"
 
 const data = {
-  user: {
-    name: "Dinesh Vasireddy",
-    email: "dinesh@venderelabs.com",
-    avatar: "/avatars/dinesh.jpg",
-  },
   teams: [
     {
       name: "Acme Inc",
@@ -81,6 +78,7 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth()
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -99,14 +97,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        {/* <TeamSwitcher teams={data.teams} /> */}
         <div className="mt-auto px-3 py-1 group-data-[state=collapsed]:hidden">
           <div className="inline-flex items-center gap-1.5 rounded-sm border border-border/30 bg-muted/20 px-1.5 py-0.5 text-[10px] text-muted-foreground/70">
             <Command className="h-2.5 w-2.5" />
             <span className="font-medium">E to Collapse</span>
           </div>
         </div>
-        <NavUser user={data.user} />
+        {user && (
+          <NavUser
+            user={{
+              name: _.startCase(_.toLower(user.email?.split('@')[0] ?? 'User')),
+              email: user.email ?? '',
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`,
+            }}
+          />
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
