@@ -29,7 +29,6 @@ def evaluate_ad(ad: GoogleAd):
         print(f"Error evaluating ad: {e}")
         raise  # Re-raise the exception to trigger a retry
 
-
 def evaluate_ads(ads: list[GoogleAd]):
     total = len(ads)
     success_bar = tqdm(total=total, desc="Successful", position=0)

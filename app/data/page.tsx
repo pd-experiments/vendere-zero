@@ -138,7 +138,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-background">
       <div className="p-4">
         <h1 className="text-2xl font-bold">
           AI-Generated Visual Analytics on Nike Ads
