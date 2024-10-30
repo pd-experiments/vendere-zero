@@ -35,7 +35,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-center w-12 h-12 mb-4">
             <Ratio className="h-8 w-8 bg-[#B1E116] text-black p-1.5 rounded-md" />
           </div>
-          <h2 className="text-2xl font-semibold">Welcome back</h2>
+          <h2 className="text-2xl font-semibold">Welcome to Vendere Labs</h2>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
@@ -73,8 +73,9 @@ export default function LoginPage() {
 
         <div className="text-center text-sm">
           <span className="text-muted-foreground">Don&apos;t have an account? </span>
-          <Link href="/auth/signup" className="text-primary hover:underline">
-            Sign up
+          <span className="text-foreground">Contact us at </span>
+          <Link href="mailto:dinesh@venderelabs.com" className="text-primary hover:underline">
+            dinesh@venderelabs.com
           </Link>
         </div>
       </div>
