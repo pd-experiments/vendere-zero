@@ -45,7 +45,7 @@ const data = {
   navMain: [
     {
       title: "Library",
-      url: "/evaluate",
+      url: "/library",
       icon: BookIcon
     },
     {
