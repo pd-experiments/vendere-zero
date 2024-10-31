@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Database } from '@/lib/types/schema';
 
 type UploadingFile = {
     id: string;
@@ -56,6 +57,13 @@ type AdRecord = {
     };
     created_at: string;
 };
+
+// Add type definitions for the database responses
+type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
+type Feature = Database['public']['Tables']['features']['Row'] & {
+    visual_attributes: Database['public']['Tables']['visual_attributes']['Row'][];
+};
+type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
 
 export default function Library() {
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -94,9 +102,10 @@ export default function Library() {
                 image_description
             `, { count: 'exact' })
             .eq('user', user.id)
-            .range(from, to);
+            .range(from, to)
+            .returns<AdOutput[]>();
 
-        if (adError) {
+        if (adError || !adOutputs) {
             console.error("Error fetching ad outputs:", adError);
             setLoading(false);
             return;
@@ -121,9 +130,10 @@ export default function Library() {
                     value
                 )
             `)
-            .eq('user', user.id);
+            .eq('user', user.id)
+            .returns<Feature[]>();
 
-        if (featuresError) {
+        if (featuresError || !features) {
             console.error("Error fetching features:", featuresError);
             setLoading(false);
             return;
@@ -138,9 +148,10 @@ export default function Library() {
                 tone,
                 confidence
             `)
-            .eq('user', user.id);
+            .eq('user', user.id)
+            .returns<SentimentAnalysis[]>();
 
-        if (sentimentError) {
+        if (sentimentError || !sentiments) {
             console.error("Error fetching sentiments:", sentimentError);
             setLoading(false);
             return;
