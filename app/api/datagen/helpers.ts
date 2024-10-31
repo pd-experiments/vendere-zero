@@ -1,8 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { openai } from "@/lib/ai";
 import { AdStructuredOutput } from "./models";
+import { Database } from '@/lib/types/schema';
 
-export async function uploadImageToBucket(file: File, supabase: SupabaseClient): Promise<string> {
+// Define the type for the Supabase client with your database types
+type TypedSupabaseClient = SupabaseClient<Database>;
+
+export async function uploadImageToBucket(file: File, supabase: TypedSupabaseClient): Promise<string> {
   const fileName = `${Date.now()}-${file.name}`;
   
   const { error } = await supabase
@@ -31,22 +35,21 @@ export async function createEmbeddings(description: string): Promise<number[]> {
   return embedding.data[0].embedding;
 }
 
-export async function storeAnalysisResults(analysis: AdStructuredOutput, userId: string, supabase: SupabaseClient) {
-  // First, insert the main ad output
+export async function storeAnalysisResults(analysis: AdStructuredOutput, userId: string, supabase: TypedSupabaseClient): Promise<string> {
   const { data: outputData, error: outputError } = await supabase
     .from("ad_structured_output")
     .insert({
       image_url: analysis.image_url,
       image_description: analysis.image_description,
-      description_embeddings: analysis.description_embeddings,
+      description_embeddings: JSON.stringify(analysis.description_embeddings), // Convert array to string
       user: userId
     })
-    .select()
+    .select('id')
     .single();
   
   if (outputError) throw outputError;
+  if (!outputData) throw new Error('Failed to insert ad output');
 
-  // Then insert features
   const { data: featuresData, error: featuresError } = await supabase
     .from("features")
     .insert(
@@ -59,9 +62,10 @@ export async function storeAnalysisResults(analysis: AdStructuredOutput, userId:
         location: feature.location
       }))
     )
-    .select();
+    .select('id');
 
   if (featuresError) throw featuresError;
+  if (!featuresData) throw new Error('Failed to insert features');
 
   // Insert visual attributes for each feature if they exist
   for (let i = 0; i < analysis.features.length; i++) {
