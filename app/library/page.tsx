@@ -29,6 +29,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type UploadingFile = {
     id: string;
@@ -60,34 +61,49 @@ export default function Library() {
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [records, setRecords] = useState<AdRecord[]>([]);
     const [selectedRecord, setSelectedRecord] = useState<AdRecord | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const RECORDS_PER_PAGE = 10;
 
     // Fetch user's records on mount
     useEffect(() => {
-        fetchRecords();
+        fetchRecords(1);
     }, []);
 
-    const fetchRecords = async () => {
+    const fetchRecords = async (page = 1) => {
+        setLoading(true);
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
             console.error("Error getting user:", userError);
+            setLoading(false);
             return;
         }
 
-        // Get base records
-        const { data: adOutputs, error: adError } = await supabase
+        // Calculate range for pagination
+        const from = (page - 1) * RECORDS_PER_PAGE;
+        const to = from + RECORDS_PER_PAGE - 1;
+
+        // Get base records with pagination
+        const { data: adOutputs, error: adError, count } = await supabase
             .from("ad_structured_output")
             .select(`
                 id,
                 image_url,
                 image_description
-            `)
-            .eq('user', user.id);
+            `, { count: 'exact' })
+            .eq('user', user.id)
+            .range(from, to);
 
         if (adError) {
             console.error("Error fetching ad outputs:", adError);
+            setLoading(false);
             return;
         }
+
+        // Update hasMore based on count
+        setHasMore(count ? from + RECORDS_PER_PAGE < count : false);
 
         // Get features
         const { data: features, error: featuresError } = await supabase
@@ -109,6 +125,7 @@ export default function Library() {
 
         if (featuresError) {
             console.error("Error fetching features:", featuresError);
+            setLoading(false);
             return;
         }
 
@@ -125,6 +142,7 @@ export default function Library() {
 
         if (sentimentError) {
             console.error("Error fetching sentiments:", sentimentError);
+            setLoading(false);
             return;
         }
 
@@ -157,7 +175,13 @@ export default function Library() {
             };
         });
 
-        setRecords(transformedRecords);
+        if (page === 1) {
+            setRecords(transformedRecords);
+        } else {
+            setRecords(prev => [...prev, ...transformedRecords]);
+        }
+
+        setLoading(false);
     };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,6 +315,35 @@ export default function Library() {
         }
     ];
 
+    // Add a load more function
+    const loadMore = () => {
+        if (!loading && hasMore) {
+            const nextPage = currentPage + 1;
+            setCurrentPage(nextPage);
+            fetchRecords(nextPage);
+        }
+    };
+
+    // Add the loading skeleton component
+    const LoadingSkeleton = () => (
+        <div className="space-y-3">
+            {Array(5).fill(0).map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 p-4">
+                    <Skeleton className="h-16 w-16 rounded" />
+                    <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-[250px]" />
+                        <div className="flex space-x-2">
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-4 w-[100px]" />
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -348,11 +401,28 @@ export default function Library() {
             <div className="px-6 py-6 max-w-[1400px] mx-auto w-full">
                 <ResizablePanelGroup direction="horizontal">
                     <ResizablePanel defaultSize={70}>
-                        <DataTable
-                            columns={columns}
-                            data={records}
-                            onRowClick={(record) => setSelectedRecord(record)}
-                        />
+                        {loading && records.length === 0 ? (
+                            <LoadingSkeleton />
+                        ) : (
+                            <>
+                                <DataTable
+                                    columns={columns}
+                                    data={records}
+                                    onRowClick={(record) => setSelectedRecord(record)}
+                                />
+                                {hasMore && (
+                                    <div className="py-4 text-center">
+                                        <Button
+                                            variant="outline"
+                                            onClick={loadMore}
+                                            disabled={loading}
+                                        >
+                                            {loading ? "Loading..." : "Load More"}
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </ResizablePanel>
 
                     {selectedRecord && (
