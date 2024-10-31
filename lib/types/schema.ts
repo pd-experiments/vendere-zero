@@ -47,18 +47,21 @@ export type Database = {
           id: string
           image_description: string
           image_url: string
+          user: string | null
         }
         Insert: {
           description_embeddings?: string | null
           id?: string
           image_description: string
           image_url: string
+          user?: string | null
         }
         Update: {
           description_embeddings?: string | null
           id?: string
           image_description?: string
           image_url?: string
+          user?: string | null
         }
         Relationships: []
       }
@@ -70,6 +73,7 @@ export type Database = {
           id: string
           keyword: string
           location: string
+          user: string | null
         }
         Insert: {
           ad_output_id: string
@@ -78,6 +82,7 @@ export type Database = {
           id?: string
           keyword: string
           location: string
+          user?: string | null
         }
         Update: {
           ad_output_id?: string
@@ -86,6 +91,7 @@ export type Database = {
           id?: string
           keyword?: string
           location?: string
+          user?: string | null
         }
         Relationships: [
           {
@@ -133,18 +139,21 @@ export type Database = {
           confidence: number
           id: string
           tone: string
+          user: string | null
         }
         Insert: {
           ad_output_id: string
           confidence: number
           id?: string
           tone: string
+          user?: string | null
         }
         Update: {
           ad_output_id?: string
           confidence?: number
           id?: string
           tone?: string
+          user?: string | null
         }
         Relationships: [
           {
@@ -190,7 +199,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_ads: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

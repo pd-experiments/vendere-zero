@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Upload, MoreVertical, X } from "lucide-react";
+import { Upload, X } from "lucide-react"; //MoreVertical removed
 import { Progress } from "@/components/ui/progress";
-import { blobToBase64 } from "@/lib/utils";
-import { AdStructuredOutputSchema } from "../api/evaluate/schemas";
-import { z } from "zod";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+// import { AdStructuredOutputSchema } from "../api/datagen/models";
+// import { z } from "zod";
+// import {
+//     DropdownMenu,
+//     DropdownMenuContent,
+//     DropdownMenuItem,
+//     DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import {
@@ -29,222 +28,287 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { supabase } from "@/lib/supabase";
 
-type EvaluationResult = {
+type UploadingFile = {
     id: string;
     fileName: string;
     file: File;
-    base64: string;
-    status: "pending" | "processing" | "complete" | "error";
-    result?: z.infer<typeof AdStructuredOutputSchema>;
+    status: "uploading" | "processing" | "complete" | "error";
     error?: string;
-    uploadedAt: Date;
-}
+};
 
-export default function BatchEvaluate() {
-    const [evaluations, setEvaluations] = useState<EvaluationResult[]>([]);
-    const [selectedEvaluation, setSelectedEvaluation] = useState<EvaluationResult | null>(null);
+type AdRecord = {
+    id: string;
+    image_url: string;
+    image_description: string;
+    features: {
+        keyword: string;
+        confidence_score: number;
+        category: string;
+        location: string;
+        visual_attributes?: { attribute: string; value: string; }[];
+    }[];
+    sentiment_analysis: {
+        tone: string;
+        confidence: number;
+    };
+    created_at: string;
+};
+
+export default function Library() {
+    const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+    const [records, setRecords] = useState<AdRecord[]>([]);
+    const [selectedRecord, setSelectedRecord] = useState<AdRecord | null>(null);
+
+    // Fetch user's records on mount
+    useEffect(() => {
+        fetchRecords();
+    }, []);
+
+    const fetchRecords = async () => {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+            console.error("Error getting user:", userError);
+            return;
+        }
+
+        // Get base records
+        const { data: adOutputs, error: adError } = await supabase
+            .from("ad_structured_output")
+            .select(`
+                id,
+                image_url,
+                image_description
+            `)
+            .eq('user', user.id);
+
+        if (adError) {
+            console.error("Error fetching ad outputs:", adError);
+            return;
+        }
+
+        // Get features
+        const { data: features, error: featuresError } = await supabase
+            .from("features")
+            .select(`
+                id,
+                ad_output_id,
+                keyword,
+                confidence_score,
+                category,
+                location,
+                visual_attributes (
+                    id,
+                    attribute,
+                    value
+                )
+            `)
+            .eq('user', user.id);
+
+        if (featuresError) {
+            console.error("Error fetching features:", featuresError);
+            return;
+        }
+
+        // Get sentiment analysis
+        const { data: sentiments, error: sentimentError } = await supabase
+            .from("sentiment_analysis")
+            .select(`
+                id,
+                ad_output_id,
+                tone,
+                confidence
+            `)
+            .eq('user', user.id);
+
+        if (sentimentError) {
+            console.error("Error fetching sentiments:", sentimentError);
+            return;
+        }
+
+        // Combine the data
+        const transformedRecords: AdRecord[] = adOutputs.map(adOutput => {
+            // Get features for this ad
+            const adFeatures = features.filter(f => f.ad_output_id === adOutput.id);
+            // Get sentiment for this ad
+            const adSentiment = sentiments.find(s => s.ad_output_id === adOutput.id);
+
+            return {
+                id: adOutput.id,
+                image_url: adOutput.image_url,
+                image_description: adOutput.image_description,
+                created_at: new Date().toISOString(), // Use current date since we don't have created_at
+                features: adFeatures.map(feature => ({
+                    keyword: feature.keyword,
+                    confidence_score: feature.confidence_score,
+                    category: feature.category,
+                    location: feature.location,
+                    visual_attributes: feature.visual_attributes
+                })),
+                sentiment_analysis: adSentiment ? {
+                    tone: adSentiment.tone,
+                    confidence: adSentiment.confidence
+                } : {
+                    tone: '',
+                    confidence: 0
+                }
+            };
+        });
+
+        setRecords(transformedRecords);
+    };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
-        if (!files) return;
+        if (!files?.length) return;
 
-        const newEvaluations = await Promise.all(
-            Array.from(files).map(async (file) => ({
-                id: Math.random().toString(36).slice(2),
-                fileName: file.name,
-                file,
-                base64: await blobToBase64(file),
-                status: "pending" as const,
-                uploadedAt: new Date(),
-            }))
-        );
+        const newFiles = Array.from(files).map(file => ({
+            id: Math.random().toString(36).slice(2),
+            fileName: file.name,
+            file,
+            status: "uploading" as const
+        }));
 
-        setEvaluations(prev => [...prev, ...newEvaluations]);
-        processImages(newEvaluations);
-    };
+        setUploadingFiles(prev => [...prev, ...newFiles]);
 
-    const processImages = async (imagesToProcess: EvaluationResult[]) => {
-        for (const evaluation of imagesToProcess) {
-            setEvaluations(prev =>
-                prev.map(e =>
-                    e.id === evaluation.id
-                        ? { ...e, status: "processing" }
-                        : e
-                )
+        // Create FormData with all files
+        const formData = new FormData();
+        Array.from(files).forEach(file => {
+            formData.append('files', file);
+        });
+
+        try {
+            const response = await fetch("/api/datagen", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) throw new Error("Upload failed");
+
+            const { results } = await response.json();
+
+            // Update status for each file
+            setUploadingFiles(prev =>
+                prev.map(file => {
+                    const result = results.find((r: { filename: string; status: string; error?: string }) =>
+                        r.filename === file.fileName
+                    );
+                    return {
+                        ...file,
+                        status: result?.status === "success" ? "complete" : "error",
+                        error: result?.error
+                    };
+                })
             );
 
-            try {
-                const response = await fetch("/api/evaluate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ imageData: evaluation.base64 }),
-                });
+            // Refresh records
+            await fetchRecords();
 
-                if (!response.ok) throw new Error("Evaluation failed");
+            // Clear completed uploads after a delay
+            setTimeout(() => {
+                setUploadingFiles(prev => prev.filter(f => f.status !== "complete"));
+            }, 3000);
 
-                const data = await response.json();
-
-                setEvaluations(prev =>
-                    prev.map(e =>
-                        e.id === evaluation.id
-                            ? { ...e, status: "complete", result: data.ad_description }
-                            : e
-                    )
-                );
-            } catch (error) {
-                setEvaluations(prev =>
-                    prev.map(e =>
-                        e.id === evaluation.id
-                            ? { ...e, status: "error", error: error instanceof Error ? error.message : "Unknown error" }
-                            : e
-                    )
-                );
-            }
+        } catch (error) {
+            setUploadingFiles(prev =>
+                prev.map(file => ({
+                    ...file,
+                    status: "error",
+                    error: error instanceof Error ? error.message : "Upload failed"
+                }))
+            );
         }
     };
 
-    const removeEvaluation = (id: string) => {
-        setEvaluations(prev => prev.filter(e => e.id !== id));
-    };
-
-    const handleRowClick = (evaluation: EvaluationResult) => {
-        setSelectedEvaluation(evaluation);
-    };
-
-    // Define all possible columns
-    const allColumns: ColumnDef<EvaluationResult>[] = [
+    // Define columns
+    const columns: ColumnDef<AdRecord>[] = [
         {
-            accessorKey: "fileName",
-            header: "Name",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                return (
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 relative rounded overflow-hidden bg-accent">
-                            <Image
-                                src={evaluation.base64}
-                                alt={evaluation.fileName}
-                                layout="fill"
-                                objectFit="cover"
-                            />
-                        </div>
-                        <span className="font-medium truncate max-w-[200px]">
-                            {evaluation.fileName}
-                        </span>
-                    </div>
-                );
-            },
+            accessorKey: "image_url",
+            header: "Image",
+            cell: ({ row }) => (
+                <div className="w-16 h-16 relative rounded overflow-hidden">
+                    <Image
+                        src={row.original.image_url}
+                        alt="Ad image"
+                        layout="fill"
+                        objectFit="cover"
+                    />
+                </div>
+            ),
         },
         {
-            accessorKey: "description",
+            accessorKey: "image_description",
             header: "Description",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                return (
-                    <p className="truncate max-w-[400px] text-sm text-muted-foreground">
-                        {evaluation.result?.image_description || "Processing..."}
-                    </p>
-                );
-            },
+            cell: ({ row }) => (
+                <p className="truncate max-w-[400px] text-sm">
+                    {row.original.image_description}
+                </p>
+            ),
         },
         {
-            accessorKey: "status",
-            header: "Status",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                return (
-                    <span className={`
-                        inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                        ${evaluation.status === "complete" ? "bg-green-100 text-green-800" : ""}
-                        ${evaluation.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
-                        ${evaluation.status === "error" ? "bg-red-100 text-red-800" : ""}
-                        ${evaluation.status === "pending" ? "bg-gray-100 text-gray-800" : ""}
-                    `}>
-                        {evaluation.status}
-                    </span>
-                );
-            },
-        },
-        {
-            accessorKey: "confidence",
-            header: "Confidence",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                if (!evaluation.result) return null;
-                return (
-                    <div className="flex items-center gap-2">
-                        <Progress
-                            value={evaluation.result.sentiment_analysis.confidence * 100}
-                            className="h-2 w-20"
-                        />
-                        <span className="text-sm">
-                            {(evaluation.result.sentiment_analysis.confidence * 100).toFixed(0)}%
+            accessorKey: "features",
+            header: "Features",
+            cell: ({ row }) => (
+                <div className="flex flex-wrap gap-1">
+                    {row.original.features.slice(0, 3).map(feature => (
+                        <span key={feature.keyword} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-accent">
+                            {feature.keyword}
                         </span>
-                    </div>
-                );
-            },
+                    ))}
+                    {row.original.features.length > 3 && (
+                        <span className="text-xs text-muted-foreground">
+                            +{row.original.features.length - 3} more
+                        </span>
+                    )}
+                </div>
+            ),
         },
         {
-            accessorKey: "uploadedAt",
-            header: "Uploaded",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                return (
-                    <span className="text-sm text-muted-foreground">
-                        {evaluation.uploadedAt.toLocaleString()}
+            accessorKey: "sentiment_analysis",
+            header: "Sentiment",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <span className="text-sm capitalize">
+                        {row.original.sentiment_analysis.tone}
                     </span>
-                );
-            },
+                    <Progress
+                        value={row.original.sentiment_analysis.confidence * 100}
+                        className="h-2 w-20"
+                    />
+                </div>
+            ),
         },
         {
-            id: "actions",
-            cell: ({ row }) => {
-                const evaluation = row.original;
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => removeEvaluation(evaluation.id)}>
-                                Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Download</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                );
-            },
-        },
+            accessorKey: "created_at",
+            header: "Created",
+            cell: ({ row }) => (
+                <span className="text-sm text-muted-foreground">
+                    {new Date(row.original.created_at).toLocaleString()}
+                </span>
+            ),
+        }
     ];
-
-    // Get the active columns based on whether details panel is open
-    const activeColumns = selectedEvaluation
-        ? allColumns.slice(0, 3) // Only Name, Description, and Status columns
-        : allColumns;            // All columns
 
     return (
         <div className="min-h-screen bg-background">
+            {/* Header */}
             <div className="border-b">
                 <div className="px-6 py-4 max-w-[1400px] mx-auto w-full">
                     <div className="flex justify-between items-center">
                         <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                                <h1 className="text-2xl font-semibold tracking-tight text-[#B1E116]">Library</h1>
-                            </div>
+                            <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
                             <p className="text-sm text-muted-foreground">
-                                Manage and analyze your visual content
+                                Upload and analyze your ad images
                             </p>
                         </div>
                         <Button
                             onClick={() => document.getElementById('fileInput')?.click()}
-                            className="flex items-center gap-2 bg-[#B1E116] text-black hover:bg-[#B1E116]/90"
+                            className="flex items-center gap-2"
                         >
                             <Upload className="h-4 w-4" />
-                            Upload Files
+                            Upload Images
                         </Button>
                         <input
                             id="fileInput"
@@ -258,37 +322,44 @@ export default function BatchEvaluate() {
                 </div>
             </div>
 
+            {/* Upload Progress */}
+            {uploadingFiles.length > 0 && (
+                <div className="px-6 py-4 max-w-[1400px] mx-auto w-full">
+                    <div className="space-y-2">
+                        {uploadingFiles.map(file => (
+                            <div key={file.id} className="flex items-center gap-4">
+                                <span className="text-sm">{file.fileName}</span>
+                                {file.status === "uploading" && (
+                                    <Progress value={undefined} className="w-[200px]" />
+                                )}
+                                {file.status === "complete" && (
+                                    <span className="text-sm text-green-600">Complete</span>
+                                )}
+                                {file.status === "error" && (
+                                    <span className="text-sm text-red-600">{file.error}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Main Content */}
             <div className="px-6 py-6 max-w-[1400px] mx-auto w-full">
-                <ResizablePanelGroup 
-                    direction="horizontal" 
-                    className="relative"
-                    onClick={(e) => {
-                        // Close panel when clicking the background
-                        if (e.target === e.currentTarget) {
-                            setSelectedEvaluation(null);
-                        }
-                    }}
-                >
-                    <ResizablePanel 
-                        defaultSize={selectedEvaluation ? 60 : 100}
-                        minSize={40}
-                        className="pr-3"
-                    >
-                        <DataTable 
-                            columns={activeColumns} 
-                            data={evaluations} 
-                            onRowClick={handleRowClick}
+                <ResizablePanelGroup direction="horizontal">
+                    <ResizablePanel defaultSize={70}>
+                        <DataTable
+                            columns={columns}
+                            data={records}
+                            onRowClick={(record) => setSelectedRecord(record)}
                         />
                     </ResizablePanel>
 
-                    {selectedEvaluation && (
+                    {selectedRecord && (
                         <>
-                            <ResizableHandle className="bg-border/20" />
-                            <ResizablePanel defaultSize={40} minSize={25}>
-                                <div 
-                                    className="h-[calc(100vh-8rem)] relative bg-background pl-3"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={30}>
+                                <div className="h-[calc(100vh-8rem)] relative bg-background pl-3">
                                     <div className="bg-card rounded-xl shadow-sm border h-full flex flex-col p-0.5">
                                         {/* Sticky Header */}
                                         <div className="shrink-0 px-8 py-6 border-b flex flex-col gap-4 bg-background">
@@ -297,32 +368,32 @@ export default function BatchEvaluate() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => setSelectedEvaluation(null)}
+                                                    onClick={() => setSelectedRecord(null)}
                                                     className="h-8 w-8"
                                                 >
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 text-sm">
-                                                {/* File name and thumbnail */}
+                                                {/* Image preview */}
                                                 <div className="flex items-center gap-2 min-w-0">
                                                     <div className="w-8 h-8 relative shrink-0 rounded-md overflow-hidden bg-accent">
                                                         <Image
-                                                            src={selectedEvaluation.base64}
-                                                            alt={selectedEvaluation.fileName}
+                                                            src={selectedRecord.image_url}
+                                                            alt="Selected image"
                                                             layout="fill"
                                                             objectFit="cover"
                                                         />
                                                     </div>
                                                     <span className="font-medium truncate">
-                                                        {selectedEvaluation.fileName}
+                                                        {selectedRecord.id}
                                                     </span>
                                                 </div>
 
-                                                {/* Metadata wrapper */}
+                                                {/* Metadata */}
                                                 <div className="flex flex-wrap items-center gap-3 text-sm">
                                                     <div className="text-muted-foreground shrink-0">
-                                                        {selectedEvaluation.uploadedAt.toLocaleString()}
+                                                        {new Date(selectedRecord.created_at).toLocaleString()}
                                                     </div>
                                                 </div>
                                             </div>
@@ -331,10 +402,11 @@ export default function BatchEvaluate() {
                                         {/* Scrollable Content */}
                                         <div className="flex-1 overflow-y-auto">
                                             <div className="p-8 space-y-8">
+                                                {/* Large Image Preview */}
                                                 <div className="relative h-[300px] w-full rounded-lg overflow-hidden bg-accent/50">
                                                     <Image
-                                                        src={selectedEvaluation.base64}
-                                                        alt={selectedEvaluation.fileName}
+                                                        src={selectedRecord.image_url}
+                                                        alt="Selected image"
                                                         layout="fill"
                                                         objectFit="contain"
                                                         className="bg-accent/50"
@@ -342,76 +414,66 @@ export default function BatchEvaluate() {
                                                 </div>
 
                                                 {/* Features Table */}
-                                                {selectedEvaluation.result && (
-                                                    <div>
-                                                        <h3 className="text-sm font-medium mb-2">Visual Features</h3>
-                                                        <div className="rounded-lg border overflow-x-auto">
-                                                            <Table>
-                                                                <TableHeader>
-                                                                    <TableRow>
-                                                                        <TableHead className="w-[25%]">Keyword</TableHead>
-                                                                        <TableHead className="w-[25%]">Category</TableHead>
-                                                                        <TableHead className="w-[15%]">Confidence</TableHead>
-                                                                        <TableHead className="w-[35%]">Attributes</TableHead>
+                                                <div>
+                                                    <h3 className="text-sm font-medium mb-2">Visual Features</h3>
+                                                    <div className="rounded-lg border overflow-x-auto">
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead className="w-[25%]">Keyword</TableHead>
+                                                                    <TableHead className="w-[25%]">Category</TableHead>
+                                                                    <TableHead className="w-[15%]">Confidence</TableHead>
+                                                                    <TableHead className="w-[35%]">Location</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {selectedRecord.features.map((feature) => (
+                                                                    <TableRow key={feature.keyword}>
+                                                                        <TableCell className="font-medium">
+                                                                            {feature.keyword}
+                                                                        </TableCell>
+                                                                        <TableCell className="text-muted-foreground">
+                                                                            {feature.category}
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <span className="text-sm">
+                                                                                {(feature.confidence_score * 100).toFixed(0)}%
+                                                                            </span>
+                                                                        </TableCell>
+                                                                        <TableCell className="text-muted-foreground">
+                                                                            {feature.location}
+                                                                        </TableCell>
                                                                     </TableRow>
-                                                                </TableHeader>
-                                                                <TableBody>
-                                                                    {selectedEvaluation.result.features.map((feature) => (
-                                                                        <TableRow key={feature.keyword}>
-                                                                            <TableCell className="font-medium">
-                                                                                {feature.keyword}
-                                                                            </TableCell>
-                                                                            <TableCell className="text-muted-foreground">
-                                                                                {feature.category}
-                                                                            </TableCell>
-                                                                            <TableCell>
-                                                                                <span className="text-sm">
-                                                                                    {(feature.confidence_score * 100).toFixed(0)}%
-                                                                                </span>
-                                                                            </TableCell>
-                                                                            <TableCell>
-                                                                                <div className="space-y-1">
-                                                                                    {feature.visual_attributes?.map((attr) => (
-                                                                                        <div key={attr.attribute} className="text-sm text-muted-foreground">
-                                                                                            <span className="font-medium text-foreground">{attr.attribute}:</span> {attr.value}
-                                                                                        </div>
-                                                                                    )) || "N/A"}
-                                                                                </div>
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    ))}
-                                                                </TableBody>
-                                                            </Table>
-                                                        </div>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
                                                     </div>
-                                                )}
+                                                </div>
 
                                                 {/* Analysis section */}
-                                                {selectedEvaluation.result && (
-                                                    <div>
-                                                        <h3 className="text-sm font-medium mb-2">Analysis</h3>
-                                                        <div className="space-y-4 bg-accent/50 rounded-lg p-4">
-                                                            <div>
-                                                                <h4 className="text-sm text-muted-foreground mb-1">Description</h4>
-                                                                <p className="text-sm">
-                                                                    {selectedEvaluation.result.image_description}
-                                                                </p>
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-sm text-muted-foreground mb-1">Sentiment</h4>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-sm capitalize">
-                                                                        {selectedEvaluation.result.sentiment_analysis.tone}
-                                                                    </span>
-                                                                    <Progress
-                                                                        value={selectedEvaluation.result.sentiment_analysis.confidence * 100}
-                                                                        className="h-2 w-20"
-                                                                    />
-                                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-medium mb-2">Analysis</h3>
+                                                    <div className="space-y-4 bg-accent/50 rounded-lg p-4">
+                                                        <div>
+                                                            <h4 className="text-sm text-muted-foreground mb-1">Description</h4>
+                                                            <p className="text-sm">
+                                                                {selectedRecord.image_description}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm text-muted-foreground mb-1">Sentiment</h4>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm capitalize">
+                                                                    {selectedRecord.sentiment_analysis.tone}
+                                                                </span>
+                                                                <Progress
+                                                                    value={selectedRecord.sentiment_analysis.confidence * 100}
+                                                                    className="h-2 w-20"
+                                                                />
                                                             </div>
                                                         </div>
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
