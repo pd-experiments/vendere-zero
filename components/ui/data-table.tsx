@@ -28,18 +28,22 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (data: TData) => void;
+  searchPlaceholder?: string;
+  maxRowsPerPage?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  searchPlaceholder,
   onRowClick,
+  maxRowsPerPage = 10,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -57,30 +61,44 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
+    initialState: {
+      pagination: {
+        pageSize: maxRowsPerPage,
+      },
+    },
   });
 
   return (
     <div className="w-full" onClick={(e) => e.stopPropagation()}>
-      <div className="flex items-center gap-4 py-4">
-        <Input
-          placeholder="Search your creative library..."
-          value={(table.getColumn("fileName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("fileName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="relative w-[380px]">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={searchPlaceholder ?? "Search your creative library..."}
+            value={(table.getColumn("fileName")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("fileName")?.setFilterValue(event.target.value)
+            }
+            className="pl-8 h-8"
+          />
+        </div>
+        <div className="flex-1" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="h-8">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-[150px]">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
               .map((column) => {
+                const displayName = column.id
+                  .split('_')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ');
+
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
@@ -90,21 +108,21 @@ export function DataTable<TData, TValue>({
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id}
+                    {displayName}
                   </DropdownMenuCheckboxItem>
                 );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
+      <div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-b hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="h-9 px-4 text-xs font-medium text-muted-foreground">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -123,11 +141,11 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={onRowClick ? "cursor-pointer hover:bg-accent" : ""}
+                  className={`${onRowClick ? "cursor-pointer" : ""} border-b last:border-0 hover:bg-accent/50`}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="px-4 py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -140,7 +158,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-sm text-muted-foreground"
                 >
                   No results.
                 </TableCell>
@@ -149,23 +167,30 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between px-4 py-3 border-t">
+        <div className="text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} items
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

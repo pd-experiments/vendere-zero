@@ -3,26 +3,20 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Video } from "lucide-react"; //MoreVertical removed
+import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Database } from '@/lib/types/schema';
+import { useRouter } from "next/navigation";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type UploadingFile = {
     id: string;
@@ -60,9 +54,9 @@ type Feature = Database['public']['Tables']['features']['Row'] & {
 type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
 
 export default function Library() {
+    const router = useRouter();
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [records, setRecords] = useState<AdRecord[]>([]);
-    const [selectedRecord, setSelectedRecord] = useState<AdRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -297,7 +291,7 @@ export default function Library() {
             accessorKey: "image_url",
             header: "Image",
             cell: ({ row }) => (
-                <div className="w-16 h-16 relative rounded overflow-hidden">
+                <div className="w-14 h-14 relative bg-accent/50">
                     <Image
                         src={row.original.image_url}
                         alt="Ad image"
@@ -320,32 +314,52 @@ export default function Library() {
             accessorKey: "features",
             header: "Features",
             cell: ({ row }) => (
-                <div className="flex flex-wrap gap-1">
+                <div className="space-y-1.5">
                     {row.original.features.slice(0, 3).map(feature => (
-                        <span key={feature.keyword} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-accent">
-                            {feature.keyword}
-                        </span>
+                        <div 
+                            key={feature.keyword}
+                            className="flex items-center justify-between"
+                        >
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-sm font-medium">{feature.keyword}</span>
+                                <span className="text-xs text-muted-foreground">
+                                    ({feature.category})
+                                </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                                {(feature.confidence_score * 100).toFixed(0)}%
+                            </span>
+                        </div>
                     ))}
                     {row.original.features.length > 3 && (
-                        <span className="text-xs text-muted-foreground">
-                            +{row.original.features.length - 3} more
+                        <span className="text-xs text-muted-foreground block mt-1">
+                            +{row.original.features.length - 3} more features
                         </span>
                     )}
                 </div>
             ),
         },
         {
-            accessorKey: "sentiment_analysis",
-            header: "Sentiment",
+            accessorKey: "sentiment_tone",
+            header: "Tone",
+            cell: ({ row }) => (
+                <span className="text-sm capitalize">
+                    {row.original.sentiment_analysis.tone}
+                </span>
+            ),
+        },
+        {
+            accessorKey: "sentiment_confidence",
+            header: "Confidence",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    <span className="text-sm capitalize">
-                        {row.original.sentiment_analysis.tone}
-                    </span>
                     <Progress
                         value={row.original.sentiment_analysis.confidence * 100}
-                        className="h-2 w-20"
+                        className="h-2 w-16"
                     />
+                    <span className="text-xs text-muted-foreground">
+                        {(row.original.sentiment_analysis.confidence * 100).toFixed(0)}%
+                    </span>
                 </div>
             ),
         },
@@ -357,6 +371,50 @@ export default function Library() {
                     {new Date(row.original.created_at).toLocaleString()}
                 </span>
             ),
+        },
+        {
+            id: "actions",
+            cell: ({ row }) => {
+                const handleDelete = async (e: React.MouseEvent) => {
+                    e.stopPropagation(); // Prevent row click when clicking delete
+                    if (confirm("Are you sure you want to delete this item?")) {
+                        const { error } = await supabase
+                            .from("ad_structured_output")
+                            .delete()
+                            .eq('id', row.original.id);
+                        
+                        if (error) {
+                            console.error("Error deleting record:", error);
+                            return;
+                        }
+                        
+                        // Refresh the records
+                        fetchRecords(currentPage);
+                    }
+                };
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button 
+                                variant="ghost" 
+                                className="h-8 w-8 p-0"
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                                onClick={handleDelete}
+                                className="text-destructive focus:text-destructive"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            },
         }
     ];
 
@@ -371,250 +429,186 @@ export default function Library() {
 
     // Add the loading skeleton component
     const LoadingSkeleton = () => (
-        <div className="space-y-3">
-            {Array(5).fill(0).map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 p-4">
-                    <Skeleton className="h-16 w-16 rounded" />
-                    <div className="space-y-2 flex-1">
-                        <Skeleton className="h-4 w-[250px]" />
-                        <div className="flex space-x-2">
-                            <Skeleton className="h-6 w-16 rounded-full" />
-                            <Skeleton className="h-6 w-16 rounded-full" />
-                            <Skeleton className="h-6 w-16 rounded-full" />
+        <div className="min-h-screen bg-background">
+            {/* Header Loading */}
+            <div className="border-b">
+                <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                    <div className="flex justify-between items-center">
+                        <div className="flex flex-col gap-1">
+                            <Skeleton className="h-8 w-32" /> {/* Title */}
+                            <Skeleton className="h-4 w-64" /> {/* Subtitle */}
+                        </div>
+                        <Skeleton className="h-8 w-24" /> {/* Upload button */}
+                    </div>
+                </div>
+            </div>
+
+            {/* Table Loading */}
+            <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                <div className="border bg-card">
+                    {/* Table Controls */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b">
+                        <Skeleton className="h-8 w-[380px]" /> {/* Search bar */}
+                        <Skeleton className="h-8 w-24" /> {/* Columns button */}
+                    </div>
+
+                    {/* Table Header */}
+                    <div className="flex items-center px-4 py-3 border-b">
+                        <Skeleton className="h-4 w-14 mr-4" /> {/* Image header */}
+                        <Skeleton className="h-4 w-[400px] mr-4" /> {/* Description header */}
+                        <Skeleton className="h-4 w-[200px] mr-4" /> {/* Features header */}
+                        <Skeleton className="h-4 w-20 mr-4" /> {/* Tone header */}
+                        <Skeleton className="h-4 w-24 mr-4" /> {/* Confidence header */}
+                        <Skeleton className="h-4 w-32 mr-4" /> {/* Created header */}
+                        <Skeleton className="h-4 w-8" /> {/* Actions header */}
+                    </div>
+
+                    {/* Table Rows */}
+                    <div className="divide-y">
+                        {Array(6).fill(0).map((_, i) => (
+                            <div key={i} className="flex items-center px-4 py-3">
+                                <Skeleton className="h-14 w-14 mr-4" /> {/* Image */}
+                                <Skeleton className="h-8 w-[400px] mr-4" /> {/* Description */}
+                                <div className="w-[200px] mr-4 space-y-1">
+                                    <Skeleton className="h-5 w-full" />
+                                    <Skeleton className="h-5 w-4/5" />
+                                    <Skeleton className="h-5 w-3/5" />
+                                </div>
+                                <Skeleton className="h-6 w-20 mr-4" /> {/* Tone */}
+                                <div className="flex items-center gap-2 mr-4">
+                                    <Skeleton className="h-2 w-16" /> {/* Progress bar */}
+                                    <Skeleton className="h-4 w-8" /> {/* Percentage */}
+                                </div>
+                                <Skeleton className="h-6 w-32 mr-4" /> {/* Created date */}
+                                <Skeleton className="h-8 w-8" /> {/* Actions */}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Table Footer */}
+                    <div className="flex items-center justify-between px-4 py-3 border-t">
+                        <Skeleton className="h-4 w-20" /> {/* Items count */}
+                        <div className="flex gap-2">
+                            <Skeleton className="h-8 w-20" /> {/* Previous button */}
+                            <Skeleton className="h-8 w-20" /> {/* Next button */}
                         </div>
                     </div>
-                    <Skeleton className="h-4 w-[100px]" />
                 </div>
-            ))}
+            </div>
         </div>
     );
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Header */}
-            <div className="border-b">
-                <div className="px-6 py-4 max-w-[1400px] mx-auto w-full">
-                    <div className="flex justify-between items-center">
-                        <div className="flex flex-col gap-1">
-                            <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
-                            <p className="text-sm text-muted-foreground">
-                                Upload and analyze your ad images
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                onClick={() => document.getElementById('imageInput')?.click()}
-                                className="flex items-center gap-2"
-                            >
-                                <Upload className="h-4 w-4" />
-                                Upload Images
-                            </Button>
-                            <Button
-                                onClick={() => document.getElementById('videoInput')?.click()}
-                                className="flex items-center gap-2"
-                                variant="outline"
-                            >
-                                <Video className="h-4 w-4" />
-                                Upload Video
-                            </Button>
-                            <input
-                                id="imageInput"
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleFileUpload}
-                            />
-                            <input
-                                id="videoInput"
-                                type="file"
-                                accept="video/*"
-                                className="hidden"
-                                onChange={handleFileUpload}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Upload Progress */}
-            {uploadingFiles.length > 0 && (
-                <div className="px-6 py-4 max-w-[1400px] mx-auto w-full">
-                    <div className="space-y-2">
-                        {uploadingFiles.map(file => (
-                            <div key={file.id} className="flex items-center gap-4">
-                                <span className="text-sm">{file.fileName}</span>
-                                {file.status === "uploading" && (
-                                    <Progress value={undefined} className="w-[200px]" />
-                                )}
-                                {file.status === "complete" && (
-                                    <span className="text-sm text-green-600">Complete</span>
-                                )}
-                                {file.status === "error" && (
-                                    <span className="text-sm text-red-600">{file.error}</span>
-                                )}
+            {loading && records.length === 0 ? (
+                <LoadingSkeleton />
+            ) : (
+                <>
+                    {/* Header */}
+                    <div className="border-b">
+                        <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                            <div className="flex justify-between items-center">
+                                <div className="flex flex-col gap-1">
+                                    <h1 className="text-2xl font-semibold">Library</h1>
+                                    <p className="text-sm text-muted-foreground">
+                                        AI-powered visual analysis of your creative content
+                                    </p>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button className="h-8 flex items-center gap-2" variant="secondary">
+                                            <UploadCloud className="h-4 w-4" />
+                                            Upload
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[160px]">
+                                        <DropdownMenuItem 
+                                            onClick={() => document.getElementById('imageInput')?.click()}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <ImageIcon className="h-4 w-4" />
+                                            <span>Upload Images</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                            onClick={() => document.getElementById('videoInput')?.click()}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <Video className="h-4 w-4" />
+                                            <span>Upload Video</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <input
+                                    id="imageInput"
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFileUpload}
+                                />
+                                <input
+                                    id="videoInput"
+                                    type="file"
+                                    accept="video/*"
+                                    className="hidden"
+                                    onChange={handleFileUpload}
+                                />
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            )}
 
-            {/* Main Content */}
-            <div className="px-6 py-6 max-w-[1400px] mx-auto w-full">
-                <ResizablePanelGroup direction="horizontal">
-                    <ResizablePanel defaultSize={70}>
-                        {loading && records.length === 0 ? (
-                            <LoadingSkeleton />
-                        ) : (
-                            <>
+                    {/* Upload Progress */}
+                    {uploadingFiles.length > 0 && (
+                        <div className="border-b bg-muted/50">
+                            <div className="px-6 py-2 max-w-[1400px] mx-auto">
+                                <div className="space-y-2">
+                                    {uploadingFiles.map(file => (
+                                        <div key={file.id} className="flex items-center gap-4">
+                                            <span className="text-sm font-medium">{file.fileName}</span>
+                                            {file.status === "uploading" && (
+                                                <Progress value={undefined} className="w-[200px] h-2" />
+                                            )}
+                                            {file.status === "complete" && (
+                                                <span className="text-sm text-green-600 font-medium">Complete</span>
+                                            )}
+                                            {file.status === "error" && (
+                                                <span className="text-sm text-red-600">{file.error}</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Main Content */}
+                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                        <div className="space-y-2">
+                            <div className="border-0 bg-card">
                                 <DataTable
                                     columns={columns}
                                     data={records}
-                                    onRowClick={(record) => setSelectedRecord(record)}
+                                    onRowClick={(record) => router.push(`/library/${record.id}`)}
+                                    searchPlaceholder="Search your creative library..."
+                                    maxRowsPerPage={6}
                                 />
-                                {hasMore && (
-                                    <div className="py-4 text-center">
-                                        <Button
-                                            variant="outline"
-                                            onClick={loadMore}
-                                            disabled={loading}
-                                        >
-                                            {loading ? "Loading..." : "Load More"}
-                                        </Button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </ResizablePanel>
-
-                    {selectedRecord && (
-                        <>
-                            <ResizableHandle />
-                            <ResizablePanel defaultSize={30}>
-                                <div className="h-[calc(100vh-8rem)] relative bg-background pl-3">
-                                    <div className="bg-card rounded-xl shadow-sm border h-full flex flex-col p-0.5">
-                                        {/* Sticky Header */}
-                                        <div className="shrink-0 px-8 py-6 border-b flex flex-col gap-4 bg-background">
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="text-xl font-semibold">Image Details</h2>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setSelectedRecord(null)}
-                                                    className="h-8 w-8"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 text-sm">
-                                                {/* Image preview */}
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <div className="w-8 h-8 relative shrink-0 rounded-md overflow-hidden bg-accent">
-                                                        <Image
-                                                            src={selectedRecord.image_url}
-                                                            alt="Selected image"
-                                                            layout="fill"
-                                                            objectFit="cover"
-                                                        />
-                                                    </div>
-                                                    <span className="font-medium truncate">
-                                                        {selectedRecord.id}
-                                                    </span>
-                                                </div>
-
-                                                {/* Metadata */}
-                                                <div className="flex flex-wrap items-center gap-3 text-sm">
-                                                    <div className="text-muted-foreground shrink-0">
-                                                        {new Date(selectedRecord.created_at).toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Scrollable Content */}
-                                        <div className="flex-1 overflow-y-auto">
-                                            <div className="p-8 space-y-8">
-                                                {/* Large Image Preview */}
-                                                <div className="relative h-[300px] w-full rounded-lg overflow-hidden bg-accent/50">
-                                                    <Image
-                                                        src={selectedRecord.image_url}
-                                                        alt="Selected image"
-                                                        layout="fill"
-                                                        objectFit="contain"
-                                                        className="bg-accent/50"
-                                                    />
-                                                </div>
-
-                                                {/* Features Table */}
-                                                <div>
-                                                    <h3 className="text-sm font-medium mb-2">Visual Features</h3>
-                                                    <div className="rounded-lg border overflow-x-auto">
-                                                        <Table>
-                                                            <TableHeader>
-                                                                <TableRow>
-                                                                    <TableHead className="w-[25%]">Keyword</TableHead>
-                                                                    <TableHead className="w-[25%]">Category</TableHead>
-                                                                    <TableHead className="w-[15%]">Confidence</TableHead>
-                                                                    <TableHead className="w-[35%]">Location</TableHead>
-                                                                </TableRow>
-                                                            </TableHeader>
-                                                            <TableBody>
-                                                                {selectedRecord.features.map((feature) => (
-                                                                    <TableRow key={feature.keyword}>
-                                                                        <TableCell className="font-medium">
-                                                                            {feature.keyword}
-                                                                        </TableCell>
-                                                                        <TableCell className="text-muted-foreground">
-                                                                            {feature.category}
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <span className="text-sm">
-                                                                                {(feature.confidence_score * 100).toFixed(0)}%
-                                                                            </span>
-                                                                        </TableCell>
-                                                                        <TableCell className="text-muted-foreground">
-                                                                            {feature.location}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </div>
-                                                </div>
-
-                                                {/* Analysis section */}
-                                                <div>
-                                                    <h3 className="text-sm font-medium mb-2">Analysis</h3>
-                                                    <div className="space-y-4 bg-accent/50 rounded-lg p-4">
-                                                        <div>
-                                                            <h4 className="text-sm text-muted-foreground mb-1">Description</h4>
-                                                            <p className="text-sm">
-                                                                {selectedRecord.image_description}
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="text-sm text-muted-foreground mb-1">Sentiment</h4>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-sm capitalize">
-                                                                    {selectedRecord.sentiment_analysis.tone}
-                                                                </span>
-                                                                <Progress
-                                                                    value={selectedRecord.sentiment_analysis.confidence * 100}
-                                                                    className="h-2 w-20"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            </div>
+                            {hasMore && (
+                                <div className="flex justify-center pt-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={loadMore}
+                                        disabled={loading}
+                                        className="h-8"
+                                    >
+                                        {loading ? "Loading..." : "Load More"}
+                                    </Button>
                                 </div>
-                            </ResizablePanel>
-                        </>
-                    )}
-                </ResizablePanelGroup>
-            </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 } 
