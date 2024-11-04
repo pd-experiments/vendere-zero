@@ -3,16 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Upload, X } from "lucide-react"; //MoreVertical removed
+import { Upload, X, Video } from "lucide-react"; //MoreVertical removed
 import { Progress } from "@/components/ui/progress";
-// import { AdStructuredOutputSchema } from "../api/datagen/models";
-// import { z } from "zod";
-// import {
-//     DropdownMenu,
-//     DropdownMenuContent,
-//     DropdownMenuItem,
-//     DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import {
@@ -36,8 +28,10 @@ type UploadingFile = {
     id: string;
     fileName: string;
     file: File;
+    fileType: "image" | "video";
     status: "uploading" | "processing" | "complete" | "error";
     error?: string;
+    progress?: number;
 };
 
 type AdRecord = {
@@ -203,58 +197,98 @@ export default function Library() {
             id: Math.random().toString(36).slice(2),
             fileName: file.name,
             file,
-            status: "uploading" as const
+            fileType: file.type.startsWith('video/') ? 'video' as const : 'image' as const,
+            status: "uploading" as const,
+            progress: 0
         }));
 
         setUploadingFiles(prev => [...prev, ...newFiles]);
 
-        // Create FormData with all files
-        const formData = new FormData();
-        Array.from(files).forEach(file => {
-            formData.append('files', file);
-        });
+        // Process each file
+        for (const uploadingFile of newFiles) {
+            const formData = new FormData();
+            
+            if (uploadingFile.fileType === 'video') {
+                // Handle video upload
+                formData.append('video', uploadingFile.file);
+                
+                try {
+                    const response = await fetch("/api/upload-video", {
+                        method: "POST",
+                        body: formData
+                    });
 
-        try {
-            const response = await fetch("/api/datagen", {
-                method: "POST",
-                body: formData
-            });
+                    if (!response.ok) throw new Error("Upload failed");
 
-            if (!response.ok) throw new Error("Upload failed");
-
-            const { results } = await response.json();
-
-            // Update status for each file
-            setUploadingFiles(prev =>
-                prev.map(file => {
-                    const result = results.find((r: { filename: string; status: string; error?: string }) =>
-                        r.filename === file.fileName
+                    setUploadingFiles(prev =>
+                        prev.map(file =>
+                            file.id === uploadingFile.id
+                                ? { ...file, status: "complete" }
+                                : file
+                        )
                     );
-                    return {
-                        ...file,
-                        status: result?.status === "success" ? "complete" : "error",
-                        error: result?.error
-                    };
-                })
-            );
 
-            // Refresh records
-            await fetchRecords();
+                    // Refresh records after successful upload
+                    await fetchRecords();
 
-            // Clear completed uploads after a delay
-            setTimeout(() => {
-                setUploadingFiles(prev => prev.filter(f => f.status !== "complete"));
-            }, 3000);
+                } catch (error) {
+                    setUploadingFiles(prev =>
+                        prev.map(file =>
+                            file.id === uploadingFile.id
+                                ? {
+                                    ...file,
+                                    status: "error",
+                                    error: error instanceof Error ? error.message : "Upload failed"
+                                }
+                                : file
+                        )
+                    );
+                }
+            } else {
+                // Handle image upload (existing logic)
+                formData.append('files', uploadingFile.file);
+                
+                try {
+                    const response = await fetch("/api/datagen", {
+                        method: "POST",
+                        body: formData
+                    });
 
-        } catch (error) {
-            setUploadingFiles(prev =>
-                prev.map(file => ({
-                    ...file,
-                    status: "error",
-                    error: error instanceof Error ? error.message : "Upload failed"
-                }))
-            );
+                    if (!response.ok) throw new Error("Upload failed");
+
+                    const { results } = await response.json();
+
+                    setUploadingFiles(prev =>
+                        prev.map(file => {
+                            const result = results.find((r: { filename: string; status: string; error?: string }) =>
+                                r.filename === file.fileName
+                            );
+                            return {
+                                ...file,
+                                status: result?.status === "success" ? "complete" : "error",
+                                error: result?.error
+                            };
+                        })
+                    );
+
+                    await fetchRecords();
+
+                } catch (error) {
+                    setUploadingFiles(prev =>
+                        prev.map(file => ({
+                            ...file,
+                            status: "error",
+                            error: error instanceof Error ? error.message : "Upload failed"
+                        }))
+                    );
+                }
+            }
         }
+
+        // Clear completed uploads after a delay
+        setTimeout(() => {
+            setUploadingFiles(prev => prev.filter(f => f.status !== "complete"));
+        }, 3000);
     };
 
     // Define columns
@@ -367,21 +401,38 @@ export default function Library() {
                                 Upload and analyze your ad images
                             </p>
                         </div>
-                        <Button
-                            onClick={() => document.getElementById('fileInput')?.click()}
-                            className="flex items-center gap-2"
-                        >
-                            <Upload className="h-4 w-4" />
-                            Upload Images
-                        </Button>
-                        <input
-                            id="fileInput"
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                        />
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => document.getElementById('imageInput')?.click()}
+                                className="flex items-center gap-2"
+                            >
+                                <Upload className="h-4 w-4" />
+                                Upload Images
+                            </Button>
+                            <Button
+                                onClick={() => document.getElementById('videoInput')?.click()}
+                                className="flex items-center gap-2"
+                                variant="outline"
+                            >
+                                <Video className="h-4 w-4" />
+                                Upload Video
+                            </Button>
+                            <input
+                                id="imageInput"
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                            />
+                            <input
+                                id="videoInput"
+                                type="file"
+                                accept="video/*"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
