@@ -3,7 +3,6 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -11,6 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 import _ from "lodash"
 
 export function Header() {
@@ -33,9 +33,12 @@ export function Header() {
                   {isLast ? (
                     <BreadcrumbPage>{_.capitalize(segment)}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink href={href}>
+                    <Link 
+                      href={href} 
+                      className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    >
                       {_.capitalize(segment)}
-                    </BreadcrumbLink>
+                    </Link>
                   )}
                   {!isLast && <BreadcrumbSeparator />}
                 </BreadcrumbItem>
