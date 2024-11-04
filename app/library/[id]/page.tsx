@@ -27,6 +27,13 @@ type AdRecord = {
     created_at: string;
 };
 
+type AdOutputResult = {
+    id: string;
+    image_url: string;
+    image_description: string;
+    created_at?: string;
+};
+
 const LoadingSkeleton = () => (
     <div className="min-h-screen bg-background">
         <div className="px-6 py-4">
@@ -134,17 +141,18 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             return;
         }
 
-        // Get the specific record
+        // Update the query to explicitly specify the return type
         const { data: adOutput, error: adError } = await supabase
             .from("ad_structured_output")
             .select(`
                 id,
                 image_url,
-                image_description
+                image_description,
+                created_at
             `)
             .eq('id', params.id)
             .eq('user', user.id)
-            .single();
+            .single<AdOutputResult>();
 
         if (adError || !adOutput) {
             console.error("Error fetching ad output:", adError);
@@ -183,7 +191,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             id: adOutput.id,
             image_url: adOutput.image_url,
             image_description: adOutput.image_description,
-            created_at: new Date().toISOString(),
+            created_at: adOutput.created_at || new Date().toISOString(),
             features: features || [],
             sentiment_analysis: sentiment || { tone: '', confidence: 0 }
         });
