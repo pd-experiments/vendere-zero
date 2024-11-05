@@ -495,7 +495,7 @@ export default function VideoDetail({ params }: { params: { id: string } }) {
                                     <h2 className="font-medium">Visual Features</h2>
                                 </div>
                                 <div className="p-4">
-                                    <div className="grid gap-3">
+                                    <div className="grid gap-3 sm:grid-cols-1 xl:grid-cols-2">
                                         {currentFrame.features.map((feature, index) => (
                                             <div
                                                 key={index}

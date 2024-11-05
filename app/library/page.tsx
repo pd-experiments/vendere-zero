@@ -32,6 +32,7 @@ type StandaloneImage = Database['public']['Tables']['ad_structured_output']['Row
     video_frames_mapping: Pick<Database['public']['Tables']['video_frames_mapping']['Row'], 'id'>[] | null;
 };
 
+// Update LibraryItem type to have an array of tones
 type LibraryItem = {
     id: string;
     type: 'image' | 'video';
@@ -42,7 +43,8 @@ type LibraryItem = {
         description: string | null;
         video_url: string;
         frames: Array<{
-            id: string;
+            mapping_id: string;
+            frame_id: string;
             image_url: string;
             image_description: string;
             frame_number: number;
@@ -55,10 +57,13 @@ type LibraryItem = {
         confidence_score: number;
         category: string;
         location: string;
-        visual_attributes?: Database['public']['Tables']['visual_attributes']['Row'][];
+        visual_attributes?: Array<{
+            attribute: string;
+            value: string;
+        }>;
     }>;
     sentiment_analysis: {
-        tone: string;
+        tones: string[];  
         confidence: number;
     };
     created_at: string;
@@ -113,6 +118,7 @@ export default function Library() {
                     id,
                     frame_number,
                     video_timestamp,
+                    frame_id,
                     frame:ad_structured_output!video_frames_mapping_frame_id_fkey (
                         id,
                         image_url,
@@ -146,12 +152,10 @@ export default function Library() {
             return;
         }
 
+        // Fetch features with visual attributes
         const { data: features, error: featuresError } = await supabase
-            .from("features")
-            .select<
-                string,
-                FeatureWithAttributes
-            >(`
+            .from('features')
+            .select<string, FeatureWithAttributes>(`
                 id,
                 ad_output_id,
                 keyword,
@@ -172,17 +176,10 @@ export default function Library() {
             return;
         }
 
+        // Fetch sentiment analysis
         const { data: sentiments, error: sentimentError } = await supabase
-            .from("sentiment_analysis")
-            .select<
-                string,
-                Database['public']['Tables']['sentiment_analysis']['Row']
-            >(`
-                id,
-                ad_output_id,
-                tone,
-                confidence
-            `)
+            .from('sentiment_analysis')
+            .select<string, Database['public']['Tables']['sentiment_analysis']['Row']>()
             .eq('user', user.id);
 
         if (sentimentError || !sentiments) {
@@ -205,7 +202,8 @@ export default function Library() {
                     frames: video.video_frames_mapping
                         .sort((a, b) => a.frame_number - b.frame_number)
                         .map(mapping => ({
-                            id: mapping.frame.id,
+                            mapping_id: mapping.id,
+                            frame_id: mapping.frame_id,
                             image_url: mapping.frame.image_url,
                             image_description: mapping.frame.image_description,
                             frame_number: mapping.frame_number,
@@ -214,7 +212,7 @@ export default function Library() {
                 },
                 image_description: video.description || 'No description',
                 features: features
-                    .filter(f => video.video_frames_mapping.some(m => m.frame.id === f.ad_output_id))
+                    .filter(f => video.video_frames_mapping.some(m => m.frame_id === f.ad_output_id))
                     .map(feature => ({
                         keyword: feature.keyword,
                         confidence_score: feature.confidence_score,
@@ -222,16 +220,18 @@ export default function Library() {
                         location: feature.location,
                         visual_attributes: feature.visual_attributes
                     })),
-                sentiment_analysis: sentiments.find(s => s.ad_output_id === video.id)
-                    ? {
-                        tone: sentiments.find(s => s.ad_output_id === video.id)!.tone,
-                        confidence: sentiments.find(s => s.ad_output_id === video.id)!.confidence
-                    }
-                    : {
-                        tone: '',
-                        confidence: 0
-                    },
-                created_at: new Date().toISOString()
+                sentiment_analysis: {
+                    // Get unique tones from all frames
+                    tones: Array.from(new Set(
+                        video.video_frames_mapping
+                            .map(mapping => 
+                                sentiments.find(s => s.ad_output_id === mapping.frame_id)?.tone
+                            )
+                            .filter(Boolean) as string[]
+                    )),
+                    confidence: sentiments.find(s => s.ad_output_id === video.id)?.confidence || 0
+                },
+                created_at: video.created_at || new Date().toISOString()
             })) || []),
             // Add standalone images
             ...(standaloneImages?.map(image => ({
@@ -248,15 +248,11 @@ export default function Library() {
                         location: feature.location,
                         visual_attributes: feature.visual_attributes
                     })),
-                sentiment_analysis: sentiments.find(s => s.ad_output_id === image.id)
-                    ? {
-                        tone: sentiments.find(s => s.ad_output_id === image.id)!.tone,
-                        confidence: sentiments.find(s => s.ad_output_id === image.id)!.confidence
-                    }
-                    : {
-                        tone: '',
-                        confidence: 0
-                    },
+                sentiment_analysis: {
+                    // Single tone in array for images
+                    tones: [sentiments.find(s => s.ad_output_id === image.id)?.tone || ''],
+                    confidence: sentiments.find(s => s.ad_output_id === image.id)?.confidence || 0
+                },
                 created_at: new Date().toISOString()
             })) || [])
         ];
@@ -373,16 +369,16 @@ export default function Library() {
             accessorKey: "type",
             header: "Type",
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                     {row.original.type === 'video' ? (
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Video className="h-3 w-3" />
-                            <span className="text-xs">Video</span>
+                            <Video className="h-3.5 w-3.5" />
+                            <span className="text-xs font-medium">Video</span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <ImageIcon className="h-3 w-3" />
-                            <span className="text-xs">Image</span>
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            <span className="text-xs font-medium">Image</span>
                         </div>
                     )}
                 </div>
@@ -392,36 +388,41 @@ export default function Library() {
             accessorKey: "preview",
             header: "Preview",
             cell: ({ row }) => (
-                <div className="flex gap-2">
+                <div className="py-1">
                     {row.original.type === 'video' ? (
-                        <div className="flex gap-1">
-                            {row.original.video?.frames.slice(0, 3).map(frame => (
-                                <div key={frame.id} className="relative w-14 h-14 bg-accent/50">
+                        <div className="flex -space-x-2">
+                            {row.original.video?.frames.slice(0, 3).map((frame, index) => (
+                                <div 
+                                    key={frame.frame_id} 
+                                    className="relative w-10 h-10 border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform"
+                                    style={{ zIndex: 3 - index }}
+                                >
                                     <Image
                                         src={frame.image_url}
                                         alt={`Frame ${frame.frame_number}`}
                                         layout="fill"
                                         objectFit="cover"
-                                        className="rounded-sm"
                                     />
                                 </div>
                             ))}
                             {(row.original.video?.frames.length || 0) > 3 && (
-                                <div className="w-14 h-14 bg-accent/50 rounded-sm flex items-center justify-center">
-                                    <span className="text-xs text-muted-foreground">
+                                <div 
+                                    className="relative w-10 h-10 border-2 border-background rounded-md bg-muted/50 flex items-center justify-center"
+                                    style={{ zIndex: 0 }}
+                                >
+                                    <span className="text-xs font-medium text-muted-foreground">
                                         +{(row.original.video?.frames.length || 0) - 3}
                                     </span>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className="w-14 h-14 relative bg-accent/50">
+                        <div className="w-10 h-10 relative border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform">
                             <Image
                                 src={row.original.image_url!}
                                 alt="Image"
                                 layout="fill"
                                 objectFit="cover"
-                                className="rounded-sm"
                             />
                         </div>
                     )}
@@ -432,35 +433,37 @@ export default function Library() {
             accessorKey: "image_description",
             header: "Description",
             cell: ({ row }) => (
-                <p className="truncate max-w-[400px] text-sm">
-                    {row.original.image_description}
-                </p>
+                <div className="py-1">
+                    <p className="max-w-[280px] line-clamp-2 text-sm text-muted-foreground">
+                        {row.original.image_description}
+                    </p>
+                </div>
             ),
         },
         {
             accessorKey: "features",
             header: "Features",
             cell: ({ row }) => (
-                <div className="space-y-1.5">
-                    {row.original.features.slice(0, 3).map(feature => (
+                <div className="py-1 space-y-1">
+                    {row.original.features.slice(0, 2).map(feature => (
                         <div
                             key={feature.keyword}
-                            className="flex items-center justify-between"
+                            className="flex items-center gap-3 text-sm"
                         >
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-sm font-medium">{feature.keyword}</span>
-                                <span className="text-xs text-muted-foreground">
-                                    ({feature.category})
-                                </span>
-                            </div>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="font-medium min-w-[80px] truncate">
+                                {feature.keyword}
+                            </span>
+                            <span className="text-xs px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground">
+                                {feature.category}
+                            </span>
+                            <span className="text-xs text-muted-foreground ml-auto">
                                 {(feature.confidence_score * 100).toFixed(0)}%
                             </span>
                         </div>
                     ))}
-                    {row.original.features.length > 3 && (
-                        <span className="text-xs text-muted-foreground block mt-1">
-                            +{row.original.features.length - 3} more features
+                    {row.original.features.length > 2 && (
+                        <span className="text-xs text-muted-foreground">
+                            +{row.original.features.length - 2} more
                         </span>
                     )}
                 </div>
@@ -470,19 +473,31 @@ export default function Library() {
             accessorKey: "sentiment_tone",
             header: "Tone",
             cell: ({ row }) => (
-                <span className="text-sm capitalize">
-                    {row.original.sentiment_analysis.tone}
-                </span>
+                <div className="py-1 space-y-1">
+                    {row.original.sentiment_analysis.tones.slice(0, 2).map((tone, index) => (
+                        <div key={index} className="flex items-center gap-1.5">
+                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                            <span className="text-sm capitalize text-muted-foreground">
+                                {tone}
+                            </span>
+                        </div>
+                    ))}
+                    {row.original.sentiment_analysis.tones.length > 2 && (
+                        <span className="text-xs text-muted-foreground pl-3">
+                            +{row.original.sentiment_analysis.tones.length - 2} more
+                        </span>
+                    )}
+                </div>
             ),
         },
         {
             accessorKey: "sentiment_confidence",
             header: "Confidence",
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 py-1">
                     <Progress
                         value={row.original.sentiment_analysis.confidence * 100}
-                        className="h-2 w-16"
+                        className="h-1.5 w-14"
                     />
                     <span className="text-xs text-muted-foreground">
                         {(row.original.sentiment_analysis.confidence * 100).toFixed(0)}%
@@ -494,16 +509,24 @@ export default function Library() {
             accessorKey: "created_at",
             header: "Created",
             cell: ({ row }) => (
-                <span className="text-sm text-muted-foreground">
-                    {new Date(row.original.created_at).toLocaleString()}
-                </span>
+                <div className="py-1">
+                    <span className="text-xs text-muted-foreground">
+                        {new Date(row.original.created_at).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </span>
+                </div>
             ),
         },
         {
             id: "actions",
             cell: ({ row }) => {
                 const handleDelete = async (e: React.MouseEvent) => {
-                    e.stopPropagation(); // Prevent row click when clicking delete
+                    e.stopPropagation();
                     if (confirm("Are you sure you want to delete this item?")) {
                         const { error } = await supabase
                             .from("ad_structured_output")
@@ -515,7 +538,6 @@ export default function Library() {
                             return;
                         }
 
-                        // Refresh the records
                         fetchRecords();
                     }
                 };
@@ -525,12 +547,12 @@ export default function Library() {
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 hover:bg-muted"
                             >
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="w-[160px]">
                             <DropdownMenuItem
                                 onClick={handleDelete}
                                 className="text-destructive focus:text-destructive"
