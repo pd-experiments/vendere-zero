@@ -18,6 +18,53 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Extend database types for video frames
+type VideoFrameMapping = Database['public']['Tables']['video_frames_mapping']['Row'] & {
+    frame: Database['public']['Tables']['ad_structured_output']['Row'];
+};
+
+type VideoWithFrames = Database['public']['Tables']['videos']['Row'] & {
+    video_frames_mapping: VideoFrameMapping[];
+    video_url: string;
+};
+
+type StandaloneImage = Database['public']['Tables']['ad_structured_output']['Row'] & {
+    video_frames_mapping: Pick<Database['public']['Tables']['video_frames_mapping']['Row'], 'id'>[] | null;
+};
+
+type LibraryItem = {
+    id: string;
+    type: 'image' | 'video';
+    image_url?: string;
+    video?: {
+        id: string;
+        name: string;
+        description: string | null;
+        video_url: string;
+        frames: Array<{
+            id: string;
+            image_url: string;
+            image_description: string;
+            frame_number: number;
+            video_timestamp: unknown;
+        }>;
+    };
+    image_description: string;
+    features: Array<{
+        keyword: string;
+        confidence_score: number;
+        category: string;
+        location: string;
+        visual_attributes?: Database['public']['Tables']['visual_attributes']['Row'][];
+    }>;
+    sentiment_analysis: {
+        tone: string;
+        confidence: number;
+    };
+    created_at: string;
+};
+
+// Add UploadingFile type definition
 type UploadingFile = {
     id: string;
     fileName: string;
@@ -28,46 +75,23 @@ type UploadingFile = {
     progress?: number;
 };
 
-type AdRecord = {
-    id: string;
-    image_url: string;
-    image_description: string;
-    features: {
-        keyword: string;
-        confidence_score: number;
-        category: string;
-        location: string;
-        visual_attributes?: { attribute: string; value: string; }[];
-    }[];
-    sentiment_analysis: {
-        tone: string;
-        confidence: number;
-    };
-    created_at: string;
-};
-
-// Add type definitions for the database responses
-type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
-type Feature = Database['public']['Tables']['features']['Row'] & {
+// Add FeatureWithAttributes type definition
+type FeatureWithAttributes = Database['public']['Tables']['features']['Row'] & {
     visual_attributes: Database['public']['Tables']['visual_attributes']['Row'][];
 };
-type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
 
 export default function Library() {
     const router = useRouter();
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-    const [records, setRecords] = useState<AdRecord[]>([]);
+    const [records, setRecords] = useState<LibraryItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const RECORDS_PER_PAGE = 10;
 
     // Fetch user's records on mount
     useEffect(() => {
-        fetchRecords(1);
+        fetchRecords();
     }, []);
 
-    const fetchRecords = async (page = 1) => {
+    const fetchRecords = async () => {
         setLoading(true);
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -77,35 +101,57 @@ export default function Library() {
             return;
         }
 
-        // Calculate range for pagination
-        const from = (page - 1) * RECORDS_PER_PAGE;
-        const to = from + RECORDS_PER_PAGE - 1;
-
-        // Get base records with pagination
-        const { data: adOutputs, error: adError, count } = await supabase
-            .from("ad_structured_output")
-            .select(`
+        // Fetch videos with frames
+        const { data: videos, error: videosError } = await supabase
+            .from('videos')
+            .select<string, VideoWithFrames>(`
                 id,
-                image_url,
-                image_description
-            `, { count: 'exact' })
-            .eq('user', user.id)
-            .range(from, to)
-            .returns<AdOutput[]>();
+                name,
+                description,
+                video_url,
+                video_frames_mapping!video_frames_mapping_video_id_fkey (
+                    id,
+                    frame_number,
+                    video_timestamp,
+                    frame:ad_structured_output!video_frames_mapping_frame_id_fkey (
+                        id,
+                        image_url,
+                        image_description
+                    )
+                )
+            `)
+            .eq('user_id', user.id);
 
-        if (adError || !adOutputs) {
-            console.error("Error fetching ad outputs:", adError);
+        if (videosError) {
+            console.error("Error fetching videos:", videosError);
             setLoading(false);
             return;
         }
 
-        // Update hasMore based on count
-        setHasMore(count ? from + RECORDS_PER_PAGE < count : false);
+        // Fetch standalone images
+        const { data: standaloneImages, error: imagesError } = await supabase
+            .from('ad_structured_output')
+            .select<string, StandaloneImage>(`
+                id,
+                image_url,
+                image_description,
+                video_frames_mapping!video_frames_mapping_frame_id_fkey (id)
+            `)
+            .eq('user', user.id)
+            .is('video_frames_mapping', null);
 
-        // Get features
+        if (imagesError) {
+            console.error("Error fetching images:", imagesError);
+            setLoading(false);
+            return;
+        }
+
         const { data: features, error: featuresError } = await supabase
             .from("features")
-            .select(`
+            .select<
+                string,
+                FeatureWithAttributes
+            >(`
                 id,
                 ad_output_id,
                 keyword,
@@ -118,8 +164,7 @@ export default function Library() {
                     value
                 )
             `)
-            .eq('user', user.id)
-            .returns<Feature[]>();
+            .eq('user', user.id);
 
         if (featuresError || !features) {
             console.error("Error fetching features:", featuresError);
@@ -127,17 +172,18 @@ export default function Library() {
             return;
         }
 
-        // Get sentiment analysis
         const { data: sentiments, error: sentimentError } = await supabase
             .from("sentiment_analysis")
-            .select(`
+            .select<
+                string,
+                Database['public']['Tables']['sentiment_analysis']['Row']
+            >(`
                 id,
                 ad_output_id,
                 tone,
                 confidence
             `)
-            .eq('user', user.id)
-            .returns<SentimentAnalysis[]>();
+            .eq('user', user.id);
 
         if (sentimentError || !sentiments) {
             console.error("Error fetching sentiments:", sentimentError);
@@ -145,41 +191,77 @@ export default function Library() {
             return;
         }
 
-        // Combine the data
-        const transformedRecords: AdRecord[] = adOutputs.map(adOutput => {
-            // Get features for this ad
-            const adFeatures = features.filter(f => f.ad_output_id === adOutput.id);
-            // Get sentiment for this ad
-            const adSentiment = sentiments.find(s => s.ad_output_id === adOutput.id);
+        // Transform the data into LibraryItems
+        const libraryItems: LibraryItem[] = [
+            // Add videos
+            ...(videos?.map(video => ({
+                id: video.id,
+                type: 'video' as const,
+                video: {
+                    id: video.id,
+                    name: video.name,
+                    description: video.description,
+                    video_url: video.video_url,
+                    frames: video.video_frames_mapping
+                        .sort((a, b) => a.frame_number - b.frame_number)
+                        .map(mapping => ({
+                            id: mapping.frame.id,
+                            image_url: mapping.frame.image_url,
+                            image_description: mapping.frame.image_description,
+                            frame_number: mapping.frame_number,
+                            video_timestamp: mapping.video_timestamp,
+                        }))
+                },
+                image_description: video.description || 'No description',
+                features: features
+                    .filter(f => video.video_frames_mapping.some(m => m.frame.id === f.ad_output_id))
+                    .map(feature => ({
+                        keyword: feature.keyword,
+                        confidence_score: feature.confidence_score,
+                        category: feature.category,
+                        location: feature.location,
+                        visual_attributes: feature.visual_attributes
+                    })),
+                sentiment_analysis: sentiments.find(s => s.ad_output_id === video.id)
+                    ? {
+                        tone: sentiments.find(s => s.ad_output_id === video.id)!.tone,
+                        confidence: sentiments.find(s => s.ad_output_id === video.id)!.confidence
+                    }
+                    : {
+                        tone: '',
+                        confidence: 0
+                    },
+                created_at: new Date().toISOString()
+            })) || []),
+            // Add standalone images
+            ...(standaloneImages?.map(image => ({
+                id: image.id,
+                type: 'image' as const,
+                image_url: image.image_url,
+                image_description: image.image_description,
+                features: features
+                    .filter(f => f.ad_output_id === image.id)
+                    .map(feature => ({
+                        keyword: feature.keyword,
+                        confidence_score: feature.confidence_score,
+                        category: feature.category,
+                        location: feature.location,
+                        visual_attributes: feature.visual_attributes
+                    })),
+                sentiment_analysis: sentiments.find(s => s.ad_output_id === image.id)
+                    ? {
+                        tone: sentiments.find(s => s.ad_output_id === image.id)!.tone,
+                        confidence: sentiments.find(s => s.ad_output_id === image.id)!.confidence
+                    }
+                    : {
+                        tone: '',
+                        confidence: 0
+                    },
+                created_at: new Date().toISOString()
+            })) || [])
+        ];
 
-            return {
-                id: adOutput.id,
-                image_url: adOutput.image_url,
-                image_description: adOutput.image_description,
-                created_at: new Date().toISOString(), // Use current date since we don't have created_at
-                features: adFeatures.map(feature => ({
-                    keyword: feature.keyword,
-                    confidence_score: feature.confidence_score,
-                    category: feature.category,
-                    location: feature.location,
-                    visual_attributes: feature.visual_attributes
-                })),
-                sentiment_analysis: adSentiment ? {
-                    tone: adSentiment.tone,
-                    confidence: adSentiment.confidence
-                } : {
-                    tone: '',
-                    confidence: 0
-                }
-            };
-        });
-
-        if (page === 1) {
-            setRecords(transformedRecords);
-        } else {
-            setRecords(prev => [...prev, ...transformedRecords]);
-        }
-
+        setRecords(libraryItems);
         setLoading(false);
     };
 
@@ -286,18 +368,63 @@ export default function Library() {
     };
 
     // Define columns
-    const columns: ColumnDef<AdRecord>[] = [
+    const columns: ColumnDef<LibraryItem>[] = [
         {
-            accessorKey: "image_url",
-            header: "Image",
+            accessorKey: "type",
+            header: "Type",
             cell: ({ row }) => (
-                <div className="w-14 h-14 relative bg-accent/50">
-                    <Image
-                        src={row.original.image_url}
-                        alt="Ad image"
-                        layout="fill"
-                        objectFit="cover"
-                    />
+                <div className="flex items-center gap-2">
+                    {row.original.type === 'video' ? (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Video className="h-3 w-3" />
+                            <span className="text-xs">Video</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <ImageIcon className="h-3 w-3" />
+                            <span className="text-xs">Image</span>
+                        </div>
+                    )}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "preview",
+            header: "Preview",
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    {row.original.type === 'video' ? (
+                        <div className="flex gap-1">
+                            {row.original.video?.frames.slice(0, 3).map(frame => (
+                                <div key={frame.id} className="relative w-14 h-14 bg-accent/50">
+                                    <Image
+                                        src={frame.image_url}
+                                        alt={`Frame ${frame.frame_number}`}
+                                        layout="fill"
+                                        objectFit="cover"
+                                        className="rounded-sm"
+                                    />
+                                </div>
+                            ))}
+                            {(row.original.video?.frames.length || 0) > 3 && (
+                                <div className="w-14 h-14 bg-accent/50 rounded-sm flex items-center justify-center">
+                                    <span className="text-xs text-muted-foreground">
+                                        +{(row.original.video?.frames.length || 0) - 3}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="w-14 h-14 relative bg-accent/50">
+                            <Image
+                                src={row.original.image_url!}
+                                alt="Image"
+                                layout="fill"
+                                objectFit="cover"
+                                className="rounded-sm"
+                            />
+                        </div>
+                    )}
                 </div>
             ),
         },
@@ -389,7 +516,7 @@ export default function Library() {
                         }
 
                         // Refresh the records
-                        fetchRecords(currentPage);
+                        fetchRecords();
                     }
                 };
 
@@ -418,15 +545,6 @@ export default function Library() {
         }
     ];
 
-    // Add a load more function
-    const loadMore = () => {
-        if (!loading && hasMore) {
-            const nextPage = currentPage + 1;
-            setCurrentPage(nextPage);
-            fetchRecords(nextPage);
-        }
-    };
-
     // Add the loading skeleton component
     const LoadingSkeleton = () => (
         <div className="min-h-screen bg-background">
@@ -454,6 +572,7 @@ export default function Library() {
 
                     {/* Table Header */}
                     <div className="flex items-center px-4 py-3 border-b">
+                        <Skeleton className="h-4 w-14 mr-4" /> {/* Type header */}
                         <Skeleton className="h-4 w-14 mr-4" /> {/* Image header */}
                         <Skeleton className="h-4 w-[400px] mr-4" /> {/* Description header */}
                         <Skeleton className="h-4 w-[200px] mr-4" /> {/* Features header */}
@@ -467,6 +586,7 @@ export default function Library() {
                     <div className="divide-y">
                         {Array(6).fill(0).map((_, i) => (
                             <div key={i} className="flex items-center px-4 py-3">
+                                <Skeleton className="h-6 w-14 mr-4" /> {/* Type */}
                                 <Skeleton className="h-14 w-14 mr-4" /> {/* Image */}
                                 <Skeleton className="h-8 w-[400px] mr-4" /> {/* Description */}
                                 <div className="w-[200px] mr-4 space-y-1">
@@ -583,28 +703,20 @@ export default function Library() {
 
                     {/* Main Content */}
                     <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                        <div className="space-y-2">
-                            <div className="border-0 bg-card">
-                                <DataTable
-                                    columns={columns}
-                                    data={records}
-                                    onRowClick={(record) => router.push(`/library/${record.id}`)}
-                                    searchPlaceholder="Search your creative library..."
-                                    maxRowsPerPage={6}
-                                />
-                            </div>
-                            {hasMore && (
-                                <div className="flex justify-center pt-2">
-                                    <Button
-                                        variant="outline"
-                                        onClick={loadMore}
-                                        disabled={loading}
-                                        className="h-8"
-                                    >
-                                        {loading ? "Loading..." : "Load More"}
-                                    </Button>
-                                </div>
-                            )}
+                        <div className="border-0 bg-card">
+                            <DataTable
+                                columns={columns}
+                                data={records}
+                                onRowClick={(record) => {
+                                    if (record.type === 'video') {
+                                        router.push(`/library/video/${record.id}`);
+                                    } else {
+                                        router.push(`/library/${record.id}`);
+                                    }
+                                }}
+                                searchPlaceholder="Search your creative library..."
+                                maxRowsPerPage={6}
+                            />
                         </div>
                     </div>
                 </>

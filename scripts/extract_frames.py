@@ -6,26 +6,41 @@ import numpy as np
 from urllib.parse import urlparse
 from pathlib import Path
 import base64
+from io import BytesIO
+from PIL import Image
 
 # Add these environment variables before cv2 import
 import os
 os.environ["OPENCV_DISABLE_EXTENDED_LOADER"] = "1"
-# Disable GStreamer to prevent the circular import issue
 os.environ["OPENCV_VIDEOIO_PRIORITY_GSTREAMER"] = "0"
 
-# Import cv2 with error handling
 import cv2
+
+def compress_image_base64(image_array, quality=85, max_size=(1920, 1080)):
+    """Compress image and convert to base64"""
+    # Convert CV2 image to PIL
+    image = Image.fromarray(cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB))
+    
+    # Resize if larger than max_size while maintaining aspect ratio
+    if image.size[0] > max_size[0] or image.size[1] > max_size[1]:
+        image.thumbnail(max_size, Image.Resampling.LANCZOS)
+    
+    # Save to buffer with compression
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG", quality=quality, optimize=True)
+    
+    # Convert to base64
+    base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    return f'data:image/jpeg;base64,{base64_image}'
 
 def download_video(url: str) -> str:
     """Download video to a temporary file and return the path"""
     try:
-        # Create a temporary file with .mp4 extension
         temp_file = tempfile.NamedTemporaryFile(suffix='.mp4', delete=False)
         
         response = requests.get(url, stream=True)
         response.raise_for_status()
         
-        # Write the video data to the temporary file
         with open(temp_file.name, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
@@ -39,55 +54,47 @@ def extract_frames(video_url: str) -> dict:
     temp_file = None
     cap = None
     try:
-        # If it's a URL, download it first
+        # Download if URL
         if urlparse(video_url).scheme in ['http', 'https']:
             temp_file = download_video(video_url)
             video_path = temp_file
         else:
             video_path = video_url
 
-        # Initialize video capture
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             raise Exception(f"Could not open video file: {video_path}")
 
-        # Get basic video info
         fps = cap.get(cv2.CAP_PROP_FPS)
         if fps <= 0:
-            fps = 30  # Default to 30fps if can't detect
+            fps = 30
 
-        # Get frame count and duration
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = total_frames / fps if fps > 0 else 0
 
         if duration <= 0:
-            # Manually count frames if duration detection fails
             frame_count = 0
             while cap.grab():
                 frame_count += 1
             duration = frame_count / fps
-            # Reset video to start
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
         frames = []
-        frame_interval = 10  # Extract frame every 10 seconds
+        frame_interval = 5  # Extract frame every 5 seconds for more detailed analysis
         current_sec = 0
 
         while current_sec < duration:
-            # Set position in video (convert seconds to frames)
             frame_pos = int(current_sec * fps)
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
             
             ret, frame = cap.read()
             if ret:
                 try:
-                    # Convert frame to JPEG
-                    _, buffer = cv2.imencode('.jpg', frame)
-                    # Convert to base64
-                    base64_frame = base64.b64encode(buffer).decode('utf-8')
+                    # Compress and convert frame to base64
+                    base64_frame = compress_image_base64(frame)
                     frames.append({
                         'timestamp': current_sec,
-                        'data': f'data:image/jpeg;base64,{base64_frame}'
+                        'data': base64_frame
                     })
                 except Exception as e:
                     print(f"Warning: Failed to process frame at {current_sec}s: {str(e)}", file=sys.stderr)
@@ -107,14 +114,13 @@ def extract_frames(video_url: str) -> dict:
             'error': str(e)
         }
     finally:
-        # Clean up resources
         if cap is not None:
             cap.release()
         if temp_file and Path(temp_file).exists():
             try:
                 Path(temp_file).unlink()
             except:
-                pass  # Ignore cleanup errors
+                pass
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

@@ -34,12 +34,18 @@ export async function POST(req: NextRequest) {
 
         const formData = await req.formData();
         const videoFile = formData.get('video') as File;
+        let videoName = formData.get('name') as string;
         
         if (!videoFile) {
             return NextResponse.json(
                 { error: "No video file provided" },
                 { status: 400 }
             );
+        }
+
+        // Use the video file name (without extension) if no name provided
+        if (!videoName) {
+            videoName = videoFile.name.split('.').slice(0, -1).join('.') || 'Untitled Video';
         }
 
         // Validate file type
@@ -81,7 +87,7 @@ export async function POST(req: NextRequest) {
             .from('library_videos')
             .getPublicUrl(filePath);
 
-        // Trigger video evaluation
+        // Trigger video evaluation with all required parameters
         const evaluationResponse = await fetch(`${protocol}://${host}/api/evaluate-video`, {
             method: 'POST',
             headers: {
@@ -89,9 +95,16 @@ export async function POST(req: NextRequest) {
                 cookie: req.headers.get('cookie') || '',
             },
             body: JSON.stringify({
-                videoUrl: publicUrl
+                videoUrl: publicUrl,
+                videoName: videoName,
+                userId: user.id
             }),
         });
+
+        if (!evaluationResponse.ok) {
+            const errorData = await evaluationResponse.json();
+            throw new Error(`Evaluation failed: ${errorData.error}`);
+        }
 
         const evaluationResult = await evaluationResponse.json();
 

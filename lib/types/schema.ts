@@ -165,6 +165,81 @@ export type Database = {
           },
         ]
       }
+      video_frames_mapping: {
+        Row: {
+          created_at: string | null
+          frame_id: string
+          frame_number: number
+          id: string
+          user_id: string | null
+          video_id: string
+          video_timestamp: unknown
+        }
+        Insert: {
+          created_at?: string | null
+          frame_id: string
+          frame_number: number
+          id?: string
+          user_id?: string | null
+          video_id: string
+          video_timestamp: unknown
+        }
+        Update: {
+          created_at?: string | null
+          frame_id?: string
+          frame_number?: number
+          id?: string
+          user_id?: string | null
+          video_id?: string
+          video_timestamp?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_frames_mapping_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "ad_structured_output"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_frames_mapping_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          mappings: string[] | null
+          name: string
+          user_id: string | null
+          video_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          mappings?: string[] | null
+          name: string
+          user_id?: string | null
+          video_url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          mappings?: string[] | null
+          name?: string
+          user_id?: string | null
+          video_url?: string
+        }
+        Relationships: []
+      }
       visual_attributes: {
         Row: {
           attribute: string
