@@ -4,6 +4,7 @@ import path from 'path';
 import { supabase } from '@/lib/supabase';
 import { Groq } from 'groq-sdk';
 import { z } from 'zod';
+import { Tables } from '@/lib/types/schema';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
       throw new Error(extractionResult.error || 'Frame extraction failed');
     }
 
-    // First, create the video entry with empty mappings array
+    // Add type for video insert response
     const { data: videoData, error: videoError } = await supabase
       .from('videos')
       .insert({
@@ -119,10 +120,10 @@ export async function POST(req: NextRequest) {
         created_at: new Date().toISOString(),
         description: null,
         video_url: videoUrl,
-        mappings: [] // Initialize empty array
+        mappings: []
       })
       .select('id')
-      .single();
+      .single<Pick<Tables<'videos'>, 'id'>>();
 
     if (videoError) {
       console.error("Video insert error:", videoError);
@@ -180,7 +181,7 @@ export async function POST(req: NextRequest) {
         const frameData = frameResult.results[0];
         frameIds.push(frameData.id);
 
-        // Create video_frames_mapping entry
+        // Add type for mapping insert response
         const { data: mappingData, error: mappingError } = await supabase
           .from('video_frames_mapping')
           .insert({
@@ -192,7 +193,7 @@ export async function POST(req: NextRequest) {
             created_at: new Date().toISOString()
           })
           .select('id')
-          .single();
+          .single<Pick<Tables<'video_frames_mapping'>, 'id'>>();
 
         if (mappingError) {
           console.error("Mapping insert error:", mappingError);
@@ -221,11 +222,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch all frame descriptions for the video summary
+    // Add type for frames query response
     const { data: frames, error: framesError } = await supabase
       .from('ad_structured_output')
       .select('image_description')
-      .in('id', frameIds);
+      .in('id', frameIds)
+      .returns<Pick<Tables<'ad_structured_output'>, 'image_description'>[]>();
 
     if (framesError) throw framesError;
 
