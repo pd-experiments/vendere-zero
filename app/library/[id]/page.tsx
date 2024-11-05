@@ -29,9 +29,10 @@ type AdRecord = {
 };
 
 type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
-// type Feature = Database['public']['Tables']['features']['Row'];
-// type VisualAttribute = Database['public']['Tables']['visual_attributes']['Row'];
-// type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
+type Feature = Database['public']['Tables']['features']['Row'];
+type VisualAttribute = Database['public']['Tables']['visual_attributes']['Row'];
+type FeatureWithVisualAttributes = Feature & { visual_attributes: VisualAttribute[] };
+type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
 
 const LoadingSkeleton = () => (
     <div className="min-h-screen bg-background">
@@ -160,14 +161,15 @@ export default function AdDetail({ params }: { params: { id: string } }) {
                 visual_attributes (*)
             `)
             .eq('ad_output_id', params.id)
-            .eq('user', user.id);
+            .eq('user', user.id)
+            .select<'features', FeatureWithVisualAttributes>();
 
         const { data: sentiment } = await supabase
             .from('sentiment_analysis')
             .select('*')
             .eq('ad_output_id', params.id)
             .eq('user', user.id)
-            .single();
+            .single<SentimentAnalysis>();
 
         const record: AdRecord = {
             id: adOutput.id,
