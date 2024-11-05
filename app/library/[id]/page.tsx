@@ -28,6 +28,11 @@ type AdRecord = {
     created_at: string;
 };
 
+type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
+// type Feature = Database['public']['Tables']['features']['Row'];
+// type VisualAttribute = Database['public']['Tables']['visual_attributes']['Row'];
+// type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row'];
+
 const LoadingSkeleton = () => (
     <div className="min-h-screen bg-background">
         <div className="px-6 py-4">
@@ -135,15 +140,9 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             return;
         }
 
-        type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
-
         const { data: adOutput, error: adError } = await supabase
             .from('ad_structured_output')
-            .select(`
-                id,
-                image_url,
-                image_description
-            `)
+            .select()
             .eq('id', params.id)
             .eq('user', user.id)
             .single<AdOutput>();
@@ -154,29 +153,18 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             return;
         }
 
-        // Get features
         const { data: features } = await supabase
-            .from("features")
+            .from('features')
             .select(`
-                keyword,
-                confidence_score,
-                category,
-                location,
-                visual_attributes (
-                    attribute,
-                    value
-                )
+                *,
+                visual_attributes (*)
             `)
             .eq('ad_output_id', params.id)
             .eq('user', user.id);
 
-        // Get sentiment
         const { data: sentiment } = await supabase
-            .from("sentiment_analysis")
-            .select(`
-                tone,
-                confidence
-            `)
+            .from('sentiment_analysis')
+            .select('*')
             .eq('ad_output_id', params.id)
             .eq('user', user.id)
             .single();
@@ -186,7 +174,13 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             image_url: adOutput.image_url,
             image_description: adOutput.image_description,
             created_at: new Date().toISOString(),
-            features: features || [],
+            features: (features || []).map(feature => ({
+                keyword: feature.keyword,
+                confidence_score: feature.confidence_score,
+                category: feature.category,
+                location: feature.location,
+                visual_attributes: feature.visual_attributes
+            })),
             sentiment_analysis: sentiment || { tone: '', confidence: 0 }
         };
 
