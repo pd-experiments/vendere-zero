@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type Database } from "@/lib/types/schema";
 
 type AdRecord = {
     id: string;
@@ -127,16 +128,17 @@ export default function AdDetail({ params }: { params: { id: string } }) {
 
     const fetchRecord = async () => {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
+
         if (userError || !user) {
             console.error("Error getting user:", userError);
             setLoading(false);
             return;
         }
 
-        // Get the specific record
+        type AdOutput = Database['public']['Tables']['ad_structured_output']['Row'];
+
         const { data: adOutput, error: adError } = await supabase
-            .from("ad_structured_output")
+            .from('ad_structured_output')
             .select(`
                 id,
                 image_url,
@@ -144,7 +146,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
             `)
             .eq('id', params.id)
             .eq('user', user.id)
-            .single();
+            .single<AdOutput>();
 
         if (adError || !adOutput) {
             console.error("Error fetching ad output:", adError);
@@ -302,7 +304,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
                                                     {feature.visual_attributes && feature.visual_attributes.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-2 pl-2 border-l-2 border-muted">
                                                             {feature.visual_attributes.map((attr) => (
-                                                                <span 
+                                                                <span
                                                                     key={attr.attribute}
                                                                     className="inline-flex items-center text-xs bg-muted/40 px-1.5 py-0.5"
                                                                 >
