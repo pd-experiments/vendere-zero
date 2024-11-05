@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       throw new Error(extractionResult.error || 'Frame extraction failed');
     }
 
-    // Add type for video insert response
+    // Create video entry first
     const { data: videoData, error: videoError } = await supabase
       .from('videos')
       .insert({
@@ -125,70 +125,63 @@ export async function POST(req: NextRequest) {
       .select('id')
       .single<Pick<Tables<'videos'>, 'id'>>();
 
-    if (videoError) {
+    if (videoError || !videoData) {
       console.error("Video insert error:", videoError);
-      throw videoError;
-    }
-
-    if (!videoData) {
-      throw new Error("Failed to create video entry");
+      throw videoError || new Error("Failed to create video entry");
     }
 
     const videoId = videoData.id;
-    const mappingIds: string[] = [];
-    const frameIds: string[] = [];
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
     const host = req.headers.get('host') || 'localhost:3000';
 
-    // Process all frames
+    // Prepare all frames for batch processing
+    const formData = new FormData();
+    const frameMetadata: Array<{ timestamp: number, index: number }> = [];
+
+    // Add all frames to formData and track their metadata
     for (let index = 0; index < extractionResult.frames.length; index++) {
       const frame = extractionResult.frames[index];
-      const formData = new FormData();
-      
       const response = await fetch(frame.data);
       const blob = await response.blob();
-      const file = new File([blob], `frame_${frame.timestamp}s.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `frame_${index}.jpg`, { type: 'image/jpeg' });
       formData.append('files', file);
-      
-      console.log(`Processing frame ${index + 1}/${extractionResult.frames.length}`);
-      
-      try {
-        const frameResponse = await fetch(`${protocol}://${host}/api/datagen`, {
-          method: 'POST',
-          body: formData,
-           headers: {
-              ...(req.headers.get('authorization') 
-                ? { 'authorization': req.headers.get('authorization') as string }
-                : {}),
-              ...(req.headers.get('cookie')
-                ? { 'cookie': req.headers.get('cookie') as string }
-                : {})
-            }
-        });
+      frameMetadata.push({ timestamp: frame.timestamp, index });
+    }
 
-        if (!frameResponse.ok) {
-          console.warn(`Failed to process frame at ${frame.timestamp}s`);
-          continue;
-        }
+    // Process all frames in one batch
+    console.log(`Processing ${extractionResult.frames.length} frames in batch`);
+    const frameResponse = await fetch(`${protocol}://${host}/api/datagen`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        ...(req.headers.get('authorization') 
+          ? { 'authorization': req.headers.get('authorization') as string }
+          : {}),
+        ...(req.headers.get('cookie')
+          ? { 'cookie': req.headers.get('cookie') as string }
+          : {})
+      }
+    });
 
-        const frameResult = DatagenResultSchema.parse(await frameResponse.json());
+    if (!frameResponse.ok) {
+      throw new Error('Failed to process frames batch');
+    }
+
+    const frameResults = DatagenResultSchema.parse(await frameResponse.json());
+    
+    // Create mappings for successfully processed frames
+    const mappingPromises = frameResults.results
+      .filter(result => result.status === "success")
+      .map(async (frameResult, arrayIndex) => {
+        const metadata = frameMetadata[arrayIndex];
         
-        if (frameResult.results[0].status === "error") {
-          console.warn(`Failed to process frame at ${frame.timestamp}s: ${frameResult.results[0].error}`);
-          continue;
-        }
-
-        const frameData = frameResult.results[0];
-        frameIds.push(frameData.id);
-
-        // Add type for mapping insert response
         const { data: mappingData, error: mappingError } = await supabase
           .from('video_frames_mapping')
           .insert({
             video_id: videoId,
-            frame_id: frameData.id,
-            frame_number: index + 1,
-            video_timestamp: frame.timestamp,
+            frame_id: frameResult.id,
+            frame_number: metadata.index + 1,
+            video_timestamp: metadata.timestamp,
             user_id: userId,
             created_at: new Date().toISOString()
           })
@@ -197,19 +190,19 @@ export async function POST(req: NextRequest) {
 
         if (mappingError) {
           console.error("Mapping insert error:", mappingError);
-          continue;
+          return null;
         }
 
-        if (mappingData) {
-          mappingIds.push(mappingData.id);
-        }
-      } catch (frameError) {
-        console.error(`Error processing frame ${index + 1}:`, frameError);
-        continue;
-      }
-    }
+        return mappingData?.id;
+      });
 
-    // Update video with all mapping IDs
+    // Wait for all mappings to be created
+    const mappingIds = (await Promise.all(mappingPromises)).filter(Boolean) as string[];
+    const frameIds = frameResults.results
+      .filter(result => result.status === "success")
+      .map(result => result.id);
+
+    // Update video with mapping IDs
     if (mappingIds.length > 0) {
       const { error: updateError } = await supabase
         .from('videos')
@@ -222,7 +215,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Add type for frames query response
+    // Get frame descriptions and generate video description
     const { data: frames, error: framesError } = await supabase
       .from('ad_structured_output')
       .select('image_description')
@@ -232,8 +225,6 @@ export async function POST(req: NextRequest) {
     if (framesError) throw framesError;
 
     const descriptions = frames?.map(f => f.image_description) || [];
-
-    // Generate overall video description
     const videoDescription = descriptions.length > 0 
       ? await generateVideoDescription(descriptions)
       : 'No description available';

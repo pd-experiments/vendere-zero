@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
     const host = request.headers.get('host') || 'localhost:3000'
     
-    // Create server-side Supabase client with cookie auth
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -23,7 +22,6 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Use getUser instead of getSession
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
@@ -43,13 +41,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const results = [];
-    for (const file of files) {
+    // Process all files concurrently
+    const processPromises = files.map(async (file) => {
       try {
-        // Upload to Supabase storage first
+        // Upload to Supabase storage
         const imageUrl = await uploadImageToBucket(file, supabase);
         
-        // Convert file to base64 for analysis
+        // Convert file to base64
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const base64Image = `data:${file.type};base64,${buffer.toString('base64')}`;
@@ -75,36 +73,38 @@ export async function POST(request: NextRequest) {
         // Generate embeddings
         const embeddings = await createEmbeddings(ad_description.image_description);
         
-        // Parse and validate the output
+        // Parse and validate
         const analysis = AdStructuredOutputSchema.parse({
           ...ad_description,
           image_url: imageUrl,
           description_embeddings: embeddings
         });
-
-        console.log(imageUrl);
         
-        // Store in database with user ID
+        // Store in database
         const id = await storeAnalysisResults(analysis, user.id, supabase);
         
-        results.push({ 
+        return { 
           id,
           filename: file.name,
           imageUrl,
-          status: "success" 
-        });
+          status: "success" as const
+        };
 
       } catch (error) {
-        console.log("Error processing image:", error);
-        results.push({
+        console.error("Error processing image:", error);
+        return {
           filename: file.name,
-          status: "error",
+          status: "error" as const,
           error: error instanceof Error ? error.message : "Unknown error"
-        });
+        };
       }
-    }
+    });
+
+    // Wait for all files to be processed
+    const results = await Promise.all(processPromises);
 
     return NextResponse.json({ results });
+    
   } catch (error) {
     console.error("Error processing images:", error);
     return NextResponse.json(
