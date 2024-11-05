@@ -221,7 +221,6 @@ export default function Library() {
                         visual_attributes: feature.visual_attributes
                     })),
                 sentiment_analysis: {
-                    // Get unique tones from all frames
                     tones: Array.from(new Set(
                         video.video_frames_mapping
                             .map(mapping => 
@@ -229,7 +228,10 @@ export default function Library() {
                             )
                             .filter(Boolean) as string[]
                     )),
-                    confidence: sentiments.find(s => s.ad_output_id === video.id)?.confidence || 0
+                    confidence: video.video_frames_mapping.reduce((sum, mapping) => {
+                        const frameSentiment = sentiments.find(s => s.ad_output_id === mapping.frame_id);
+                        return sum + (frameSentiment?.confidence || 0);
+                    }, 0) / (video.video_frames_mapping.length || 1)
                 },
                 created_at: video.created_at || new Date().toISOString()
             })) || []),
@@ -499,9 +501,14 @@ export default function Library() {
                         value={row.original.sentiment_analysis.confidence * 100}
                         className="h-1.5 w-14"
                     />
-                    <span className="text-xs text-muted-foreground">
-                        {(row.original.sentiment_analysis.confidence * 100).toFixed(0)}%
-                    </span>
+                    <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">
+                            {(row.original.sentiment_analysis.confidence * 100).toFixed(0)}%
+                        </span>
+                        {row.original.type === 'video' && (
+                            <span className="text-xs text-muted-foreground/60">(avg)</span>
+                        )}
+                    </div>
                 </div>
             ),
         },
