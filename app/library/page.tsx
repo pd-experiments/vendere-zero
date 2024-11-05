@@ -70,7 +70,7 @@ export default function Library() {
     const fetchRecords = async (page = 1) => {
         setLoading(true);
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
+
         if (userError || !user) {
             console.error("Error getting user:", userError);
             setLoading(false);
@@ -201,11 +201,11 @@ export default function Library() {
         // Process each file
         for (const uploadingFile of newFiles) {
             const formData = new FormData();
-            
+
             if (uploadingFile.fileType === 'video') {
                 // Handle video upload
                 formData.append('video', uploadingFile.file);
-                
+
                 try {
                     const response = await fetch("/api/upload-video", {
                         method: "POST",
@@ -241,7 +241,7 @@ export default function Library() {
             } else {
                 // Handle image upload (existing logic)
                 formData.append('files', uploadingFile.file);
-                
+
                 try {
                     const response = await fetch("/api/datagen", {
                         method: "POST",
@@ -316,7 +316,7 @@ export default function Library() {
             cell: ({ row }) => (
                 <div className="space-y-1.5">
                     {row.original.features.slice(0, 3).map(feature => (
-                        <div 
+                        <div
                             key={feature.keyword}
                             className="flex items-center justify-between"
                         >
@@ -382,12 +382,12 @@ export default function Library() {
                             .from("ad_structured_output")
                             .delete()
                             .eq('id', row.original.id);
-                        
+
                         if (error) {
                             console.error("Error deleting record:", error);
                             return;
                         }
-                        
+
                         // Refresh the records
                         fetchRecords(currentPage);
                     }
@@ -396,8 +396,8 @@ export default function Library() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button 
-                                variant="ghost" 
+                            <Button
+                                variant="ghost"
                                 className="h-8 w-8 p-0"
                             >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -522,14 +522,14 @@ export default function Library() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-[160px]">
-                                        <DropdownMenuItem 
+                                        <DropdownMenuItem
                                             onClick={() => document.getElementById('imageInput')?.click()}
                                             className="flex items-center gap-2"
                                         >
                                             <ImageIcon className="h-4 w-4" />
                                             <span>Upload Images</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem 
+                                        <DropdownMenuItem
                                             onClick={() => document.getElementById('videoInput')?.click()}
                                             className="flex items-center gap-2"
                                         >
