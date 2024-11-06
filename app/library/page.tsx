@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon } from "lucide-react";
@@ -91,6 +91,8 @@ export default function Library() {
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [records, setRecords] = useState<LibraryItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [confidenceRange, setConfidenceRange] = useState<[number, number]>([0, 100]);
+    const [selectedTones, setSelectedTones] = useState<string[]>([]);
 
     // Fetch user's records on mount
     useEffect(() => {
@@ -369,6 +371,15 @@ export default function Library() {
         }, 3000);
     };
 
+    // Get unique tones
+    const allTones = useMemo(() => {
+        const tones = new Set<string>();
+        records.forEach((item) => {
+            item.sentiment_analysis.tones.forEach((tone) => tones.add(tone));
+        });
+        return Array.from(tones);
+    }, [records]);
+
     // Define columns
     const columns: ColumnDef<LibraryItem>[] = [
         {
@@ -408,11 +419,11 @@ export default function Library() {
                 <div className="py-1">
                     {row.original.type === 'video' ? (
                         <div className="flex -space-x-2">
-                            {row.original.video?.frames.slice(0, 3).map((frame, index) => (
+                            {row.original.video?.frames.slice(0, 2).map((frame, index) => (
                                 <div 
                                     key={frame.frame_id} 
                                     className="relative w-10 h-10 border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform"
-                                    style={{ zIndex: 3 - index }}
+                                    style={{ zIndex: 2 - index }}
                                 >
                                     <Image
                                         src={frame.image_url}
@@ -422,13 +433,13 @@ export default function Library() {
                                     />
                                 </div>
                             ))}
-                            {(row.original.video?.frames.length || 0) > 3 && (
+                            {(row.original.video?.frames.length || 0) > 2 && (
                                 <div 
                                     className="relative w-10 h-10 border-2 border-background rounded-md bg-muted/50 flex items-center justify-center"
                                     style={{ zIndex: 0 }}
                                 >
                                     <span className="text-xs font-medium text-muted-foreground">
-                                        +{(row.original.video?.frames.length || 0) - 3}
+                                        +{(row.original.video?.frames.length || 0) - 2}
                                     </span>
                                 </div>
                             )}
@@ -487,8 +498,14 @@ export default function Library() {
             ),
         },
         {
-            accessorKey: "sentiment_tone",
+            accessorFn: (row) => row.sentiment_analysis.tones,
+            id: "sentiment_tone",
             header: "Tone",
+            filterFn: (row, id, filterValue) => {
+                if (!filterValue || (Array.isArray(filterValue) && filterValue.length === 0)) return true;
+                const tones = row.getValue<string[]>(id);
+                return tones.some(tone => filterValue.includes(tone.toLowerCase()));
+            },
             cell: ({ row }) => (
                 <div className="py-1 space-y-1">
                     {row.original.sentiment_analysis.tones.slice(0, 2).map((tone, index) => (
@@ -508,8 +525,15 @@ export default function Library() {
             ),
         },
         {
-            accessorKey: "sentiment_confidence",
+            accessorFn: (row) => row.sentiment_analysis.confidence,
+            id: "sentiment_confidence",
             header: "Confidence",
+            filterFn: (row, id, filterValue) => {
+                if (!filterValue) return true;
+                const [min, max] = filterValue as [number, number];
+                const confidence = row.getValue<number>(id);
+                return confidence >= min && confidence <= max;
+            },
             cell: ({ row }) => (
                 <div className="flex items-center gap-3 py-1">
                     <Progress
@@ -530,6 +554,7 @@ export default function Library() {
         {
             accessorKey: "created_at",
             header: "Created",
+            sortingFn: "datetime",
             cell: ({ row }) => (
                 <div className="py-1">
                     <span className="text-xs text-muted-foreground">
@@ -751,6 +776,7 @@ export default function Library() {
                             <DataTable
                                 columns={columns}
                                 data={records}
+                                searchPlaceholder="Search your creative library..."
                                 onRowClick={(record) => {
                                     if (record.type === 'video') {
                                         router.push(`/library/video/${record.id}`);
@@ -758,7 +784,43 @@ export default function Library() {
                                         router.push(`/library/${record.id}`);
                                     }
                                 }}
-                                searchPlaceholder="Search your creative library..."
+                                filters={[
+                                    {
+                                        id: "sentiment_confidence",
+                                        label: "Confidence Range",
+                                        type: "range",
+                                        value: confidenceRange,
+                                        filterFn: (row, id, value) => {
+                                            if (!value) return true;
+                                            const [min, max] = value as [number, number];
+                                            const confidence = row.getValue<number>(id);
+                                            return confidence >= min/100 && confidence <= max/100;
+                                        },
+                                        onValueChange: (value) => setConfidenceRange(value as [number, number]),
+                                    },
+                                    {
+                                        id: "sentiment_tone",
+                                        label: "Tones",
+                                        type: "multiselect",
+                                        options: allTones,
+                                        value: selectedTones,
+                                        filterFn: (row, id, value) => {
+                                            if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                            const tones = row.getValue<string[]>(id);
+                                            return tones.some(tone => value.includes(tone.toLowerCase()));
+                                        },
+                                        onValueChange: (value) => setSelectedTones(value as string[]),
+                                    },
+                                ]}
+                                globalFilter={{
+                                    placeholder: "Search your creative library...",
+                                    searchFn: (row, id, value) => {
+                                        const searchValue = (value as string).toLowerCase();
+                                        const name = String(row.getValue("name") || "").toLowerCase();
+                                        const description = String(row.getValue("image_description") || "").toLowerCase();
+                                        return name.includes(searchValue) || description.includes(searchValue);
+                                    },
+                                }}
                                 maxRowsPerPage={6}
                             />
                         </div>
