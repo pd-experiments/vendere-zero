@@ -776,7 +776,8 @@ export default function Library() {
                             <DataTable
                                 columns={columns}
                                 data={records}
-                                searchPlaceholder="Search your creative library..."
+                                // disableSearch={true}
+                                searchPlaceholder="Fuzzy search your creative library..."
                                 onRowClick={(record) => {
                                     if (record.type === 'video') {
                                         router.push(`/library/video/${record.id}`);

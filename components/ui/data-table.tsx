@@ -57,6 +57,7 @@ interface DataTableProps<TData, TValue> {
     placeholder: string;
     searchFn: FilterFn<TData>;
   };
+  disableSearch?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -67,6 +68,7 @@ export function DataTable<TData, TValue>({
   onRowClick,
   searchPlaceholder = "Search...",
   maxRowsPerPage = 10,
+  disableSearch = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -137,9 +139,9 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full" onClick={(e) => e.stopPropagation()}>
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+      <div className="flex items-center justify-between py-3 border-b">
         <div className="flex items-center gap-4">
-          {globalFilter && (
+          {globalFilter && !disableSearch && (
             <div className="relative w-[380px]">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
