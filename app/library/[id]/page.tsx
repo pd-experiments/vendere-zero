@@ -14,6 +14,7 @@ type AdRecord = {
     id: string;
     image_url: string;
     image_description: string;
+    name?: string;
     features: {
         keyword: string;
         confidence_score: number;
@@ -37,79 +38,70 @@ type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row
 const LoadingSkeleton = () => (
     <div className="min-h-screen bg-background">
         <div className="px-6 py-4">
-            {/* Header Loading */}
+            {/* Header Skeleton */}
             <div className="max-w-[1400px] mx-auto mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-8" /> {/* Back button */}
-                        <Skeleton className="h-8 w-48" /> {/* Title */}
+                        <Skeleton className="h-8 w-8" />
+                        <Skeleton className="h-8 w-48" />
                     </div>
-                    <Skeleton className="h-4 w-40" /> {/* Created date */}
+                    <Skeleton className="h-4 w-32" />
                 </div>
             </div>
 
-            {/* Main Content Loading */}
+            {/* Main Content Skeleton */}
             <div className="max-w-[1400px] mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column */}
-                    <div className="space-y-4">
-                        {/* Image Loading */}
-                        <Skeleton className="h-[500px] w-full" />
+                    <div className="space-y-6">
+                        {/* Image Skeleton */}
+                        <Skeleton className="aspect-video w-full" />
 
-                        {/* Description Loading */}
+                        {/* Description Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-24" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-24" />
                             </div>
-                            <div className="p-4">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-4/5" />
-                                    <Skeleton className="h-4 w-3/5" />
-                                </div>
+                            <div className="p-4 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-4/5" />
+                                <Skeleton className="h-4 w-3/4" />
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column */}
-                    <div className="space-y-4">
-                        {/* Sentiment Analysis Loading */}
+                    <div className="space-y-6">
+                        {/* Sentiment Analysis Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-36" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
                             </div>
                             <div className="p-4">
                                 <div className="flex items-center gap-4">
                                     <Skeleton className="h-6 w-24" />
                                     <Skeleton className="h-2 flex-1" />
-                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="h-4 w-16" />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Features Loading */}
+                        {/* Features Grid Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-28" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
                             </div>
                             <div className="p-4">
-                                <div className="grid gap-2 sm:grid-cols-1 xl:grid-cols-2">
-                                    {Array(6).fill(0).map((_, i) => (
-                                        <div key={i} className="border bg-muted/50 p-3 space-y-2">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Skeleton className="h-5 w-24" />
-                                                    <Skeleton className="h-4 w-16" />
-                                                </div>
+                                <div className="grid gap-4 sm:grid-cols-1 xl:grid-cols-2">
+                                    {Array(4).fill(0).map((_, i) => (
+                                        <div key={i} className="border p-4">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <Skeleton className="h-5 w-32" />
                                                 <Skeleton className="h-4 w-12" />
                                             </div>
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-32" />
-                                                <div className="pl-2 border-l-2 border-muted space-y-1">
-                                                    <Skeleton className="h-4 w-28" />
-                                                    <Skeleton className="h-4 w-24" />
-                                                    <Skeleton className="h-4 w-32" />
-                                                </div>
+                                            <Skeleton className="h-4 w-full mt-2" />
+                                            <div className="mt-2 pl-2 border-l-2 border-muted">
+                                                <Skeleton className="h-4 w-4/5" />
                                             </div>
                                         </div>
                                     ))}
@@ -173,6 +165,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
 
         const record: AdRecord = {
             id: adOutput.id,
+            name: adOutput.name ?? 'Untitled',
             image_url: adOutput.image_url,
             image_description: adOutput.image_description,
             created_at: new Date().toISOString(),
@@ -213,7 +206,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
                             >
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
-                            <h1 className="text-2xl font-semibold">Image Analysis</h1>
+                            <h1 className="text-2xl font-semibold">{record.name ?? 'Untitled'}</h1>
                         </div>
                         <p className="text-sm text-muted-foreground">
                             Created {new Date(record.created_at).toLocaleString()}

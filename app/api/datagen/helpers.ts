@@ -39,6 +39,7 @@ export async function storeAnalysisResults(analysis: AdStructuredOutput, userId:
   const { data: outputData, error: outputError } = await supabase
     .from("ad_structured_output")
     .insert({
+      name: analysis.name,
       image_url: analysis.image_url,
       image_description: analysis.image_description,
       description_embeddings: JSON.stringify(analysis.description_embeddings), // Convert array to string

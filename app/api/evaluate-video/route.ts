@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { spawn } from 'child_process';
 import path from 'path';
 import { supabase } from '@/lib/supabase';
-import { Groq } from 'groq-sdk';
+// import { Groq } from 'groq-sdk';
 import { z } from 'zod';
 import { Tables } from '@/lib/types/schema';
+import { openai } from '@/lib/ai';
+import { zodResponseFormat } from 'openai/helpers/zod';
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+// const groq = new Groq({
+//   apiKey: process.env.GROQ_API_KEY
+// });
 
 // Zod schemas
 const FrameSchema = z.object({
@@ -40,21 +42,47 @@ const RequestBodySchema = z.object({
   userId: z.string().uuid().nullable()
 });
 
-async function generateVideoDescription(frameDescriptions: string[]): Promise<string> {
-  const prompt = `Based on the following frame descriptions from a video, provide a concise overall description of the video content:
+const VideoDescriptionSchema = z.object({
+  name: z.string(),
+  description: z.string()
+});
 
-${frameDescriptions.join('\n')}
+async function generateVideoDescription(frameDescriptions: string[]): Promise<z.infer<typeof VideoDescriptionSchema>> {
+  const prompt = `Based on the following frame descriptions from a video, generate a structured output containing:
+1. A short, memorable name (3-4 words) for the video that captures its essence
+2. A concise overall description of the video content in 2-3 sentences
 
-Provide a coherent summary in 2-3 sentences.`;
+Frame descriptions:
+${frameDescriptions.join('\n')}`;
 
-  const completion = await groq.chat.completions.create({
-    messages: [{ role: 'user', content: prompt }],
-    model: 'mixtral-8x7b-32768',
-    temperature: 0.5,
-    max_tokens: 200,
+  const response = await openai.beta.chat.completions.parse({
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    model: "gpt-4o-mini",
+    response_format: zodResponseFormat(VideoDescriptionSchema, "video_description"),
   });
 
-  return completion.choices[0]?.message?.content || 'No description generated';
+  // const completion = await groq.chat.completions.create({
+  //   messages: [{ role: 'user', content: prompt }],
+  //   model: 'mixtral-8x7b-32768',
+  //   temperature: 0.5,
+  //   max_tokens: 200,
+  // });
+
+  const result = response.choices[0].message.parsed;
+  
+  if (!result) {
+    return {
+      name: "Untitled Video",
+      description: "No description available"
+    };
+  }
+
+  return result;
 }
 
 async function extractFramesWithPython(videoUrl: string) {
@@ -225,14 +253,17 @@ export async function POST(req: NextRequest) {
     if (framesError) throw framesError;
 
     const descriptions = frames?.map(f => f.image_description) || [];
-    const videoDescription = descriptions.length > 0 
+    const videoAnalysis = descriptions.length > 0 
       ? await generateVideoDescription(descriptions)
-      : 'No description available';
+      : { name: "Untitled Video", description: "No description available" };
 
-    // Update video with description
+    // Update video with description and name
     const { error: updateError } = await supabase
       .from('videos')
-      .update({ description: videoDescription })
+      .update({ 
+        description: videoAnalysis.description,
+        name: videoAnalysis.name 
+      })
       .eq('id', videoId);
 
     if (updateError) throw updateError;
@@ -242,7 +273,8 @@ export async function POST(req: NextRequest) {
       videoId: videoId,
       total_duration: extractionResult.total_duration,
       total_frames: extractionResult.frame_count,
-      description: videoDescription
+      description: videoAnalysis.description,
+      name: videoAnalysis.name
     });
     
   } catch (error) {

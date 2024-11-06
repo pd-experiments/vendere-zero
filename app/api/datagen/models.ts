@@ -32,6 +32,7 @@ export const SentimentAnalysisSchema = z.object({
 export const AdStructuredOutputSchema = z.object({
   image_url: z.string(),
   image_description: z.string(),
+  name: z.string(),
   features: z.array(FeatureSchema),
   sentiment_analysis: SentimentAnalysisSchema,
   description_embeddings: z.array(z.number()).optional()

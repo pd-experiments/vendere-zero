@@ -5,6 +5,7 @@ import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { groq, openai } from "@/lib/ai";
 import { AdStructuredOutputSchema } from "./schemas";
 import { insertAdEvaluation } from "./dao";
+// import _ from "lodash";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const keyword_gen_prompt = `
-You are tasked with analyzing the following ad image description and generating structured output for ad performance analysis. First, extract a few descriptive keywords and classify each into general categories such as "emotion", "object", or "background". For each keyword, provide additional details on any specific visual features, such as color, lighting, or object size. Next, assess the overall sentiment or tone of the image. The goal is to organize the extracted features and sentiment into a format that can later be used to associate these features with performance metrics like Return on Ad Spend (ROAS) or conversion rates.
+You are tasked with analyzing the following ad image description and generating structured output for ad performance analysis. First, generate a short, memorable name (3-4 words) that captures the essence of this advertisement. Then, extract a few descriptive keywords and classify each into general categories such as "emotion", "object", or "background". For each keyword, provide additional details on any specific visual features, such as color, lighting, or object size. Next, assess the overall sentiment or tone of the image. The goal is to organize the extracted features and sentiment into a format that can later be used to associate these features with performance metrics like Return on Ad Spend (ROAS) or conversion rates.
 
 Here is the ad image description: {imageDescription}
   `;
@@ -88,7 +89,11 @@ Here is the ad image description: {imageDescription}
       );
     }
 
+    console.log("Ad description:", JSON.stringify(ad_description));
+    console.log("Ad name:", ad_description.name);
+
     ad_description.image_description = description;
+    // ad_description.name = _.startCase(_.toLower(ad_description.name));
 
     if (saveToDatabase) {
       await insertAdEvaluation(imageData, ad_description);

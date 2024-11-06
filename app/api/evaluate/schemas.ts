@@ -37,6 +37,7 @@ const SentimentAnalysisSchema = z.object({
 // Define the full schema for the structured output
 const AdStructuredOutputSchema = z.object({
     image_description: z.string(), // Raw description of the image
+    name: z.string(), // Generated name for the image
     features: z.array(FeatureSchema), // Array of features with their details
     sentiment_analysis: SentimentAnalysisSchema, // Sentiment analysis
 });

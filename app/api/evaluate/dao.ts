@@ -12,12 +12,14 @@ async function insertAdEvaluation(
     imageUrl: string,
     adEvaluation: z.infer<typeof AdStructuredOutputSchema>,
 ) {
+    console.log("Inserting ad evaluation name:", adEvaluation.name);
     const { data: adStructuredOutputData, error: adStructuredOutputError } =
         await supabase
             .from("ad_structured_output")
             .insert({
                 image_description: adEvaluation.image_description,
                 image_url: imageUrl,
+                name: adEvaluation.name,
             })
             .select()
             .returns<AdStructuredOutput>()

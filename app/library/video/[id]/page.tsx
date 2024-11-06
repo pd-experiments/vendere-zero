@@ -21,6 +21,7 @@ type VideoRow = {
 
 type FrameRow = {
     id: string;
+    name: string;
     image_url: string;
     image_description: string;
     user: string | null;
@@ -103,89 +104,88 @@ const LoadingSkeleton = () => (
         <div className="px-6 py-4">
             {/* Header Skeleton */}
             <div className="max-w-[1400px] mx-auto mb-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-8" /> {/* Back button */}
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <Skeleton className="h-5 w-5" /> {/* Video icon */}
-                                <Skeleton className="h-8 w-48" /> {/* Title */}
-                            </div>
-                            <Skeleton className="h-4 w-64 mt-1" /> {/* Description */}
-                        </div>
-                    </div>
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8" /> {/* Back button */}
+                    <Skeleton className="h-8 w-64" /> {/* Title */}
                 </div>
             </div>
 
             {/* Main Content Skeleton */}
             <div className="max-w-[1400px] mx-auto">
-                {/* Frame Navigation Skeleton */}
-                <div className="mb-6 border bg-card p-4">
-                    <div className="grid grid-cols-6 gap-2">
-                        {Array(6).fill(0).map((_, i) => (
-                            <Skeleton key={i} className="aspect-video w-full" />
-                        ))}
-                    </div>
-                </div>
-
-                {/* Frame Details Skeleton */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column */}
-                    <div className="space-y-4">
-                        <Skeleton className="aspect-video w-full" />
-
+                    <div className="space-y-6">
+                        {/* Video Player Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-24" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-24" />
+                            </div>
+                            <div className="p-4">
+                                <Skeleton className="aspect-video w-full" />
+                            </div>
+                        </div>
+
+                        {/* Timeline Skeleton */}
+                        <div className="border bg-card">
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-24" />
+                            </div>
+                            <div className="p-4">
+                                <div className="flex gap-2">
+                                    {Array(5).fill(0).map((_, i) => (
+                                        <Skeleton key={i} className="w-20 aspect-video flex-shrink-0" />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Description Skeleton */}
+                        <div className="border bg-card">
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
                             </div>
                             <div className="p-4 space-y-2">
                                 <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-4/5" />
-                                <Skeleton className="h-4 w-3/5" />
+                                <Skeleton className="h-4 w-3/4" />
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column */}
-                    <div className="space-y-4">
-                        {/* Sentiment Analysis Skeleton */}
+                    <div className="space-y-6">
+                        {/* Current Frame Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-36" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
                             </div>
                             <div className="p-4">
-                                <div className="flex items-center gap-4">
-                                    <Skeleton className="h-5 w-24" />
-                                    <Skeleton className="h-2 flex-1" />
-                                    <Skeleton className="h-5 w-32" />
-                                </div>
+                                <Skeleton className="aspect-video w-full" />
                             </div>
                         </div>
 
-                        {/* Features Skeleton */}
+                        {/* Frame Analysis Skeleton */}
                         <div className="border bg-card">
-                            <div className="px-4 py-2 border-b bg-muted/50">
-                                <Skeleton className="h-5 w-32" />
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
+                            </div>
+                            <div className="p-4 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-4/5" />
+                                <Skeleton className="h-4 w-3/4" />
+                            </div>
+                        </div>
+
+                        {/* Features Grid Skeleton */}
+                        <div className="border bg-card">
+                            <div className="px-4 py-2 border-b">
+                                <Skeleton className="h-4 w-32" />
                             </div>
                             <div className="p-4">
-                                <div className="grid gap-2 sm:grid-cols-1 xl:grid-cols-2">
+                                <div className="grid gap-4 sm:grid-cols-1 xl:grid-cols-2">
                                     {Array(4).fill(0).map((_, i) => (
-                                        <div key={i} className="border bg-muted/50 p-3 space-y-2">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Skeleton className="h-5 w-24" />
-                                                    <Skeleton className="h-4 w-16" />
-                                                </div>
-                                                <Skeleton className="h-4 w-12" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-32" />
-                                                <div className="pl-2 border-l-2 border-muted space-y-1">
-                                                    <Skeleton className="h-4 w-28" />
-                                                    <Skeleton className="h-4 w-24" />
-                                                    <Skeleton className="h-4 w-32" />
-                                                </div>
-                                            </div>
+                                        <div key={i} className="border p-4 space-y-2">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-4 w-full" />
                                         </div>
                                     ))}
                                 </div>

@@ -37,6 +37,7 @@ type LibraryItem = {
     id: string;
     type: 'image' | 'video';
     image_url?: string;
+    name?: string | null;
     video?: {
         id: string;
         name: string;
@@ -139,6 +140,7 @@ export default function Library() {
             .from('ad_structured_output')
             .select<string, StandaloneImage>(`
                 id,
+                name,
                 image_url,
                 image_description,
                 video_frames_mapping!video_frames_mapping_frame_id_fkey (id)
@@ -194,6 +196,7 @@ export default function Library() {
             ...(videos?.map(video => ({
                 id: video.id,
                 type: 'video' as const,
+                name: video.name,
                 video: {
                     id: video.id,
                     name: video.name,
@@ -239,6 +242,7 @@ export default function Library() {
             ...(standaloneImages?.map(image => ({
                 id: image.id,
                 type: 'image' as const,
+                name: image.name,
                 image_url: image.image_url,
                 image_description: image.image_description,
                 features: features
@@ -383,6 +387,17 @@ export default function Library() {
                             <span className="text-xs font-medium">Image</span>
                         </div>
                     )}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "name",
+            header: "Name",
+            cell: ({ row }) => (
+                <div className="py-1">
+                    <span className="text-xs font-medium truncate block max-w-[200px]">
+                        {row.original.name ?? 'Untitled'}
+                    </span>
                 </div>
             ),
         },
