@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon } from "lucide-react";
+import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2, X, Search } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -17,6 +17,13 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 // Extend database types for video frames
 type VideoFrameMapping = Database['public']['Tables']['video_frames_mapping']['Row'] & {
@@ -64,7 +71,7 @@ type LibraryItem = {
         }>;
     }>;
     sentiment_analysis: {
-        tones: string[];  
+        tones: string[];
         confidence: number;
     };
     created_at: string;
@@ -79,11 +86,22 @@ type UploadingFile = {
     status: "uploading" | "processing" | "complete" | "error";
     error?: string;
     progress?: number;
+    abortController?: AbortController;
 };
 
 // Add FeatureWithAttributes type definition
 type FeatureWithAttributes = Database['public']['Tables']['features']['Row'] & {
     visual_attributes: Database['public']['Tables']['visual_attributes']['Row'][];
+};
+
+type SearchResult = LibraryItem & {
+    similarity: number;
+};
+
+type SearchResponse = {
+    results: SearchResult[];
+    analysis: string;
+    query: string;
 };
 
 export default function Library() {
@@ -93,6 +111,10 @@ export default function Library() {
     const [loading, setLoading] = useState(true);
     const [confidenceRange, setConfidenceRange] = useState<[number, number]>([0, 100]);
     const [selectedTones, setSelectedTones] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showAnalysis, setShowAnalysis] = useState(false);
 
     // Fetch user's records on mount
     useEffect(() => {
@@ -228,7 +250,7 @@ export default function Library() {
                 sentiment_analysis: {
                     tones: Array.from(new Set(
                         video.video_frames_mapping
-                            .map(mapping => 
+                            .map(mapping =>
                                 sentiments.find(s => s.ad_output_id === mapping.frame_id)?.tone
                             )
                             .filter(Boolean) as string[]
@@ -279,7 +301,8 @@ export default function Library() {
             file,
             fileType: file.type.startsWith('video/') ? 'video' as const : 'image' as const,
             status: "uploading" as const,
-            progress: 0
+            progress: 0,
+            abortController: new AbortController()
         }));
 
         setUploadingFiles(prev => [...prev, ...newFiles]);
@@ -289,16 +312,24 @@ export default function Library() {
             const formData = new FormData();
 
             if (uploadingFile.fileType === 'video') {
-                // Handle video upload
                 formData.append('video', uploadingFile.file);
 
                 try {
                     const response = await fetch("/api/upload-video", {
                         method: "POST",
-                        body: formData
+                        body: formData,
+                        signal: uploadingFile.abortController?.signal
                     });
 
                     if (!response.ok) throw new Error("Upload failed");
+                    const result = await response.json();
+
+                    // Check if upload was cancelled
+                    if (uploadingFile.abortController?.signal.aborted) {
+                        // Delete the video and associated data
+                        await deleteVideoData(result.videoId);
+                        return;
+                    }
 
                     setUploadingFiles(prev =>
                         prev.map(file =>
@@ -308,10 +339,14 @@ export default function Library() {
                         )
                     );
 
-                    // Refresh records after successful upload
                     await fetchRecords();
 
-                } catch (error) {
+                } catch (error: unknown) {
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        setUploadingFiles(prev => prev.filter(f => f.id !== uploadingFile.id));
+                        return;
+                    }
+
                     setUploadingFiles(prev =>
                         prev.map(file =>
                             file.id === uploadingFile.id
@@ -325,18 +360,28 @@ export default function Library() {
                     );
                 }
             } else {
-                // Handle image upload (existing logic)
+                // Handle image upload with cancellation
                 formData.append('files', uploadingFile.file);
 
                 try {
                     const response = await fetch("/api/datagen", {
                         method: "POST",
-                        body: formData
+                        body: formData,
+                        signal: uploadingFile.abortController?.signal
                     });
 
                     if (!response.ok) throw new Error("Upload failed");
-
                     const { results } = await response.json();
+
+                    // Check if upload was cancelled
+                    if (uploadingFile.abortController?.signal.aborted) {
+                        // Delete the uploaded image data
+                        const imageId = results[0]?.id;
+                        if (imageId) {
+                            await deleteImageData(imageId);
+                        }
+                        return;
+                    }
 
                     setUploadingFiles(prev =>
                         prev.map(file => {
@@ -353,7 +398,12 @@ export default function Library() {
 
                     await fetchRecords();
 
-                } catch (error) {
+                } catch (error: unknown) {
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        setUploadingFiles(prev => prev.filter(f => f.id !== uploadingFile.id));
+                        return;
+                    }
+
                     setUploadingFiles(prev =>
                         prev.map(file => ({
                             ...file,
@@ -365,10 +415,57 @@ export default function Library() {
             }
         }
 
-        // Clear completed uploads after a delay
         setTimeout(() => {
             setUploadingFiles(prev => prev.filter(f => f.status !== "complete"));
         }, 3000);
+    };
+
+    // Add helper functions to delete data
+    const deleteVideoData = async (videoId: string) => {
+        const { data: mappings } = await supabase
+            .from('video_frames_mapping')
+            .select('frame_id')
+            .eq('video_id', videoId);
+
+        if (mappings) {
+            // Delete all frame records from ad_structured_output
+            for (const mapping of mappings) {
+                await supabase
+                    .from('ad_structured_output')
+                    .delete()
+                    .eq('id', mapping.frame_id);
+            }
+        }
+
+        // Delete mappings
+        await supabase
+            .from('video_frames_mapping')
+            .delete()
+            .eq('video_id', videoId);
+
+        // Delete video record
+        await supabase
+            .from('videos')
+            .delete()
+            .eq('id', videoId);
+    };
+
+    const deleteImageData = async (imageId: string) => {
+        await supabase
+            .from('ad_structured_output')
+            .delete()
+            .eq('id', imageId);
+    };
+
+    // Add cancel upload handler
+    const handleCancelUpload = (fileId: string) => {
+        setUploadingFiles(prev => {
+            const file = prev.find(f => f.id === fileId);
+            if (file?.abortController) {
+                file.abortController.abort();
+            }
+            return prev.filter(f => f.id !== fileId);
+        });
     };
 
     // Get unique tones
@@ -420,8 +517,8 @@ export default function Library() {
                     {row.original.type === 'video' ? (
                         <div className="flex -space-x-2">
                             {row.original.video?.frames.slice(0, 2).map((frame, index) => (
-                                <div 
-                                    key={frame.frame_id} 
+                                <div
+                                    key={frame.frame_id}
                                     className="relative w-10 h-10 border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform"
                                     style={{ zIndex: 2 - index }}
                                 >
@@ -434,7 +531,7 @@ export default function Library() {
                                 </div>
                             ))}
                             {(row.original.video?.frames.length || 0) > 2 && (
-                                <div 
+                                <div
                                     className="relative w-10 h-10 border-2 border-background rounded-md bg-muted/50 flex items-center justify-center"
                                     style={{ zIndex: 0 }}
                                 >
@@ -687,143 +784,311 @@ export default function Library() {
         </div>
     );
 
+    // Add this function to handle search
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        
+        if (!query.trim()) {
+            setSearchResults(null);
+            setShowAnalysis(false);
+            return;
+        }
+
+        setIsSearching(true);
+        setShowAnalysis(true);
+
+        try {
+            const response = await fetch("/api/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query }),
+            });
+
+            if (!response.ok) throw new Error("Search failed");
+            const data: SearchResponse = await response.json();
+            setSearchResults(data);
+        } catch (error) {
+            console.error("Search error:", error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    // Add this function to clear search
+    const clearSearch = () => {
+        setSearchQuery("");
+        setSearchResults(null);
+        setShowAnalysis(false);
+    };
+
+    // Modify the search input section to handle key press
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch(searchQuery);
+        }
+    };
+
+    // Modify the search input to use onChange without immediate search
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        if (!e.target.value) {
+            clearSearch();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background">
-            {loading && records.length === 0 ? (
+            {loading ? (
                 <LoadingSkeleton />
             ) : (
                 <>
-                    {/* Header */}
                     <div className="border-b">
                         <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                            <div className="flex justify-between items-center">
-                                <div className="flex flex-col gap-1">
-                                    <h1 className="text-2xl font-semibold">Library</h1>
-                                    <p className="text-sm text-muted-foreground">
-                                        AI-powered visual analysis of your creative content
-                                    </p>
+                            <div className="flex flex-col gap-4">
+                                {/* Existing header content */}
+                                <div className="flex justify-between items-center">
+                                    <div className="flex flex-col gap-1">
+                                        <h1 className="text-2xl font-semibold">Library</h1>
+                                        <p className="text-sm text-muted-foreground">
+                                            AI-powered visual analysis of your creative content
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {uploadingFiles.length > 0 && (
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="flex items-center gap-2"
+                                                    >
+                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                        <span>Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}</span>
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    align="end"
+                                                    className="w-80 p-2"
+                                                >
+                                                    <div className="space-y-2">
+                                                        {uploadingFiles.map(file => (
+                                                            <div
+                                                                key={file.id}
+                                                                className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
+                                                            >
+                                                                <div className="relative w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
+                                                                    {file.fileType === 'image' && file.file && (
+                                                                        <Image
+                                                                            src={URL.createObjectURL(file.file)}
+                                                                            alt={file.fileName}
+                                                                            layout="fill"
+                                                                            objectFit="cover"
+                                                                        />
+                                                                    )}
+                                                                    {file.fileType === 'video' && (
+                                                                        <Video className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
+                                                                    )}
+                                                                    {file.status === "uploading" && (
+                                                                        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                                                                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                                                                        </div>
+                                                                    )}
+                                                                    {file.status === "complete" && (
+                                                                        <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                                                                            <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                                                <svg
+                                                                                    className="h-2 w-2 text-white"
+                                                                                    fill="none"
+                                                                                    strokeWidth="2"
+                                                                                    stroke="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <polyline points="20 6 9 17 4 12" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {file.status === "error" && (
+                                                                        <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
+                                                                            <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                                                                                <X className="h-2 w-2 text-white" />
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <p className="text-sm font-medium truncate">
+                                                                            {file.fileName}
+                                                                        </p>
+                                                                        {file.status === "uploading" && (
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                className="h-5 w-5 p-0"
+                                                                                onClick={() => handleCancelUpload(file.id)}
+                                                                            >
+                                                                                <X className="h-3 w-3" />
+                                                                            </Button>
+                                                                        )}
+                                                                    </div>
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        {file.status === "uploading" && "Uploading..."}
+                                                                        {file.status === "processing" && "Processing..."}
+                                                                        {file.status === "complete" && "Complete"}
+                                                                        {file.status === "error" && (
+                                                                            <span className="text-red-500">{file.error || "Upload failed"}</span>
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        )}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button className="h-8 flex items-center gap-2" variant="secondary">
+                                                    <UploadCloud className="h-4 w-4" />
+                                                    Upload
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-[160px]">
+                                                <DropdownMenuItem
+                                                    onClick={() => document.getElementById('imageInput')?.click()}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <ImageIcon className="h-4 w-4" />
+                                                    <span>Upload Images</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => document.getElementById('videoInput')?.click()}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <Video className="h-4 w-4" />
+                                                    <span>Upload Video</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        <input
+                                            id="imageInput"
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleFileUpload}
+                                        />
+                                        <input
+                                            id="videoInput"
+                                            type="file"
+                                            accept="video/*"
+                                            className="hidden"
+                                            onChange={handleFileUpload}
+                                        />
+                                    </div>
                                 </div>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button className="h-8 flex items-center gap-2" variant="secondary">
-                                            <UploadCloud className="h-4 w-4" />
-                                            Upload
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-[160px]">
-                                        <DropdownMenuItem
-                                            onClick={() => document.getElementById('imageInput')?.click()}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <ImageIcon className="h-4 w-4" />
-                                            <span>Upload Images</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={() => document.getElementById('videoInput')?.click()}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <Video className="h-4 w-4" />
-                                            <span>Upload Video</span>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                <input
-                                    id="imageInput"
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleFileUpload}
-                                />
-                                <input
-                                    id="videoInput"
-                                    type="file"
-                                    accept="video/*"
-                                    className="hidden"
-                                    onChange={handleFileUpload}
-                                />
                             </div>
                         </div>
                     </div>
 
-                    {/* Upload Progress */}
-                    {uploadingFiles.length > 0 && (
-                        <div className="border-b bg-muted/50">
-                            <div className="px-6 py-2 max-w-[1400px] mx-auto">
-                                <div className="space-y-2">
-                                    {uploadingFiles.map(file => (
-                                        <div key={file.id} className="flex items-center gap-4">
-                                            <span className="text-sm font-medium">{file.fileName}</span>
-                                            {file.status === "uploading" && (
-                                                <Progress value={undefined} className="w-[200px] h-2" />
-                                            )}
-                                            {file.status === "complete" && (
-                                                <span className="text-sm text-green-600 font-medium">Complete</span>
-                                            )}
-                                            {file.status === "error" && (
-                                                <span className="text-sm text-red-600">{file.error}</span>
-                                            )}
-                                        </div>
-                                    ))}
+                    {/* Main Content */}
+                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                        {/* Add search bar */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search for visually similar content... (Press Enter to search)"
+                                className="pl-10 pr-10"
+                                value={searchQuery}
+                                onChange={handleInputChange}
+                                onKeyPress={handleKeyPress}
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={clearSearch}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                        {/* Analysis section */}
+                            <div
+                            className={cn(
+                                "overflow-hidden transition-all duration-500",
+                                showAnalysis ? "h-auto opacity-100 mt-4 mb-2" : "h-0 opacity-0"
+                            )}
+                        >
+                            <div className="bg-muted/50 rounded-lg p-4">
+                                <div className="relative">
+                                    <p className="text-sm leading-relaxed">
+                                        {isSearching ? (
+                                            <span className="flex items-center gap-2">
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                                Analyzing results...
+                                            </span>
+                                        ) : searchResults?.analysis}
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {/* Main Content */}
-                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
                         <div className="border-0 bg-card">
-                            <DataTable
-                                columns={columns}
-                                data={records}
-                                // disableSearch={true}
-                                searchPlaceholder="Fuzzy search your creative library..."
-                                onRowClick={(record) => {
-                                    if (record.type === 'video') {
-                                        router.push(`/library/video/${record.id}`);
-                                    } else {
-                                        router.push(`/library/${record.id}`);
-                                    }
-                                }}
-                                filters={[
-                                    {
-                                        id: "sentiment_confidence",
-                                        label: "Confidence Range",
-                                        type: "range",
-                                        value: confidenceRange,
-                                        filterFn: (row, id, value) => {
-                                            if (!value) return true;
-                                            const [min, max] = value as [number, number];
-                                            const confidence = row.getValue<number>(id);
-                                            return confidence >= min/100 && confidence <= max/100;
+                            {isSearching ? (
+                                <LoadingSkeleton />
+                            ) : (
+                                <DataTable
+                                    columns={columns}
+                                    disableSearch
+                                    data={searchResults?.results || records}
+                                    searchPlaceholder="Filter results..."
+                                    onRowClick={(record) => {
+                                        if (record.type === 'video') {
+                                            router.push(`/library/video/${record.id}`);
+                                        } else {
+                                            router.push(`/library/${record.id}`);
+                                        }
+                                    }}
+                                    filters={[
+                                        {
+                                            id: "sentiment_confidence",
+                                            label: "Confidence Range",
+                                            type: "range",
+                                            value: confidenceRange,
+                                            filterFn: (row, id, value) => {
+                                                if (!value) return true;
+                                                const [min, max] = value as [number, number];
+                                                const confidence = row.getValue<number>(id);
+                                                return confidence >= min / 100 && confidence <= max / 100;
+                                            },
+                                            onValueChange: (value) => setConfidenceRange(value as [number, number]),
                                         },
-                                        onValueChange: (value) => setConfidenceRange(value as [number, number]),
-                                    },
-                                    {
-                                        id: "sentiment_tone",
-                                        label: "Tones",
-                                        type: "multiselect",
-                                        options: allTones,
-                                        value: selectedTones,
-                                        filterFn: (row, id, value) => {
-                                            if (!value || (Array.isArray(value) && value.length === 0)) return true;
-                                            const tones = row.getValue<string[]>(id);
-                                            return tones.some(tone => value.includes(tone.toLowerCase()));
+                                        {
+                                            id: "sentiment_tone",
+                                            label: "Tones",
+                                            type: "multiselect",
+                                            options: allTones,
+                                            value: selectedTones,
+                                            filterFn: (row, id, value) => {
+                                                if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                                const tones = row.getValue<string[]>(id);
+                                                return tones.some(tone => value.includes(tone.toLowerCase()));
+                                            },
+                                            onValueChange: (value) => setSelectedTones(value as string[]),
                                         },
-                                        onValueChange: (value) => setSelectedTones(value as string[]),
-                                    },
-                                ]}
-                                globalFilter={{
-                                    placeholder: "Search your creative library...",
-                                    searchFn: (row, id, value) => {
-                                        const searchValue = (value as string).toLowerCase();
-                                        const name = String(row.getValue("name") || "").toLowerCase();
-                                        const description = String(row.getValue("image_description") || "").toLowerCase();
-                                        return name.includes(searchValue) || description.includes(searchValue);
-                                    },
-                                }}
-                                maxRowsPerPage={6}
-                            />
+                                    ]}
+                                    globalFilter={{
+                                        placeholder: "Search your creative library...",
+                                        searchFn: (row, id, value) => {
+                                            const searchValue = (value as string).toLowerCase();
+                                            const name = String(row.getValue("name") || "").toLowerCase();
+                                            const description = String(row.getValue("image_description") || "").toLowerCase();
+                                            return name.includes(searchValue) || description.includes(searchValue);
+                                        },
+                                    }}
+                                    maxRowsPerPage={6}
+                                />
+                            )}
                         </div>
                     </div>
                 </>

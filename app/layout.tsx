@@ -24,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${GeistSans.className} dark:bg-gray-900 dark:text-white`}>
+      <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
         <AuthProvider>
           <AuthLayout>
             <SidebarProvider>
