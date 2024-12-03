@@ -787,7 +787,7 @@ export default function Library() {
     // Add this function to handle search
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
-        
+
         if (!query.trim()) {
             setSearchResults(null);
             setShowAnalysis(false);
@@ -1014,7 +1014,7 @@ export default function Library() {
                             )}
                         </div>
                         {/* Analysis section */}
-                            <div
+                        <div
                             className={cn(
                                 "overflow-hidden transition-all duration-500",
                                 showAnalysis ? "h-auto opacity-100 mt-4 mb-2" : "h-0 opacity-0"

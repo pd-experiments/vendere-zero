@@ -1,7 +1,8 @@
 import { createEmbeddings } from "@/app/api/datagen/helpers";
-import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 import { groq } from "@/lib/ai";
+import { cookies } from "next/headers";
+import { createServerClient } from '@supabase/ssr';
 
 // Update LibraryItem type to have an array of tones
 type LibraryItem = {
@@ -55,6 +56,21 @@ type SearchRPCResult = {
 };
 
 export async function POST(request: NextRequest) {
+
+    const cookieStore = cookies();
+        
+    // Create server-side Supabase client with cookie auth
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+            },
+        }
+    );
     try {
         const { query } = await request.json();
         
@@ -67,6 +83,15 @@ export async function POST(request: NextRequest) {
 
         // Generate embeddings for the search query
         const searchEmbeddings = await createEmbeddings(query);
+        
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
 
         // First get the basic search results
         const { data: searchResults, error } = await supabase.rpc(
@@ -74,7 +99,8 @@ export async function POST(request: NextRequest) {
             {
                 query_embedding: searchEmbeddings,
                 match_threshold: 0.5,
-                match_count: 5
+                match_count: 5,
+                user_id: user.id
             }
         );
 
@@ -136,28 +162,27 @@ export async function POST(request: NextRequest) {
         );
 
         // Generate analysis using Groq
-        const analysisPrompt = `You are an AI research assistant providing helpful, detailed answers about visual advertising content. Given this search query and results, provide a natural, conversational response that feels like a direct answer to the query while incorporating insights from the search results.
+        const analysisPrompt = `You are an AI assistant helping users understand their visual ad search results. Your only purpose is to explain what was found in the search results for their query.
 
-Query: "${query}"
-
-Available Ad Data:
-${enrichedResults.map((result, index) => `
-[Ad ${index + 1}]
-Title: ${result.name || 'Untitled'}
-Description: ${result.image_description}
-Relevance: ${(result.similarity * 100).toFixed(1)}% match
-`).join('\n')}
-
-Instructions:
-1. Start with a direct answer to the query
-2. Naturally weave in specific examples from the search results to support your points
-3. Mention interesting patterns or unique findings
-4. Use a conversational, helpful tone
-5. Keep the response focused and concise (around 150 words)
-6. Don't use phrases like "According to the search results" or "In the database"
-7. Don't list out statistics directly - incorporate them naturally into your response
-
-Format your response as a natural paragraph that flows like a direct answer to the query.`;
+        Query: "${query}"
+        
+        ${enrichedResults.length === 0 ? 
+            "No matching results were found for this query." : 
+            `Found ${enrichedResults.length} relevant results:
+        ${enrichedResults.map((result, index) => `
+        [Ad ${index + 1}]
+        Title: ${result.name || 'Untitled'}
+        Description: ${result.image_description}
+        Relevance: ${(result.similarity * 100).toFixed(1)}% match
+        `).join('\n')}
+        
+        Explain these results in a natural way, focusing on:
+        1. How well they match the search query
+        2. Common visual themes or patterns
+        3. Notable differences between results
+        4. Most relevant features for the query
+        
+        Keep your response concise (around 100 words) and conversational.`}`;
 
         const analysis = await groq.chat.completions.create({
             messages: [{ role: "user", content: analysisPrompt }],
