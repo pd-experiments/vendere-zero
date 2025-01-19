@@ -7,8 +7,8 @@ import {
   Ratio,
   GalleryVerticalEnd,
   BookIcon,
-  SquareTerminal,
-  AudioLines,
+  // SquareTerminal,
+  // AudioLines,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -48,16 +48,16 @@ const data = {
       url: "/library",
       icon: BookIcon
     },
-    {
-      title: "Simulations",
-      url: "/simulations",
-      icon: SquareTerminal
-    },
-    {
-      title: "Chat",
-      url: "/chat",
-      icon: AudioLines
-    },
+    // {
+    //   title: "Simulations",
+    //   url: "/simulations",
+    //   icon: SquareTerminal
+    // },
+    // {
+    //   title: "Chat",
+    //   url: "/chat",
+    //   icon: AudioLines
+    // },
     // {
     //   title: "Creative",
     //   url: "#",

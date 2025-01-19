@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2, X, Search } from "lucide-react";
@@ -9,7 +9,6 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Database } from '@/lib/types/schema';
 import { useRouter } from "next/navigation";
 import {
     DropdownMenu,
@@ -24,22 +23,8 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+// import { useQuery } from '@tanstack/react-query';
 
-// Extend database types for video frames
-type VideoFrameMapping = Database['public']['Tables']['video_frames_mapping']['Row'] & {
-    frame: Database['public']['Tables']['ad_structured_output']['Row'];
-};
-
-type VideoWithFrames = Database['public']['Tables']['videos']['Row'] & {
-    video_frames_mapping: VideoFrameMapping[];
-    video_url: string;
-};
-
-type StandaloneImage = Database['public']['Tables']['ad_structured_output']['Row'] & {
-    video_frames_mapping: Pick<Database['public']['Tables']['video_frames_mapping']['Row'], 'id'>[] | null;
-};
-
-// Update LibraryItem type to have an array of tones
 type LibraryItem = {
     id: string;
     type: 'image' | 'video';
@@ -77,7 +62,6 @@ type LibraryItem = {
     created_at: string;
 };
 
-// Add UploadingFile type definition
 type UploadingFile = {
     id: string;
     fileName: string;
@@ -87,11 +71,6 @@ type UploadingFile = {
     error?: string;
     progress?: number;
     abortController?: AbortController;
-};
-
-// Add FeatureWithAttributes type definition
-type FeatureWithAttributes = Database['public']['Tables']['features']['Row'] & {
-    visual_attributes: Database['public']['Tables']['visual_attributes']['Row'][];
 };
 
 type SearchResult = LibraryItem & {
@@ -107,189 +86,32 @@ type SearchResponse = {
 export default function Library() {
     const router = useRouter();
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-    const [records, setRecords] = useState<LibraryItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [confidenceRange, setConfidenceRange] = useState<[number, number]>([0, 100]);
     const [selectedTones, setSelectedTones] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
     const [isSearching, setIsSearching] = useState(false);
     const [showAnalysis, setShowAnalysis] = useState(false);
+    const [records, setRecords] = useState<LibraryItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch user's records on mount
     useEffect(() => {
-        fetchRecords();
+        const fetchLibraryData = async () => {
+            setIsLoading(true);
+            try {
+                const response = await fetch('/api/library');
+                if (!response.ok) throw new Error("Failed to fetch library data");
+                const data = await response.json();
+                setRecords(data);
+            } catch (error) {
+                console.error("Error fetching library data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchLibraryData();
     }, []);
-
-    const fetchRecords = async () => {
-        setLoading(true);
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-        if (userError || !user) {
-            console.error("Error getting user:", userError);
-            setLoading(false);
-            return;
-        }
-
-        // Fetch videos with frames
-        const { data: videos, error: videosError } = await supabase
-            .from('videos')
-            .select<string, VideoWithFrames>(`
-                id,
-                name,
-                description,
-                video_url,
-                video_frames_mapping!video_frames_mapping_video_id_fkey (
-                    id,
-                    frame_number,
-                    video_timestamp,
-                    frame_id,
-                    frame:ad_structured_output!video_frames_mapping_frame_id_fkey (
-                        id,
-                        image_url,
-                        image_description
-                    )
-                )
-            `)
-            .eq('user_id', user.id);
-
-        if (videosError) {
-            console.error("Error fetching videos:", videosError);
-            setLoading(false);
-            return;
-        }
-
-        // Fetch standalone images
-        const { data: standaloneImages, error: imagesError } = await supabase
-            .from('ad_structured_output')
-            .select<string, StandaloneImage>(`
-                id,
-                name,
-                image_url,
-                image_description,
-                video_frames_mapping!video_frames_mapping_frame_id_fkey (id)
-            `)
-            .eq('user', user.id)
-            .is('video_frames_mapping', null);
-
-        if (imagesError) {
-            console.error("Error fetching images:", imagesError);
-            setLoading(false);
-            return;
-        }
-
-        // Fetch features with visual attributes
-        const { data: features, error: featuresError } = await supabase
-            .from('features')
-            .select<string, FeatureWithAttributes>(`
-                id,
-                ad_output_id,
-                keyword,
-                confidence_score,
-                category,
-                location,
-                visual_attributes (
-                    id,
-                    attribute,
-                    value
-                )
-            `)
-            .eq('user', user.id);
-
-        if (featuresError || !features) {
-            console.error("Error fetching features:", featuresError);
-            setLoading(false);
-            return;
-        }
-
-        // Fetch sentiment analysis
-        const { data: sentiments, error: sentimentError } = await supabase
-            .from('sentiment_analysis')
-            .select<string, Database['public']['Tables']['sentiment_analysis']['Row']>()
-            .eq('user', user.id);
-
-        if (sentimentError || !sentiments) {
-            console.error("Error fetching sentiments:", sentimentError);
-            setLoading(false);
-            return;
-        }
-
-        // Transform the data into LibraryItems
-        const libraryItems: LibraryItem[] = [
-            // Add videos
-            ...(videos?.map(video => ({
-                id: video.id,
-                type: 'video' as const,
-                name: video.name,
-                video: {
-                    id: video.id,
-                    name: video.name,
-                    description: video.description,
-                    video_url: video.video_url,
-                    frames: video.video_frames_mapping
-                        .sort((a, b) => a.frame_number - b.frame_number)
-                        .map(mapping => ({
-                            mapping_id: mapping.id,
-                            frame_id: mapping.frame_id,
-                            image_url: mapping.frame.image_url,
-                            image_description: mapping.frame.image_description,
-                            frame_number: mapping.frame_number,
-                            video_timestamp: mapping.video_timestamp,
-                        }))
-                },
-                image_description: video.description || 'No description',
-                features: features
-                    .filter(f => video.video_frames_mapping.some(m => m.frame_id === f.ad_output_id))
-                    .map(feature => ({
-                        keyword: feature.keyword,
-                        confidence_score: feature.confidence_score,
-                        category: feature.category,
-                        location: feature.location,
-                        visual_attributes: feature.visual_attributes
-                    })),
-                sentiment_analysis: {
-                    tones: Array.from(new Set(
-                        video.video_frames_mapping
-                            .map(mapping =>
-                                sentiments.find(s => s.ad_output_id === mapping.frame_id)?.tone
-                            )
-                            .filter(Boolean) as string[]
-                    )),
-                    confidence: video.video_frames_mapping.reduce((sum, mapping) => {
-                        const frameSentiment = sentiments.find(s => s.ad_output_id === mapping.frame_id);
-                        return sum + (frameSentiment?.confidence || 0);
-                    }, 0) / (video.video_frames_mapping.length || 1)
-                },
-                created_at: video.created_at || new Date().toISOString()
-            })) || []),
-            // Add standalone images
-            ...(standaloneImages?.map(image => ({
-                id: image.id,
-                type: 'image' as const,
-                name: image.name,
-                image_url: image.image_url,
-                image_description: image.image_description,
-                features: features
-                    .filter(f => f.ad_output_id === image.id)
-                    .map(feature => ({
-                        keyword: feature.keyword,
-                        confidence_score: feature.confidence_score,
-                        category: feature.category,
-                        location: feature.location,
-                        visual_attributes: feature.visual_attributes
-                    })),
-                sentiment_analysis: {
-                    // Single tone in array for images
-                    tones: [sentiments.find(s => s.ad_output_id === image.id)?.tone || ''],
-                    confidence: sentiments.find(s => s.ad_output_id === image.id)?.confidence || 0
-                },
-                created_at: new Date().toISOString()
-            })) || [])
-        ];
-
-        setRecords(libraryItems);
-        setLoading(false);
-    };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -339,7 +161,7 @@ export default function Library() {
                         )
                     );
 
-                    await fetchRecords();
+                    // await fetchLibraryData();
 
                 } catch (error: unknown) {
                     if (error instanceof Error && error.name === 'AbortError') {
@@ -396,7 +218,7 @@ export default function Library() {
                         })
                     );
 
-                    await fetchRecords();
+                    // await fetchLibraryData();
 
                 } catch (error: unknown) {
                     if (error instanceof Error && error.name === 'AbortError') {
@@ -468,10 +290,10 @@ export default function Library() {
         });
     };
 
-    // Get unique tones
+    // Get unique tones with optional chaining
     const allTones = useMemo(() => {
         const tones = new Set<string>();
-        records.forEach((item) => {
+        (records || []).forEach((item) => {
             item.sentiment_analysis.tones.forEach((tone) => tones.add(tone));
         });
         return Array.from(tones);
@@ -682,7 +504,7 @@ export default function Library() {
                             return;
                         }
 
-                        fetchRecords();
+                        // await fetchLibraryData();
                     }
                 };
 
@@ -836,263 +658,263 @@ export default function Library() {
         }
     };
 
+    if (isLoading) return <LoadingSkeleton />;
+
     return (
         <div className="min-h-screen bg-background">
-            {loading ? (
-                <LoadingSkeleton />
-            ) : (
-                <>
-                    <div className="border-b">
-                        <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                            <div className="flex flex-col gap-4">
-                                {/* Existing header content */}
-                                <div className="flex justify-between items-center">
-                                    <div className="flex flex-col gap-1">
-                                        <h1 className="text-2xl font-semibold">Library</h1>
-                                        <p className="text-sm text-muted-foreground">
-                                            AI-powered visual analysis of your creative content
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        {uploadingFiles.length > 0 && (
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="flex items-center gap-2"
-                                                    >
-                                                        <Loader2 className="h-3 w-3 animate-spin" />
-                                                        <span>Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}</span>
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    align="end"
-                                                    className="w-80 p-2"
-                                                >
-                                                    <div className="space-y-2">
-                                                        {uploadingFiles.map(file => (
-                                                            <div
-                                                                key={file.id}
-                                                                className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
-                                                            >
-                                                                <div className="relative w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
-                                                                    {file.fileType === 'image' && file.file && (
-                                                                        <Image
-                                                                            src={URL.createObjectURL(file.file)}
-                                                                            alt={file.fileName}
-                                                                            layout="fill"
-                                                                            objectFit="cover"
-                                                                        />
-                                                                    )}
-                                                                    {file.fileType === 'video' && (
-                                                                        <Video className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
-                                                                    )}
-                                                                    {file.status === "uploading" && (
-                                                                        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-                                                                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                                                                        </div>
-                                                                    )}
-                                                                    {file.status === "complete" && (
-                                                                        <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
-                                                                            <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                                                                                <svg
-                                                                                    className="h-2 w-2 text-white"
-                                                                                    fill="none"
-                                                                                    strokeWidth="2"
-                                                                                    stroke="currentColor"
-                                                                                    viewBox="0 0 24 24"
-                                                                                >
-                                                                                    <polyline points="20 6 9 17 4 12" />
-                                                                                </svg>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                    {file.status === "error" && (
-                                                                        <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
-                                                                            <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
-                                                                                <X className="h-2 w-2 text-white" />
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <p className="text-sm font-medium truncate">
-                                                                            {file.fileName}
-                                                                        </p>
-                                                                        {file.status === "uploading" && (
-                                                                            <Button
-                                                                                variant="ghost"
-                                                                                size="sm"
-                                                                                className="h-5 w-5 p-0"
-                                                                                onClick={() => handleCancelUpload(file.id)}
-                                                                            >
-                                                                                <X className="h-3 w-3" />
-                                                                            </Button>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="text-xs text-muted-foreground">
-                                                                        {file.status === "uploading" && "Uploading..."}
-                                                                        {file.status === "processing" && "Processing..."}
-                                                                        {file.status === "complete" && "Complete"}
-                                                                        {file.status === "error" && (
-                                                                            <span className="text-red-500">{file.error || "Upload failed"}</span>
-                                                                        )}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </PopoverContent>
-                                            </Popover>
-                                        )}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button className="h-8 flex items-center gap-2" variant="secondary">
-                                                    <UploadCloud className="h-4 w-4" />
-                                                    Upload
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-[160px]">
-                                                <DropdownMenuItem
-                                                    onClick={() => document.getElementById('imageInput')?.click()}
-                                                    className="flex items-center gap-2"
-                                                >
-                                                    <ImageIcon className="h-4 w-4" />
-                                                    <span>Upload Images</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => document.getElementById('videoInput')?.click()}
-                                                    className="flex items-center gap-2"
-                                                >
-                                                    <Video className="h-4 w-4" />
-                                                    <span>Upload Video</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                        <input
-                                            id="imageInput"
-                                            type="file"
-                                            multiple
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleFileUpload}
-                                        />
-                                        <input
-                                            id="videoInput"
-                                            type="file"
-                                            accept="video/*"
-                                            className="hidden"
-                                            onChange={handleFileUpload}
-                                        />
-                                    </div>
+            <>
+                <div className="border-b">
+                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                        <div className="flex flex-col gap-4">
+                            {/* Header content is always shown */}
+                            <div className="flex justify-between items-center">
+                                <div className="flex flex-col gap-1">
+                                    <h1 className="text-2xl font-semibold">Library</h1>
+                                    <p className="text-sm text-muted-foreground">
+                                        AI-powered visual analysis of your creative content
+                                    </p>
                                 </div>
+                                <div className="flex items-center gap-3">
+                                    {uploadingFiles.length > 0 && (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                    <span>Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}</span>
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                align="end"
+                                                className="w-80 p-2"
+                                            >
+                                                <div className="space-y-2">
+                                                    {uploadingFiles.map(file => (
+                                                        <div
+                                                            key={file.id}
+                                                            className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
+                                                        >
+                                                            <div className="relative w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
+                                                                {file.fileType === 'image' && file.file && (
+                                                                    <Image
+                                                                        src={URL.createObjectURL(file.file)}
+                                                                        alt={file.fileName}
+                                                                        layout="fill"
+                                                                        objectFit="cover"
+                                                                    />
+                                                                )}
+                                                                {file.fileType === 'video' && (
+                                                                    <Video className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
+                                                                )}
+                                                                {file.status === "uploading" && (
+                                                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                                                                        <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                                                                    </div>
+                                                                )}
+                                                                {file.status === "complete" && (
+                                                                    <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                                                                        <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                                            <svg
+                                                                                className="h-2 w-2 text-white"
+                                                                                fill="none"
+                                                                                strokeWidth="2"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24"
+                                                                            >
+                                                                                <polyline points="20 6 9 17 4 12" />
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {file.status === "error" && (
+                                                                    <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
+                                                                        <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                                                                            <X className="h-2 w-2 text-white" />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center justify-between">
+                                                                    <p className="text-sm font-medium truncate">
+                                                                        {file.fileName}
+                                                                    </p>
+                                                                    {file.status === "uploading" && (
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-5 w-5 p-0"
+                                                                            onClick={() => handleCancelUpload(file.id)}
+                                                                        >
+                                                                            <X className="h-3 w-3" />
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {file.status === "uploading" && "Uploading..."}
+                                                                    {file.status === "processing" && "Processing..."}
+                                                                    {file.status === "complete" && "Complete"}
+                                                                    {file.status === "error" && (
+                                                                        <span className="text-red-500">{file.error || "Upload failed"}</span>
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button className="h-8 flex items-center gap-2" variant="secondary">
+                                                <UploadCloud className="h-4 w-4" />
+                                                Upload
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-[160px]">
+                                            <DropdownMenuItem
+                                                onClick={() => document.getElementById('imageInput')?.click()}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <ImageIcon className="h-4 w-4" />
+                                                <span>Upload Images</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => document.getElementById('videoInput')?.click()}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <Video className="h-4 w-4" />
+                                                <span>Upload Video</span>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <input
+                                        id="imageInput"
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                    />
+                                    <input
+                                        id="videoInput"
+                                        type="file"
+                                        accept="video/*"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="px-6 py-4 max-w-[1400px] mx-auto">
+                    {/* Search bar is always shown */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search for visually similar content... (Press Enter to search)"
+                            className="pl-10 pr-10"
+                            value={searchQuery}
+                            onChange={handleInputChange}
+                            onKeyPress={handleKeyPress}
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={clearSearch}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Analysis section */}
+                    <div
+                        className={cn(
+                            "overflow-hidden transition-all duration-500",
+                            showAnalysis ? "h-auto opacity-100 mt-4 mb-2" : "h-0 opacity-0"
+                        )}
+                    >
+                        <div className="bg-muted/50 rounded-lg p-4">
+                            <div className="relative">
+                                <p className="text-sm leading-relaxed">
+                                    {isSearching ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                            Analyzing results...
+                                        </span>
+                                    ) : searchResults?.analysis}
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Main Content */}
-                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                        {/* Add search bar */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search for visually similar content... (Press Enter to search)"
-                                className="pl-10 pr-10"
-                                value={searchQuery}
-                                onChange={handleInputChange}
-                                onKeyPress={handleKeyPress}
+                    <div className="border-0 bg-card">
+                        {isSearching || isLoading ? (
+                            <LoadingSkeleton />
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                disableSearch
+                                data={searchResults?.results || records || []}
+                                searchPlaceholder="Filter results..."
+                                onRowClick={(record) => {
+                                    if (record.type === 'video') {
+                                        router.push(`/library/video/${record.id}`);
+                                    } else {
+                                        router.push(`/library/${record.id}`);
+                                    }
+                                }}
+                                filters={[
+                                    {
+                                        id: "sentiment_confidence",
+                                        label: "Confidence Range",
+                                        type: "range",
+                                        value: confidenceRange,
+                                        filterFn: (row, id, value) => {
+                                            if (!value) return true;
+                                            const [min, max] = value as [number, number];
+                                            const confidence = row.getValue<number>(id);
+                                            return confidence >= min / 100 && confidence <= max / 100;
+                                        },
+                                        onValueChange: (value) => setConfidenceRange(value as [number, number]),
+                                    },
+                                    {
+                                        id: "sentiment_tone",
+                                        label: "Tones",
+                                        type: "multiselect",
+                                        options: allTones,
+                                        value: selectedTones,
+                                        filterFn: (row, id, value) => {
+                                            if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                            const tones = row.getValue<string[]>(id);
+                                            return tones.some(tone => value.includes(tone.toLowerCase()));
+                                        },
+                                        onValueChange: (value) => setSelectedTones(value as string[]),
+                                    },
+                                ]}
+                                globalFilter={{
+                                    placeholder: "Search your creative library...",
+                                    searchFn: (row, id, value) => {
+                                        const searchValue = (value as string).toLowerCase();
+                                        const name = String(row.getValue("name") || "").toLowerCase();
+                                        const description = String(row.getValue("image_description") || "").toLowerCase();
+                                        return name.includes(searchValue) || description.includes(searchValue);
+                                    },
+                                }}
+                                maxRowsPerPage={6}
                             />
-                            {searchQuery && (
-                                <button
-                                    onClick={clearSearch}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            )}
-                        </div>
-                        {/* Analysis section */}
-                        <div
-                            className={cn(
-                                "overflow-hidden transition-all duration-500",
-                                showAnalysis ? "h-auto opacity-100 mt-4 mb-2" : "h-0 opacity-0"
-                            )}
-                        >
-                            <div className="bg-muted/50 rounded-lg p-4">
-                                <div className="relative">
-                                    <p className="text-sm leading-relaxed">
-                                        {isSearching ? (
-                                            <span className="flex items-center gap-2">
-                                                <Loader2 className="h-3 w-3 animate-spin" />
-                                                Analyzing results...
-                                            </span>
-                                        ) : searchResults?.analysis}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="border-0 bg-card">
-                            {isSearching ? (
-                                <LoadingSkeleton />
-                            ) : (
-                                <DataTable
-                                    columns={columns}
-                                    disableSearch
-                                    data={searchResults?.results || records}
-                                    searchPlaceholder="Filter results..."
-                                    onRowClick={(record) => {
-                                        if (record.type === 'video') {
-                                            router.push(`/library/video/${record.id}`);
-                                        } else {
-                                            router.push(`/library/${record.id}`);
-                                        }
-                                    }}
-                                    filters={[
-                                        {
-                                            id: "sentiment_confidence",
-                                            label: "Confidence Range",
-                                            type: "range",
-                                            value: confidenceRange,
-                                            filterFn: (row, id, value) => {
-                                                if (!value) return true;
-                                                const [min, max] = value as [number, number];
-                                                const confidence = row.getValue<number>(id);
-                                                return confidence >= min / 100 && confidence <= max / 100;
-                                            },
-                                            onValueChange: (value) => setConfidenceRange(value as [number, number]),
-                                        },
-                                        {
-                                            id: "sentiment_tone",
-                                            label: "Tones",
-                                            type: "multiselect",
-                                            options: allTones,
-                                            value: selectedTones,
-                                            filterFn: (row, id, value) => {
-                                                if (!value || (Array.isArray(value) && value.length === 0)) return true;
-                                                const tones = row.getValue<string[]>(id);
-                                                return tones.some(tone => value.includes(tone.toLowerCase()));
-                                            },
-                                            onValueChange: (value) => setSelectedTones(value as string[]),
-                                        },
-                                    ]}
-                                    globalFilter={{
-                                        placeholder: "Search your creative library...",
-                                        searchFn: (row, id, value) => {
-                                            const searchValue = (value as string).toLowerCase();
-                                            const name = String(row.getValue("name") || "").toLowerCase();
-                                            const description = String(row.getValue("image_description") || "").toLowerCase();
-                                            return name.includes(searchValue) || description.includes(searchValue);
-                                        },
-                                    }}
-                                    maxRowsPerPage={6}
-                                />
-                            )}
-                        </div>
+                        )}
                     </div>
-                </>
-            )}
+                </div>
+            </>
         </div>
     );
 } 

@@ -42,7 +42,7 @@ export async function storeAnalysisResults(analysis: AdStructuredOutput, userId:
       name: analysis.name,
       image_url: analysis.image_url,
       image_description: analysis.image_description,
-      description_embeddings: JSON.stringify(analysis.description_embeddings), // Convert array to string
+      description_embeddings: JSON.stringify(analysis.description_embeddings),
       user: userId
     })
     .select('id')

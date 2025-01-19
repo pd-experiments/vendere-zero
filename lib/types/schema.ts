@@ -277,6 +277,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      match_ad_descriptions:
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+            }
+            Returns: {
+              id: string
+              name: string
+              image_url: string
+              image_description: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+              user_id: string
+            }
+            Returns: {
+              id: string
+              name: string
+              image_url: string
+              image_description: string
+              similarity: number
+            }[]
+          }
       match_ads: {
         Args: {
           query_embedding: string
