@@ -3,12 +3,11 @@
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2, X, Search } from "lucide-react";
+import { Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2, GripVertical, TrashIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { supabase } from "@/lib/supabase";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import {
     DropdownMenu,
@@ -16,45 +15,21 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 // import { useQuery } from '@tanstack/react-query';
 
 type LibraryItem = {
     id: string;
-    type: 'image' | 'video';
+    type: "image" | "video";
+    name: string | null;
     image_url?: string;
-    name?: string | null;
     video?: {
         id: string;
         name: string;
         description: string | null;
-        video_url: string;
-        frames: Array<{
-            mapping_id: string;
-            frame_id: string;
-            image_url: string;
-            image_description: string;
-            frame_number: number;
-            video_timestamp: unknown;
-        }>;
     };
     image_description: string;
-    features: Array<{
-        keyword: string;
-        confidence_score: number;
-        category: string;
-        location: string;
-        visual_attributes?: Array<{
-            attribute: string;
-            value: string;
-        }>;
-    }>;
+    features: string[];
     sentiment_analysis: {
         tones: string[];
         confidence: number;
@@ -83,6 +58,97 @@ type SearchResponse = {
     query: string;
 };
 
+type PaginatedResponse = {
+    items: LibraryItem[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+};
+
+const SearchContainer = ({
+    searchQuery,
+    handleInputChange,
+    handleKeyPress,
+    clearSearch,
+    isSearching,
+    searchResults
+}: {
+    searchQuery: string;
+    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    clearSearch: () => void;
+    isSearching: boolean;
+    searchResults: SearchResponse | null;
+}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className={cn(
+            "fixed bottom-6 right-6 z-50 transition-all duration-300 ease-in-out",
+            "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+            "rounded-lg shadow-lg border w-[400px]",
+            !isExpanded && "h-[45px]"
+        )}>
+            <div className="py-1 px-3 space-y-1">
+                <div className="flex justify-between items-start gap-3">
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="text-muted-foreground hover:text-foreground mt-2.5 cursor-grab active:cursor-grabbing"
+                    >
+                        <GripVertical className="h-4 w-4" />
+                    </button>
+                    <div className="relative flex-1">
+                        <div className="relative flex items-start gap-3">
+                            {/* <Search className="h-4 w-4 mt-2.5 text-muted-foreground" /> */}
+                            <textarea
+                                placeholder="Search for visually similar content..."
+                                className="flex-1 bg-transparent border-none focus:outline-none resize-none h-[42px] text-sm pt-2 pr-6"
+                                value={searchQuery}
+                                onChange={(e) => handleInputChange(e)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleKeyPress(e);
+                                        setIsExpanded(true);
+                                    }
+                                }}
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={clearSearch}
+                                    className="absolute right-0 top-2.5 text-muted-foreground hover:text-foreground text-sm font-medium"
+                                >
+                                    <TrashIcon className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                { isSearching || searchResults?.analysis && (
+                    <div className={cn(
+                        "overflow-hidden transition-all duration-500 h-auto",
+                    )}>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                        <div className="relative">
+                            <p className="text-sm leading-relaxed">
+                                {isSearching ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                        Analyzing results...
+                                    </span>
+                                ) : searchResults?.analysis}
+                            </p>
+                        </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default function Library() {
     const router = useRouter();
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -91,18 +157,33 @@ export default function Library() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
     const [isSearching, setIsSearching] = useState(false);
-    const [showAnalysis, setShowAnalysis] = useState(false);
     const [records, setRecords] = useState<LibraryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set([1]));
+    const [cachedRecords, setCachedRecords] = useState<Record<number, LibraryItem[]>>({});
+    const [selectedType, setSelectedType] = useState<"string"[]>([]);
 
     useEffect(() => {
-        const fetchLibraryData = async () => {
-            setIsLoading(true);
+        const fetchLibraryData = async (pageToLoad: number) => {
+            setIsLoading(!cachedRecords[pageToLoad]);
             try {
-                const response = await fetch('/api/library');
+                const response = await fetch(`/api/library?page=${pageToLoad}&pageSize=${pageSize}`);
                 if (!response.ok) throw new Error("Failed to fetch library data");
-                const data = await response.json();
-                setRecords(data);
+                const data: PaginatedResponse = await response.json();
+
+                setCachedRecords(prev => ({
+                    ...prev,
+                    [pageToLoad]: data.items
+                }));
+                setLoadedPages(prev => new Set(prev).add(pageToLoad));
+
+                if (pageToLoad === page) {
+                    setRecords(data.items);
+                    setTotal(data.total);
+                }
             } catch (error) {
                 console.error("Error fetching library data:", error);
             } finally {
@@ -110,8 +191,13 @@ export default function Library() {
             }
         };
 
-        fetchLibraryData();
-    }, []);
+        // Load current page if not cached
+        if (!cachedRecords[page]) {
+            fetchLibraryData(page);
+        } else {
+            setRecords(cachedRecords[page]);
+        }
+    }, [page, pageSize]);
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -338,40 +424,21 @@ export default function Library() {
                 <div className="py-1">
                     {row.original.type === 'video' ? (
                         <div className="flex -space-x-2">
-                            {row.original.video?.frames.slice(0, 2).map((frame, index) => (
-                                <div
-                                    key={frame.frame_id}
-                                    className="relative w-10 h-10 border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform"
-                                    style={{ zIndex: 2 - index }}
-                                >
-                                    <Image
-                                        src={frame.image_url}
-                                        alt={`Frame ${frame.frame_number}`}
-                                        layout="fill"
-                                        objectFit="cover"
-                                    />
-                                </div>
-                            ))}
-                            {(row.original.video?.frames.length || 0) > 2 && (
-                                <div
-                                    className="relative w-10 h-10 border-2 border-background rounded-md bg-muted/50 flex items-center justify-center"
-                                    style={{ zIndex: 0 }}
-                                >
-                                    <span className="text-xs font-medium text-muted-foreground">
-                                        +{(row.original.video?.frames.length || 0) - 2}
-                                    </span>
-                                </div>
-                            )}
+                            <div className="relative w-10 h-10 border-2 border-background rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                                <Video className="h-4 w-4 text-muted-foreground" />
+                            </div>
                         </div>
                     ) : (
-                        <div className="w-10 h-10 relative border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform">
-                            <Image
-                                src={row.original.image_url!}
-                                alt="Image"
-                                layout="fill"
-                                objectFit="cover"
-                            />
-                        </div>
+                        row.original.image_url && (
+                            <div className="w-10 h-10 relative border-2 border-background rounded-md overflow-hidden hover:scale-105 transition-transform">
+                                <Image
+                                    src={row.original.image_url}
+                                    alt={row.original.name || "Image"}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        )
                     )}
                 </div>
             ),
@@ -394,17 +461,11 @@ export default function Library() {
                 <div className="py-1 space-y-1">
                     {row.original.features.slice(0, 2).map(feature => (
                         <div
-                            key={feature.keyword}
+                            key={feature}
                             className="flex items-center gap-3 text-sm"
                         >
                             <span className="font-medium min-w-[80px] truncate">
-                                {feature.keyword}
-                            </span>
-                            <span className="text-xs px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground">
-                                {feature.category}
-                            </span>
-                            <span className="text-xs text-muted-foreground ml-auto">
-                                {(feature.confidence_score * 100).toFixed(0)}%
+                                {feature}
                             </span>
                         </div>
                     ))}
@@ -533,91 +594,16 @@ export default function Library() {
         }
     ];
 
-    // Add the loading skeleton component
-    const LoadingSkeleton = () => (
-        <div className="min-h-screen bg-background">
-            {/* Header Loading */}
-            <div className="border-b">
-                <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                    <div className="flex justify-between items-center">
-                        <div className="flex flex-col gap-1">
-                            <Skeleton className="h-8 w-32" /> {/* Title */}
-                            <Skeleton className="h-4 w-64" /> {/* Subtitle */}
-                        </div>
-                        <Skeleton className="h-8 w-24" /> {/* Upload button */}
-                    </div>
-                </div>
-            </div>
-
-            {/* Table Loading */}
-            <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                <div className="border bg-card">
-                    {/* Table Controls */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b">
-                        <Skeleton className="h-8 w-[380px]" /> {/* Search bar */}
-                        <Skeleton className="h-8 w-24" /> {/* Columns button */}
-                    </div>
-
-                    {/* Table Header */}
-                    <div className="flex items-center px-4 py-3 border-b">
-                        <Skeleton className="h-4 w-14 mr-4" /> {/* Type header */}
-                        <Skeleton className="h-4 w-14 mr-4" /> {/* Image header */}
-                        <Skeleton className="h-4 w-[400px] mr-4" /> {/* Description header */}
-                        <Skeleton className="h-4 w-[200px] mr-4" /> {/* Features header */}
-                        <Skeleton className="h-4 w-20 mr-4" /> {/* Tone header */}
-                        <Skeleton className="h-4 w-24 mr-4" /> {/* Confidence header */}
-                        <Skeleton className="h-4 w-32 mr-4" /> {/* Created header */}
-                        <Skeleton className="h-4 w-8" /> {/* Actions header */}
-                    </div>
-
-                    {/* Table Rows */}
-                    <div className="divide-y">
-                        {Array(6).fill(0).map((_, i) => (
-                            <div key={i} className="flex items-center px-4 py-3">
-                                <Skeleton className="h-6 w-14 mr-4" /> {/* Type */}
-                                <Skeleton className="h-14 w-14 mr-4" /> {/* Image */}
-                                <Skeleton className="h-8 w-[400px] mr-4" /> {/* Description */}
-                                <div className="w-[200px] mr-4 space-y-1">
-                                    <Skeleton className="h-5 w-full" />
-                                    <Skeleton className="h-5 w-4/5" />
-                                    <Skeleton className="h-5 w-3/5" />
-                                </div>
-                                <Skeleton className="h-6 w-20 mr-4" /> {/* Tone */}
-                                <div className="flex items-center gap-2 mr-4">
-                                    <Skeleton className="h-2 w-16" /> {/* Progress bar */}
-                                    <Skeleton className="h-4 w-8" /> {/* Percentage */}
-                                </div>
-                                <Skeleton className="h-6 w-32 mr-4" /> {/* Created date */}
-                                <Skeleton className="h-8 w-8" /> {/* Actions */}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Table Footer */}
-                    <div className="flex items-center justify-between px-4 py-3 border-t">
-                        <Skeleton className="h-4 w-20" /> {/* Items count */}
-                        <div className="flex gap-2">
-                            <Skeleton className="h-8 w-20" /> {/* Previous button */}
-                            <Skeleton className="h-8 w-20" /> {/* Next button */}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
     // Add this function to handle search
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
 
         if (!query.trim()) {
             setSearchResults(null);
-            setShowAnalysis(false);
             return;
         }
 
         setIsSearching(true);
-        setShowAnalysis(true);
 
         try {
             const response = await fetch("/api/search", {
@@ -640,7 +626,6 @@ export default function Library() {
     const clearSearch = () => {
         setSearchQuery("");
         setSearchResults(null);
-        setShowAnalysis(false);
     };
 
     // Modify the search input section to handle key press
@@ -658,263 +643,122 @@ export default function Library() {
         }
     };
 
-    if (isLoading) return <LoadingSkeleton />;
+    // Add this function to handle background loading of pages
+    const handleLoadPage = async (pageToLoad: number) => {
+        if (loadedPages.has(pageToLoad)) return;
+
+        try {
+            const response = await fetch(`/api/library?page=${pageToLoad}&pageSize=${pageSize}`);
+            if (!response.ok) throw new Error("Failed to fetch library data");
+            const data: PaginatedResponse = await response.json();
+
+            setCachedRecords(prev => ({
+                ...prev,
+                [pageToLoad]: data.items
+            }));
+            setLoadedPages(prev => new Set(prev).add(pageToLoad));
+        } catch (error) {
+            console.error("Error fetching library data:", error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background">
-            <>
-                <div className="border-b">
-                    <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                        <div className="flex flex-col gap-4">
-                            {/* Header content is always shown */}
-                            <div className="flex justify-between items-center">
-                                <div className="flex flex-col gap-1">
-                                    <h1 className="text-2xl font-semibold">Library</h1>
-                                    <p className="text-sm text-muted-foreground">
-                                        AI-powered visual analysis of your creative content
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    {uploadingFiles.length > 0 && (
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="flex items-center gap-2"
-                                                >
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                    <span>Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}</span>
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                align="end"
-                                                className="w-80 p-2"
-                                            >
-                                                <div className="space-y-2">
-                                                    {uploadingFiles.map(file => (
-                                                        <div
-                                                            key={file.id}
-                                                            className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
-                                                        >
-                                                            <div className="relative w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
-                                                                {file.fileType === 'image' && file.file && (
-                                                                    <Image
-                                                                        src={URL.createObjectURL(file.file)}
-                                                                        alt={file.fileName}
-                                                                        layout="fill"
-                                                                        objectFit="cover"
-                                                                    />
-                                                                )}
-                                                                {file.fileType === 'video' && (
-                                                                    <Video className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
-                                                                )}
-                                                                {file.status === "uploading" && (
-                                                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-                                                                        <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                                                                    </div>
-                                                                )}
-                                                                {file.status === "complete" && (
-                                                                    <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
-                                                                        <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                                                                            <svg
-                                                                                className="h-2 w-2 text-white"
-                                                                                fill="none"
-                                                                                strokeWidth="2"
-                                                                                stroke="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <polyline points="20 6 9 17 4 12" />
-                                                                            </svg>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                {file.status === "error" && (
-                                                                    <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
-                                                                        <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
-                                                                            <X className="h-2 w-2 text-white" />
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between">
-                                                                    <p className="text-sm font-medium truncate">
-                                                                        {file.fileName}
-                                                                    </p>
-                                                                    {file.status === "uploading" && (
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="sm"
-                                                                            className="h-5 w-5 p-0"
-                                                                            onClick={() => handleCancelUpload(file.id)}
-                                                                        >
-                                                                            <X className="h-3 w-3" />
-                                                                        </Button>
-                                                                    )}
-                                                                </div>
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {file.status === "uploading" && "Uploading..."}
-                                                                    {file.status === "processing" && "Processing..."}
-                                                                    {file.status === "complete" && "Complete"}
-                                                                    {file.status === "error" && (
-                                                                        <span className="text-red-500">{file.error || "Upload failed"}</span>
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                    )}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button className="h-8 flex items-center gap-2" variant="secondary">
-                                                <UploadCloud className="h-4 w-4" />
-                                                Upload
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-[160px]">
-                                            <DropdownMenuItem
-                                                onClick={() => document.getElementById('imageInput')?.click()}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <ImageIcon className="h-4 w-4" />
-                                                <span>Upload Images</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => document.getElementById('videoInput')?.click()}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <Video className="h-4 w-4" />
-                                                <span>Upload Video</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                    <input
-                                        id="imageInput"
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleFileUpload}
-                                    />
-                                    <input
-                                        id="videoInput"
-                                        type="file"
-                                        accept="video/*"
-                                        className="hidden"
-                                        onChange={handleFileUpload}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div className="px-4 mx-auto">
+                <div className="border-0 bg-card">
+                    <DataTable
+                        columns={columns}
+                        data={records}
+                        isLoading={isLoading}
+                        searchPlaceholder="Search your creative library..."
+                        loadedPages={loadedPages}
+                        onLoadPage={handleLoadPage}
+                        serverSidePagination={{
+                            page,
+                            pageSize,
+                            total,
+                            onPageChange: (newPage) => {
+                                setPage(newPage);
+                                if (cachedRecords[newPage]) {
+                                    setRecords(cachedRecords[newPage]);
+                                }
+                            },
+                            onPageSizeChange: setPageSize
+                        }}
+                        onRowClick={(record) => {
+                            if (record.type === 'video') {
+                                router.push(`/library/video/${record.id}`);
+                            } else {
+                                router.push(`/library/${record.id}`);
+                            }
+                        }}
+                        filters={[
+                            {
+                                id: "type",
+                                label: "Type",
+                                type: "multiselect",
+                                options: ["video", "image"],
+                                value: selectedType,
+                                filterFn: (row, id, value) => {
+                                    if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                    const type = row.getValue<string>(id);
+                                    return value.includes(type);
+                                },
+                                onValueChange: (value) => setSelectedType(value as string[]),
+                            },
+                            {
+                                id: "sentiment_confidence",
+                                label: "Confidence Range",
+                                type: "range",
+                                value: confidenceRange,
+                                filterFn: (row, id, value) => {
+                                    if (!value) return true;
+                                    const [min, max] = value as [number, number];
+                                    const confidence = row.getValue<number>(id);
+                                    return confidence >= min / 100 && confidence <= max / 100;
+                                },
+                                onValueChange: (value) => setConfidenceRange(value as [number, number]),
+                            },
+                            {
+                                id: "sentiment_tone",
+                                label: "Tones",
+                                type: "multiselect",
+                                options: allTones,
+                                value: selectedTones,
+                                filterFn: (row, id, value) => {
+                                    if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                    const tones = row.getValue<string[]>(id);
+                                    return tones.some(tone => value.includes(tone.toLowerCase()));
+                                },
+                                onValueChange: (value) => setSelectedTones(value as string[]),
+                            },
+                        ]}
+                        globalFilter={{
+                            placeholder: "Search your creative library...",
+                            searchFn: (row, id, value) => {
+                                const searchValue = (value as string).toLowerCase();
+                                const name = String(row.getValue("name") || "").toLowerCase();
+                                const description = String(row.getValue("image_description") || "").toLowerCase();
+                                return name.includes(searchValue) || description.includes(searchValue);
+                            },
+                        }}
+                        uploadButton={{
+                            onFileUpload: handleFileUpload,
+                            onCancelUpload: handleCancelUpload,
+                            uploadingFiles
+                        }}
+                    />
                 </div>
 
-                {/* Main Content */}
-                <div className="px-6 py-4 max-w-[1400px] mx-auto">
-                    {/* Search bar is always shown */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search for visually similar content... (Press Enter to search)"
-                            className="pl-10 pr-10"
-                            value={searchQuery}
-                            onChange={handleInputChange}
-                            onKeyPress={handleKeyPress}
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={clearSearch}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Analysis section */}
-                    <div
-                        className={cn(
-                            "overflow-hidden transition-all duration-500",
-                            showAnalysis ? "h-auto opacity-100 mt-4 mb-2" : "h-0 opacity-0"
-                        )}
-                    >
-                        <div className="bg-muted/50 rounded-lg p-4">
-                            <div className="relative">
-                                <p className="text-sm leading-relaxed">
-                                    {isSearching ? (
-                                        <span className="flex items-center gap-2">
-                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                            Analyzing results...
-                                        </span>
-                                    ) : searchResults?.analysis}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-0 bg-card">
-                        {isSearching || isLoading ? (
-                            <LoadingSkeleton />
-                        ) : (
-                            <DataTable
-                                columns={columns}
-                                disableSearch
-                                data={searchResults?.results || records || []}
-                                searchPlaceholder="Filter results..."
-                                onRowClick={(record) => {
-                                    if (record.type === 'video') {
-                                        router.push(`/library/video/${record.id}`);
-                                    } else {
-                                        router.push(`/library/${record.id}`);
-                                    }
-                                }}
-                                filters={[
-                                    {
-                                        id: "sentiment_confidence",
-                                        label: "Confidence Range",
-                                        type: "range",
-                                        value: confidenceRange,
-                                        filterFn: (row, id, value) => {
-                                            if (!value) return true;
-                                            const [min, max] = value as [number, number];
-                                            const confidence = row.getValue<number>(id);
-                                            return confidence >= min / 100 && confidence <= max / 100;
-                                        },
-                                        onValueChange: (value) => setConfidenceRange(value as [number, number]),
-                                    },
-                                    {
-                                        id: "sentiment_tone",
-                                        label: "Tones",
-                                        type: "multiselect",
-                                        options: allTones,
-                                        value: selectedTones,
-                                        filterFn: (row, id, value) => {
-                                            if (!value || (Array.isArray(value) && value.length === 0)) return true;
-                                            const tones = row.getValue<string[]>(id);
-                                            return tones.some(tone => value.includes(tone.toLowerCase()));
-                                        },
-                                        onValueChange: (value) => setSelectedTones(value as string[]),
-                                    },
-                                ]}
-                                globalFilter={{
-                                    placeholder: "Search your creative library...",
-                                    searchFn: (row, id, value) => {
-                                        const searchValue = (value as string).toLowerCase();
-                                        const name = String(row.getValue("name") || "").toLowerCase();
-                                        const description = String(row.getValue("image_description") || "").toLowerCase();
-                                        return name.includes(searchValue) || description.includes(searchValue);
-                                    },
-                                }}
-                                maxRowsPerPage={6}
-                            />
-                        )}
-                    </div>
-                </div>
-            </>
+                <SearchContainer
+                    searchQuery={searchQuery}
+                    handleInputChange={handleInputChange}
+                    handleKeyPress={handleKeyPress}
+                    clearSearch={clearSearch}
+                    isSearching={isSearching}
+                    searchResults={searchResults}
+                />
+            </div>
         </div>
     );
 } 

@@ -83,6 +83,8 @@ export async function POST(request: NextRequest) {
 
         // Generate embeddings for the search query
         const searchEmbeddings = await createEmbeddings(query);
+
+        console.log("searchEmbeddings", searchEmbeddings);
         
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -115,26 +117,11 @@ export async function POST(request: NextRequest) {
         // Fetch additional data for each result
         const enrichedResults: Result[] = await Promise.all(
             searchResults!.map(async (result: SearchRPCResult) => {
-                // Get features
-                const { data: features } = await supabase
-                    .from('features')
-                    .select(`
-                        keyword,
-                        confidence_score,
-                        category,
-                        location,
-                        visual_attributes (
-                            attribute,
-                            value
-                        )
-                    `)
-                    .eq('ad_output_id', result.id);
-
-                // Get sentiment analysis
-                const { data: sentiment } = await supabase
-                    .from('sentiment_analysis')
-                    .select('tone, confidence')
-                    .eq('ad_output_id', result.id)
+                // Get the library item which already contains features and sentiment
+                const { data: libraryItem } = await supabase
+                    .from('library_items')
+                    .select('*')
+                    .eq('id', result.id)
                     .single();
 
                 // Transform to match LibraryItem type
@@ -144,18 +131,21 @@ export async function POST(request: NextRequest) {
                     name: result.name,
                     image_url: result.image_url,
                     image_description: result.image_description,
-                    features: features?.map(f => ({
-                        keyword: f.keyword,
-                        confidence_score: f.confidence_score,
-                        category: f.category,
-                        location: f.location,
-                        visual_attributes: f.visual_attributes
-                    })) || [],
+                    features: libraryItem?.features?.map((feature: string) => {
+                        const [keyword, category, location, confidence] = feature.split('|');
+                        return {
+                            keyword,
+                            category,
+                            location,
+                            confidence_score: parseFloat(confidence),
+                            visual_attributes: [] // Visual attributes are not stored in the new format
+                        };
+                    }) || [],
                     sentiment_analysis: {
-                        tones: sentiment ? [sentiment.tone] : [],
-                        confidence: sentiment?.confidence || 0
+                        tones: libraryItem?.sentiment_tones || [],
+                        confidence: libraryItem?.avg_sentiment_confidence || 0
                     },
-                    created_at: new Date().toISOString(),
+                    created_at: libraryItem?.created_at || new Date().toISOString(),
                     similarity: result.similarity
                 };
             })
@@ -186,7 +176,7 @@ export async function POST(request: NextRequest) {
 
         const analysis = await groq.chat.completions.create({
             messages: [{ role: "user", content: analysisPrompt }],
-            model: "llama-3.1-70b-versatile",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.4,
             max_tokens: 300,
             top_p: 1,

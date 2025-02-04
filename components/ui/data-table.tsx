@@ -8,7 +8,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   FilterFn,
@@ -31,10 +30,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, UploadCloud, Video, ImageIcon, Loader2, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCallback } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Image from "next/image";
 
 interface DataTableFilter<TData> {
   id: string;
@@ -44,6 +47,14 @@ interface DataTableFilter<TData> {
   options?: string[];
   filterFn: FilterFn<TData>;
   onValueChange: (value: unknown) => void;
+}
+
+interface ServerSidePagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 interface DataTableProps<TData, TValue> {
@@ -58,6 +69,23 @@ interface DataTableProps<TData, TValue> {
     searchFn: FilterFn<TData>;
   };
   disableSearch?: boolean;
+  serverSidePagination?: ServerSidePagination;
+  isLoading?: boolean;
+  onLoadPage?: (page: number) => Promise<void>;
+  loadedPages?: Set<number>;
+  uploadButton?: {
+    onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onCancelUpload: (fileId: string) => void;
+    uploadingFiles: Array<{
+      id: string;
+      fileName: string;
+      file: File;
+      fileType: "image" | "video";
+      status: "uploading" | "processing" | "complete" | "error";
+      error?: string;
+      progress?: number;
+    }>;
+  };
 }
 
 export function DataTable<TData, TValue>({
@@ -69,6 +97,11 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
   maxRowsPerPage = 10,
   disableSearch = false,
+  serverSidePagination,
+  isLoading = false,
+  onLoadPage,
+  loadedPages = new Set<number>(),
+  uploadButton,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -78,7 +111,6 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
@@ -87,6 +119,12 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
       globalFilter: globalFilterValue,
+      pagination: serverSidePagination
+        ? {
+          pageIndex: serverSidePagination.page - 1,
+          pageSize: serverSidePagination.pageSize,
+        }
+        : undefined,
     },
     enableFilters: true,
     initialState: {
@@ -136,6 +174,27 @@ export function DataTable<TData, TValue>({
     },
     0
   );
+
+  // Add background page loading
+  const loadNextPages = useCallback(async () => {
+    if (!serverSidePagination || !onLoadPage) return;
+
+    const totalPages = Math.ceil(serverSidePagination.total / serverSidePagination.pageSize);
+    const currentPage = serverSidePagination.page;
+
+    // Load next 2 pages and previous page if they haven't been loaded
+    const pagesToLoad = [currentPage - 1, currentPage + 1, currentPage + 2]
+      .filter(page => page > 0 && page <= totalPages && !loadedPages.has(page));
+
+    for (const page of pagesToLoad) {
+      await onLoadPage(page);
+    }
+  }, [serverSidePagination, onLoadPage, loadedPages]);
+
+  // Load next pages when current page changes
+  React.useEffect(() => {
+    loadNextPages();
+  }, [loadNextPages, serverSidePagination?.page]);
 
   return (
     <div className="w-full" onClick={(e) => e.stopPropagation()}>
@@ -202,11 +261,10 @@ export function DataTable<TData, TValue>({
                             >
                               <div className="flex items-center gap-2">
                                 <div
-                                  className={`w-4 h-4 border rounded-sm ${
-                                    (filter.value as string[]).includes(option)
-                                      ? "bg-primary border-primary"
-                                      : "border-input"
-                                  }`}
+                                  className={`w-4 h-4 border rounded-sm ${(filter.value as string[]).includes(option)
+                                    ? "bg-primary border-primary"
+                                    : "border-input"
+                                    }`}
                                 />
                                 <span className="capitalize">{option}</span>
                               </div>
@@ -243,6 +301,142 @@ export function DataTable<TData, TValue>({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {uploadButton && (
+            <>
+              {uploadButton.uploadingFiles.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Uploading {uploadButton.uploadingFiles.length} file{uploadButton.uploadingFiles.length > 1 ? 's' : ''}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    className="w-80 p-2"
+                  >
+                    <div className="space-y-2">
+                      {uploadButton.uploadingFiles.map(file => (
+                        <div
+                          key={file.id}
+                          className="flex items-start gap-2 p-2 rounded-lg bg-muted/30"
+                        >
+                          <div className="relative w-8 h-8 rounded overflow-hidden bg-muted flex-shrink-0">
+                            {file.fileType === 'image' && file.file && (
+                              <Image
+                                src={URL.createObjectURL(file.file)}
+                                alt={file.fileName}
+                                fill
+                                className="object-cover"
+                              />
+                            )}
+                            {file.fileType === 'video' && (
+                              <Video className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
+                            )}
+                            {file.status === "uploading" && (
+                              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                              </div>
+                            )}
+                            {file.status === "complete" && (
+                              <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                                <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                                  <svg
+                                    className="h-2 w-2 text-white"
+                                    fill="none"
+                                    strokeWidth="2"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                </div>
+                              </div>
+                            )}
+                            {file.status === "error" && (
+                              <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
+                                <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                                  <X className="h-2 w-2 text-white" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium truncate">
+                                {file.fileName}
+                              </p>
+                              {file.status === "uploading" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 w-5 p-0"
+                                  onClick={() => uploadButton.onCancelUpload(file.id)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {file.status === "uploading" && "Uploading..."}
+                              {file.status === "processing" && "Processing..."}
+                              {file.status === "complete" && "Complete"}
+                              {file.status === "error" && (
+                                <span className="text-red-500">{file.error || "Upload failed"}</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="h-8 flex items-center gap-2" variant="secondary">
+                    <UploadCloud className="h-4 w-4" />
+                    Upload
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[160px]">
+                  <DropdownMenuItem
+                    onClick={() => document.getElementById('imageInput')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Upload Images</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => document.getElementById('videoInput')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <Video className="h-4 w-4" />
+                    <span>Upload Video</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <input
+                id="imageInput"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={uploadButton.onFileUpload}
+              />
+              <input
+                id="videoInput"
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={uploadButton.onFileUpload}
+              />
+            </>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-8">
@@ -277,29 +471,41 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {/* Rest of the component remains the same */}
+      {/* Table section with inline loading states */}
       <div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-b hover:bg-transparent">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="h-9 px-4 text-xs font-medium text-muted-foreground">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="h-9 px-4 text-xs font-medium text-muted-foreground">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              // Loading rows
+              Array(10).fill(0).map((_, i) => (
+                <TableRow key={`loading-${i}`} className="border-b last:border-0">
+                  {table.getAllColumns().map((column) => (
+                    <TableCell key={column.id} className="px-4 py-3">
+                      <div className="flex items-center h-full">
+                        <Skeleton className="h-4 w-[80%] bg-muted-foreground/10" />
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
+              // Normal data rows
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -332,14 +538,22 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex items-center justify-between px-4 py-3 border-t">
         <div className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} items
+          {serverSidePagination
+            ? `${serverSidePagination.total} items`
+            : `${table.getFilteredRowModel().rows.length} items`}
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => serverSidePagination
+              ? serverSidePagination.onPageChange(serverSidePagination.page - 1)
+              : table.previousPage()
+            }
+            disabled={serverSidePagination
+              ? serverSidePagination.page <= 1
+              : !table.getCanPreviousPage()
+            }
             className="h-8"
           >
             Previous
@@ -347,8 +561,14 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => serverSidePagination
+              ? serverSidePagination.onPageChange(serverSidePagination.page + 1)
+              : table.nextPage()
+            }
+            disabled={serverSidePagination
+              ? serverSidePagination.page >= Math.ceil(serverSidePagination.total / serverSidePagination.pageSize)
+              : !table.getCanNextPage()
+            }
             className="h-8"
           >
             Next

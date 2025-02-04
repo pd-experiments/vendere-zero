@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const pageSize = parseInt(searchParams.get('pageSize') || '10');
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize - 1;
+
         const supabase = createServerSupabaseClient();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -10,126 +16,57 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Fetch videos with frames and construct the data in SQL
-        const { data: videos, error: videosError } = await supabase
-            .from('videos')
-            .select(`
-                id,
-                name,
-                description,
-                video_url,
-                created_at,
-                video_frames_mapping (
-                    id,
-                    frame_number,
-                    video_timestamp,
-                    frame_id,
-                    frame:ad_structured_output (
-                        id,
-                        image_url,
-                        image_description,
-                        features (
-                            keyword,
-                            confidence_score,
-                            category,
-                            location,
-                            visual_attributes (*)
-                        ),
-                        sentiment_analysis (
-                            tone,
-                            confidence
-                        )
-                    )
-                )
-            `)
-            .eq('user_id', user.id);
+        // Use parallel requests for count and data
+        const [countResult, dataResult] = await Promise.all([
+            supabase
+                .from('library_items')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id),
+            
+            supabase
+                .from('library_items')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .range(start, end)
+        ]);
 
-        if (videosError) {
-            return NextResponse.json({ error: "Error fetching videos: " + videosError.message }, { status: 500 });
+        if (countResult.error) {
+            console.error("Count error:", countResult.error);
+            return NextResponse.json({ error: "Error counting items" }, { status: 500 });
         }
 
-        // Fetch standalone images
-        const { data: images, error: imagesError } = await supabase
-            .from('ad_structured_output')
-            .select(`
-                id,
-                name,
-                image_url,
-                image_description,
-                features (
-                    keyword,
-                    confidence_score,
-                    category,
-                    location,
-                    visual_attributes (*)
-                ),
-                sentiment_analysis (
-                    tone,
-                    confidence
-                )
-            `)
-            .eq('user', user.id);
-
-        if (imagesError) {
-            return NextResponse.json({ error: "Error fetching images: " + imagesError.message }, { status: 500 });
+        if (dataResult.error) {
+            console.error("Data error:", dataResult.error);
+            return NextResponse.json({ error: "Error fetching library items" }, { status: 500 });
         }
 
-        // Construct library items
-        const libraryItems = [
-            ...(videos || []).map(video => ({
-                id: video.id,
-                type: 'video',
-                name: video.name,
-                video: {
-                    id: video.id,
-                    name: video.name,
-                    description: video.description,
-                    video_url: video.video_url,
-                    frames: video.video_frames_mapping.map(mapping => ({
-                        mapping_id: mapping.id,
-                        frame_id: mapping.frame_id,
-                        image_url: mapping.frame[0].image_url || '',
-                        image_description: mapping.frame[0].image_description || '',
-                        frame_number: mapping.frame_number,
-                        video_timestamp: mapping.video_timestamp,
-                    }))
-                },
-                image_description: video.description || 'No description',
-                features: video.video_frames_mapping[0]?.frame[0].features.map(feature => ({
-                    keyword: feature.keyword,
-                    confidence_score: feature.confidence_score,
-                    category: feature.category,
-                    location: feature.location,
-                    visual_attributes: feature.visual_attributes
-                })) || [],
-                sentiment_analysis: {
-                    tones: [video.video_frames_mapping[0]?.frame[0].sentiment_analysis[0]?.tone || ''],
-                    confidence: video.video_frames_mapping[0]?.frame[0].sentiment_analysis[0]?.confidence || 0
-                },
-                created_at: video.created_at || new Date().toISOString()
-            })),
-            ...(images || []).map(image => ({
-                id: image.id,
-                type: 'image',
-                name: image.name,
-                image_url: image.image_url,
-                image_description: image.image_description,
-                features: image.features.map(feature => ({
-                    keyword: feature.keyword,
-                    confidence_score: feature.confidence_score,
-                    category: feature.category,
-                    location: feature.location,
-                    visual_attributes: feature.visual_attributes
-                })),
-                sentiment_analysis: {
-                    tones: [image.sentiment_analysis[0]?.tone || ''],
-                    confidence: image.sentiment_analysis[0]?.confidence || 0
-                },
-                created_at: new Date().toISOString()
-            }))
-        ];
+        const transformedItems = dataResult.data.map(item => ({
+            id: item.id,
+            type: item.type,
+            name: item.name,
+            image_url: item.preview_url,
+            video: item.type === 'video' ? {
+                id: item.item_id,
+                name: item.name,
+                description: item.description,
+            } : undefined,
+            image_description: item.description || 'No description',
+            features: item.features || [],
+            sentiment_analysis: {
+                tones: item.sentiment_tones || [],
+                confidence: item.avg_sentiment_confidence || 0
+            },
+            created_at: item.created_at
+        }));
 
-        return NextResponse.json(libraryItems, { status: 200 });
+        return NextResponse.json({
+            items: transformedItems,
+            total: countResult.count,
+            page,
+            pageSize,
+            totalPages: Math.ceil((countResult.count || 0) / pageSize)
+        });
     } catch (error) {
         console.error("Error fetching library data:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

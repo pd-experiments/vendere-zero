@@ -27,17 +27,19 @@ export default function RootLayout({
       <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
         <Providers>
           <AuthProvider>
-              <SidebarProvider>
-                <div className="flex h-screen w-[100%]">
-                  <AppSidebar />
-                  <div className="flex flex-col flex-1 overflow-hidden w-[100%]">
+            <SidebarProvider>
+              <div className="flex h-screen w-[100%]">
+                <AppSidebar />
+                <div className="flex flex-col flex-1 overflow-hidden w-[100%]">
+                  <div className="h-16 shrink-0">
                     <Header />
-                    <main className="flex-1 overflow-auto w-[100%]">
-                      {children}
-                    </main>
                   </div>
+                  <main className="flex-1 overflow-auto w-[100%]">
+                    {children}
+                  </main>
                 </div>
-              </SidebarProvider>
+              </div>
+            </SidebarProvider>
           </AuthProvider>
         </Providers>
       </body>

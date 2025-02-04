@@ -83,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="pb-2">
-        <div className="flex items-center gap-2 px-0 py-3 transition-all duration-300 ease-in-out group-data-[state=collapsed]:px-0">
+        <div className="flex items-center gap-2 px-0 pt-2 pb-2 transition-all duration-300 ease-in-out group-data-[state=collapsed]:px-0">
           <div className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out">
             <Ratio className="h-6 w-6 bg-[#B1E116] text-black p-1 rounded-md transition-all duration-300 ease-in-out" />
           </div>

@@ -37,9 +37,9 @@ type SentimentAnalysis = Database['public']['Tables']['sentiment_analysis']['Row
 
 const LoadingSkeleton = () => (
     <div className="min-h-screen bg-background">
-        <div className="px-6 py-4">
+        <div className="px-4 py-4">
             {/* Header Skeleton */}
-            <div className="max-w-[1400px] mx-auto mb-6">
+            <div className="mx-auto mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Skeleton className="h-8 w-8" />
@@ -50,7 +50,7 @@ const LoadingSkeleton = () => (
             </div>
 
             {/* Main Content Skeleton */}
-            <div className="max-w-[1400px] mx-auto">
+            <div className="mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column */}
                     <div className="space-y-6">
@@ -193,9 +193,9 @@ export default function AdDetail({ params }: { params: { id: string } }) {
 
     return (
         <div className="min-h-screen bg-background">
-            <div className="px-6 py-4">
+            <div className="px-4 py-4">
                 {/* Header */}
-                <div className="max-w-[1400px] mx-auto mb-6">
+                <div className="mx-auto mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Button
@@ -215,7 +215,7 @@ export default function AdDetail({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Main Content */}
-                <div className="max-w-[1400px] mx-auto">
+                <div className="mx-auto">
                     {/* Main Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Left Column - Image and Description */}

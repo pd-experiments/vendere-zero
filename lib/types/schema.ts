@@ -136,6 +136,48 @@ export type Database = {
         }
         Relationships: []
       }
+      library_items: {
+        Row: {
+          avg_sentiment_confidence: number | null
+          created_at: string | null
+          description: string | null
+          features: string[] | null
+          id: string
+          item_id: string | null
+          name: string | null
+          preview_url: string | null
+          sentiment_tones: string[] | null
+          type: Database["public"]["Enums"]["library_item_type"]
+          user_id: string | null
+        }
+        Insert: {
+          avg_sentiment_confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          item_id?: string | null
+          name?: string | null
+          preview_url?: string | null
+          sentiment_tones?: string[] | null
+          type: Database["public"]["Enums"]["library_item_type"]
+          user_id?: string | null
+        }
+        Update: {
+          avg_sentiment_confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          item_id?: string | null
+          name?: string | null
+          preview_url?: string | null
+          sentiment_tones?: string[] | null
+          type?: Database["public"]["Enums"]["library_item_type"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sentiment_analysis: {
         Row: {
           ad_output_id: string
@@ -277,6 +319,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fetch_library_items: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          type: string
+          name: string
+          image_url: string
+          image_description: string
+          features: Json
+          sentiment_analysis: Json
+          created_at: string
+        }[]
+      }
       match_ad_descriptions:
         | {
             Args: {
@@ -320,7 +377,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      library_item_type: "image" | "video"
     }
     CompositeTypes: {
       [_ in never]: never
