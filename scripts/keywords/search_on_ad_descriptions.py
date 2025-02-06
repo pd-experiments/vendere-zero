@@ -1,30 +1,43 @@
 from functools import lru_cache
 import asyncio
 from brave_search import brave_web_search
-from models import CombinedMarketResearch, GoogleAd, MarketResearch, SearchQueries
+from models import (
+    AdStructuredOutput,
+    CombinedMarketResearch,
+    GPTStructuredMarketResearch,
+    MarketResearch,
+    SearchQueries,
+)
 from playwright.async_api import async_playwright, Page
 import os
 import dotenv
 from openai import OpenAI
 from datetime import datetime
 from helpers import get_supabase_client
-from typing import Optional
+from typing import Optional, Dict
 from prompts import (
     VISUAL_AD_ANALYSIS,
     MARKET_RESEARCH_ANALYSIS,
     STRUCTURED_OUTPUT_PROMPT,
     SEARCH_QUERY_GENERATION,
+    PERPLEXITY_MARKET_ANALYSIS,
 )
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
 )
+from tenacity import retry, stop_after_attempt, wait_exponential
+from worker_pool import WorkerPool
+from tqdm import tqdm
+import httpx
 
 # Load environment variables
 dotenv.load_dotenv("../../.env.local")
 
 # Initialize clients
+
+PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 
 
 def truncate_to_token_limit(text: str, max_tokens: int = 2000) -> str:
@@ -32,32 +45,7 @@ def truncate_to_token_limit(text: str, max_tokens: int = 2000) -> str:
     return text[: max_tokens * 4]
 
 
-async def extract_page_content(page: Page) -> Optional[str]:
-    """Extract main content from page, avoiding navigation and footer"""
-    try:
-        # Remove script tags, style tags, and nav elements
-        await page.evaluate(
-            """() => {
-            const elements = document.querySelectorAll('script, style, nav, footer, header');
-            elements.forEach(el => el.remove());
-        }"""
-        )
-
-        # Get main content
-        content = await page.evaluate(
-            """() => {
-            const main = document.querySelector('main') || document.querySelector('article') || document.body;
-            return main.innerText;
-        }"""
-        )
-
-        return truncate_to_token_limit(content)
-    except Exception as e:
-        print(f"Error extracting content: {e}")
-        return None
-
-
-@lru_cache(maxsize=1000)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 async def analyze_page_content(
     url: str, content: str, query: str
 ) -> MarketResearch | None:
@@ -96,55 +84,109 @@ async def analyze_page_content(
 
 
 @lru_cache(maxsize=1000)
+async def process_content_cached(
+    url: str, query: str, image_url: str, content: str
+) -> None:
+    """Cached version of content processing"""
+    try:
+        research = await analyze_page_content(
+            url, truncate_to_token_limit(content, 500), query
+        )
+        if research:
+            supabase = get_supabase_client()
+            supabase.table("market_research").insert(
+                {
+                    **research.model_dump(),
+                    "image_url": image_url,
+                    "site_url": url,
+                }
+            ).execute()
+    except Exception as e:
+        print(f"Error processing content for {url}: {e}")
+
+
+async def process_content(content: str, context: Dict):
+    """Callback function that uses the cached version"""
+    await process_content_cached(
+        context["url"], context["query"], context["image_url"], content
+    )
+
+
+@lru_cache(maxsize=1000)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 async def search_on_ad_descriptions(
-    query: str, advertisement_url: str, ad_description: str | None
+    query: str, image_url: str, worker_pool: WorkerPool
 ):
-    """Search and analyze pages for market research"""
-    # Get search results
-    results = await brave_web_search(query, 1)
-    research_results = []
+    """Search and analyze pages for market research using worker pool"""
+    results = await brave_web_search(query, 2)
 
-    for idx, result in enumerate(results.web.results):
-        async with async_playwright() as p:
-            browser = await p.chromium.connect_over_cdp(
-                "wss://connect.browserbase.com?apiKey="
-                + os.getenv("BROWSERBASE_API_KEY", "")
+    for result in results.web.results:
+        context = {"query": query, "image_url": image_url, "url": result.url}
+        worker_pool.add_work(result.url, process_content, context)
+
+
+@lru_cache(maxsize=1000)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+async def get_perplexity_insights(description: str) -> tuple[str, list[str]]:
+    """Get market insights from Perplexity with citations"""
+    # print(f"Getting perp insights for {description[:20]}...")
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            payload = {
+                "model": "sonar",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": PERPLEXITY_MARKET_ANALYSIS,
+                    },
+                    {"role": "user", "content": description[:2000]},
+                ],
+                "max_tokens": 2048,
+                "temperature": 0,
+                "return_citations": True,
+            }
+            response = await client.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
             )
-            page = await browser.new_page()
-            try:
-                await page.goto(result.url, wait_until="load")
-                content = await extract_page_content(page)
 
-                if content:
-                    research = await analyze_page_content(result.url, content, query)
-                    if research is None:
-                        raise ValueError("No research data found")
-                    research_results.append(research)
+            if response.status_code != 200:
+                print(f"Error response: {response.text}")
+                response.raise_for_status()
 
-                    # Save to Supabase
-                    supabase = get_supabase_client()
-                    supabase.table("market_research").insert(
-                        {
-                            **research.model_dump(),
-                            "advertisement_url": advertisement_url,
-                            "ad_description": ad_description,
-                        }
-                    ).execute()
+            data = response.json()
 
-            except Exception as e:
-                print(
-                    f"Error processing {idx} of {len(results.web.results)}: {result.url}: {e}"
-                )
-            finally:
-                await page.close()
-                await browser.close()
+            if "choices" not in data or not data["choices"]:
+                raise ValueError(f"Invalid response format: {data}")
 
-    return research_results
+            content = data["choices"][0]["message"].get("content", "")
+            citations: list[str] = data.get("citations", [])
+
+            if not content:
+                raise ValueError("Empty content in response")
+
+            return content, citations
+
+        except httpx.HTTPError as e:
+            print(f"HTTP Error: {str(e)}")
+            print(
+                f"Response: {e.response.text if hasattr(e, 'response') else 'No response'}"
+            )
+            raise
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            print(f"Error type: {type(e)}")
+            raise
 
 
-async def summarize_ad(ad: GoogleAd) -> str | None:
-    if ad.ad_description:
-        return ad.ad_description
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+async def summarize_ad(ad: AdStructuredOutput) -> str | None:
+    if ad.image_description:
+        return ad.image_description
     if not ad.image_url:
         raise ValueError("Image URL is required")
 
@@ -159,7 +201,7 @@ async def summarize_ad(ad: GoogleAd) -> str | None:
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Provide a detailed visual analysis of this ad from {ad.advertiser_name}. Focus on how the visual elements work together to achieve marketing goals.",
+                        "text": f"Provide a detailed visual analysis of this ad. Focus on how the visual elements work together to achieve marketing goals.",
                     },
                     {"type": "image_url", "image_url": {"url": ad.image_url}},
                 ],
@@ -171,8 +213,9 @@ async def summarize_ad(ad: GoogleAd) -> str | None:
     return completion.choices[0].message.content
 
 
-async def generate_search_queries(ad: GoogleAd) -> list[str]:
-    if not ad.ad_description:
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+async def generate_search_queries(ad: AdStructuredOutput) -> list[str]:
+    if not ad.image_description:
         raise ValueError("Ad description is required")
 
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -181,7 +224,7 @@ async def generate_search_queries(ad: GoogleAd) -> list[str]:
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SEARCH_QUERY_GENERATION},
-            {"role": "user", "content": ad.ad_description},
+            {"role": "user", "content": ad.image_description},
         ],
         response_format=SearchQueries,
     )
@@ -193,22 +236,116 @@ async def generate_search_queries(ad: GoogleAd) -> list[str]:
     return obj.queries
 
 
-async def pipeline():
+async def process_ad(ad: AdStructuredOutput) -> None:
+    """Process a single ad through the pipeline"""
     supabase = get_supabase_client()
-    ads = supabase.table("google_image_ads").select("*").execute().data
-    for ad in ads[:1]:
-        google_ad = GoogleAd.model_validate(ad)
-        summary = await summarize_ad(google_ad)
-        google_ad.ad_description = summary
-        supabase.table("google_image_ads").update({"ad_description": summary}).eq(
-            "advertisement_url", google_ad.advertisement_url
+
+    # Get or generate ad summary
+    summary = await summarize_ad(ad)
+    if summary != ad.image_description:
+        supabase.table("ad_structured_output").update(
+            {"image_description": summary}
+        ).eq("image_url", ad.image_url).execute()
+
+    # Get market insights from Perplexity
+    if summary:
+        insights, citations = await get_perplexity_insights(summary)
+
+    # Structure the insights using GPT-4
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    structured_output = openai_client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": STRUCTURED_OUTPUT_PROMPT},
+            {"role": "user", "content": insights},
+        ],
+        response_format=GPTStructuredMarketResearch,
+    )
+
+    research = structured_output.choices[0].message.parsed
+    if research:
+        # Save to market_research_v2 table
+        supabase.table("market_research_v2").insert(
+            {
+                **research.model_dump(),
+                "image_url": ad.image_url,
+                "citations": citations,
+                "perplexity_insights": insights,
+                "user_id": "97d82337-5d25-4258-b47f-5be8ea53114c",
+            }
         ).execute()
-        search_queries = await generate_search_queries(google_ad)
-        print("search_queries", search_queries)
-        for query in search_queries[:1]:
-            research = await search_on_ad_descriptions(
-                query, google_ad.advertisement_url, google_ad.ad_description
-            )
+
+
+async def pipeline():
+    """Main pipeline to process all ads with concurrent workers"""
+    supabase = get_supabase_client()
+    ads = (
+        supabase.table("ad_structured_output")
+        .select("*")
+        .eq("user", "97d82337-5d25-4258-b47f-5be8ea53114c")
+        .execute()
+        .data
+    )
+
+    # Create a queue for ads
+    queue = asyncio.Queue()
+    for ad in ads:
+        queue.put_nowait(ad)
+
+    async def worker(worker_id: int):
+        while True:
+            try:
+                # Get ad from queue
+                ad = await queue.get()
+                try:
+                    # print(
+                    #     f"Worker {worker_id} processing ad {ad.get('image_url')[:20]}..."
+                    # )
+                    ad_obj = AdStructuredOutput.model_validate(ad)
+                    await process_ad(ad_obj)
+                except Exception as e:
+                    print(
+                        f"Worker {worker_id} error processing ad {ad.get('image_url')[:20]}...: {e}"
+                    )
+                finally:
+                    queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"Worker {worker_id} unexpected error: {e}")
+
+    # Create progress bar
+    pbar = tqdm(total=len(ads), desc="Processing ads")
+
+    # Start workers
+    num_workers = 8
+    workers = [asyncio.create_task(worker(i)) for i in range(num_workers)]
+
+    # Monitor progress
+    async def update_progress():
+        last_size = queue.qsize()
+        while not queue.empty():
+            current_size = queue.qsize()
+            if current_size != last_size:
+                pbar.update(last_size - current_size)
+                last_size = current_size
+            await asyncio.sleep(0.1)
+        pbar.update(last_size)  # Update remaining
+
+    progress_task = asyncio.create_task(update_progress())
+
+    try:
+        # Wait for all ads to be processed
+        await queue.join()
+    finally:
+        # Cancel workers and progress monitor
+        for w in workers:
+            w.cancel()
+        progress_task.cancel()
+
+        # Wait for workers to finish
+        await asyncio.gather(*workers, return_exceptions=True)
+        pbar.close()
 
 
 if __name__ == "__main__":

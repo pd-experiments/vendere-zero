@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import UUID4, BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 
@@ -65,7 +65,9 @@ class PricePoint(BaseModel):
 
 
 class MarketResearch(BaseModel):
-    intent_summary: str
+    intent_summary: str = Field(
+        description="This is a summary of the intent of the ad. It is a single sentence that captures the main idea of the ad. It should be extremely detailed and specific."
+    )
     primary_intent: str
     secondary_intents: List[str]
     market_segments: List[MarketSegment]
@@ -75,6 +77,15 @@ class MarketResearch(BaseModel):
     seasonal_factors: Optional[List[str]]
     competitor_brands: List[str]
     keywords: List[str] = Field(description="Extracted relevant keywords for PPC")
+
+
+class GPTStructuredMarketResearch(BaseModel):
+    intent_summary: str
+    target_audience: List[MarketSegment]
+    pain_points: List[str]
+    buying_stage: str
+    key_features: List[ProductFeature]
+    competitive_advantages: List[str]
 
 
 class CombinedMarketResearch(MarketResearch):
@@ -94,3 +105,9 @@ class GoogleAd(BaseModel):
 
 class SearchQueries(BaseModel):
     queries: List[str]
+
+
+class AdStructuredOutput(BaseModel):
+    id: UUID4 = Field(default_factory=UUID4)
+    image_url: str
+    image_description: str
