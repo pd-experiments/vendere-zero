@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { GeistSans } from 'geist/font/sans';
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
+import { SearchContainer } from "@/components/search-container";
 
 export const metadata: Metadata = {
   title: "Vendere Labs",
@@ -42,6 +43,7 @@ export default function RootLayout({
             </SidebarProvider>
           </AuthProvider>
         </Providers>
+        <SearchContainer />
       </body>
     </html>
   );

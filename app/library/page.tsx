@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2, GripVertical, TrashIcon } from "lucide-react";
+import { Video, MoreHorizontal, Trash2, Image as ImageIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,8 +15,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-// import { useQuery } from '@tanstack/react-query';
 
 type LibraryItem = {
     id: string;
@@ -48,15 +46,7 @@ type UploadingFile = {
     abortController?: AbortController;
 };
 
-type SearchResult = LibraryItem & {
-    similarity: number;
-};
 
-type SearchResponse = {
-    results: SearchResult[];
-    analysis: string;
-    query: string;
-};
 
 type PaginatedResponse = {
     items: LibraryItem[];
@@ -66,97 +56,11 @@ type PaginatedResponse = {
     totalPages: number;
 };
 
-const SearchContainer = ({
-    searchQuery,
-    handleInputChange,
-    handleKeyPress,
-    clearSearch,
-    isSearching,
-    searchResults
-}: {
-    searchQuery: string;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-    clearSearch: () => void;
-    isSearching: boolean;
-    searchResults: SearchResponse | null;
-}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    return (
-        <div className={cn(
-            "fixed bottom-6 right-6 z-50 transition-all duration-300 ease-in-out",
-            "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-            "rounded-lg shadow-lg border w-[400px]",
-            !isExpanded && "h-[45px]"
-        )}>
-            <div className="py-1 px-3 space-y-1">
-                <div className="flex justify-between items-start gap-3">
-                    <button
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="text-muted-foreground hover:text-foreground mt-2.5 cursor-grab active:cursor-grabbing"
-                    >
-                        <GripVertical className="h-4 w-4" />
-                    </button>
-                    <div className="relative flex-1">
-                        <div className="relative flex items-start gap-3">
-                            {/* <Search className="h-4 w-4 mt-2.5 text-muted-foreground" /> */}
-                            <textarea
-                                placeholder="Search for visually similar content..."
-                                className="flex-1 bg-transparent border-none focus:outline-none resize-none h-[42px] text-sm pt-2 pr-6"
-                                value={searchQuery}
-                                onChange={(e) => handleInputChange(e)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleKeyPress(e);
-                                        setIsExpanded(true);
-                                    }
-                                }}
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={clearSearch}
-                                    className="absolute right-0 top-2.5 text-muted-foreground hover:text-foreground text-sm font-medium"
-                                >
-                                    <TrashIcon className="h-4 w-4" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                { isSearching || searchResults?.analysis && (
-                    <div className={cn(
-                        "overflow-hidden transition-all duration-500 h-auto",
-                    )}>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                        <div className="relative">
-                            <p className="text-sm leading-relaxed">
-                                {isSearching ? (
-                                    <span className="flex items-center gap-2">
-                                        <Loader2 className="h-3 w-3 animate-spin" />
-                                        Analyzing results...
-                                    </span>
-                                ) : searchResults?.analysis}
-                            </p>
-                        </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
 export default function Library() {
     const router = useRouter();
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [confidenceRange, setConfidenceRange] = useState<[number, number]>([0, 100]);
     const [selectedTones, setSelectedTones] = useState<string[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
-    const [isSearching, setIsSearching] = useState(false);
     const [records, setRecords] = useState<LibraryItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -164,7 +68,7 @@ export default function Library() {
     const [total, setTotal] = useState(0);
     const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set([1]));
     const [cachedRecords, setCachedRecords] = useState<Record<number, LibraryItem[]>>({});
-    const [selectedType, setSelectedType] = useState<"string"[]>([]);
+    const [selectedType, setSelectedType] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchLibraryData = async (pageToLoad: number) => {
@@ -594,54 +498,6 @@ export default function Library() {
         }
     ];
 
-    // Add this function to handle search
-    const handleSearch = async (query: string) => {
-        setSearchQuery(query);
-
-        if (!query.trim()) {
-            setSearchResults(null);
-            return;
-        }
-
-        setIsSearching(true);
-
-        try {
-            const response = await fetch("/api/search", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query }),
-            });
-
-            if (!response.ok) throw new Error("Search failed");
-            const data: SearchResponse = await response.json();
-            setSearchResults(data);
-        } catch (error) {
-            console.error("Search error:", error);
-        } finally {
-            setIsSearching(false);
-        }
-    };
-
-    // Add this function to clear search
-    const clearSearch = () => {
-        setSearchQuery("");
-        setSearchResults(null);
-    };
-
-    // Modify the search input section to handle key press
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSearch(searchQuery);
-        }
-    };
-
-    // Modify the search input to use onChange without immediate search
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        if (!e.target.value) {
-            clearSearch();
-        }
-    };
 
     // Add this function to handle background loading of pages
     const handleLoadPage = async (pageToLoad: number) => {
@@ -670,7 +526,7 @@ export default function Library() {
                         columns={columns}
                         data={records}
                         isLoading={isLoading}
-                        searchPlaceholder="Search your creative library..."
+                        searchPlaceholder="Find content in your library..."
                         loadedPages={loadedPages}
                         onLoadPage={handleLoadPage}
                         serverSidePagination={{
@@ -749,15 +605,6 @@ export default function Library() {
                         }}
                     />
                 </div>
-
-                <SearchContainer
-                    searchQuery={searchQuery}
-                    handleInputChange={handleInputChange}
-                    handleKeyPress={handleKeyPress}
-                    clearSearch={clearSearch}
-                    isSearching={isSearching}
-                    searchResults={searchResults}
-                />
             </div>
         </div>
     );
