@@ -7,6 +7,7 @@ import {
   Ratio,
   GalleryVerticalEnd,
   BookIcon,
+  GlobeIcon,
   // SquareTerminal,
   // AudioLines,
 } from "lucide-react"
@@ -54,7 +55,7 @@ const data = {
     {
       title: "Market",
       url: "/market",
-      icon: BookIcon
+      icon: GlobeIcon
     },
     // {
     //   title: "Simulations",
