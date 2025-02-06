@@ -7,6 +7,8 @@ import { GeistSans } from 'geist/font/sans';
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
 import { SearchContainer } from "@/components/search-container";
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
 
 export const metadata: Metadata = {
   title: "Vendere Labs",
@@ -18,11 +20,27 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Get the session server-side
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+
   return (
     <html lang="en" className="dark">
       <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
@@ -43,7 +61,7 @@ export default function RootLayout({
             </SidebarProvider>
           </AuthProvider>
         </Providers>
-        <SearchContainer />
+        {session && <SearchContainer />}
       </body>
     </html>
   );

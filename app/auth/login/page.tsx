@@ -5,7 +5,10 @@ import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, Ratio } from "lucide-react"
+import { Instrument_Serif } from 'next/font/google';
 import Link from "next/link"
+
+const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -35,7 +38,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-center w-12 h-12 mb-4">
             <Ratio className="h-8 w-8 bg-[#B1E116] text-black p-1.5 rounded-md" />
           </div>
-          <h2 className="text-2xl font-semibold">Welcome to Vendere Labs</h2>
+          <h2 className={`${instrumentSerif.className} text-4xl font-semibold`}>Welcome to Vendere Labs</h2>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
