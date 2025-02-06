@@ -18,7 +18,7 @@ async def brave_web_search(query: str, count: int = 5) -> BraveWebSearchResponse
     Performs web searches using Brave's Search API
 
     Args:
-        query: The search query string
+        query: The search query string p
         count: Number of results to return (default: 5)
 
     Returns:

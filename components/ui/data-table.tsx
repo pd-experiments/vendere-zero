@@ -30,7 +30,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Search, SlidersHorizontal, UploadCloud, Video, ImageIcon, Loader2, X } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, Video, ImageIcon, Loader2, X } from "lucide-react";
+import { FaGoogleDrive } from "react-icons/fa";
+import { FaMeta } from "react-icons/fa6";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -399,8 +401,9 @@ export function DataTable<TData, TValue>({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="h-8 flex items-center gap-2" variant="secondary">
-                    <UploadCloud className="h-4 w-4" />
-                    Upload
+                    <FaGoogleDrive className="h-4 w-4" />
+                    <FaMeta className="h-4 w-4" />
+                    Connect
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[160px]">

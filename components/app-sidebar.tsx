@@ -23,6 +23,9 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/lib/auth-context"
 import _ from "lodash"
+import { Instrument_Serif } from 'next/font/google';
+
+const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
 
 const data = {
   teams: [
@@ -46,6 +49,11 @@ const data = {
     {
       title: "Library",
       url: "/library",
+      icon: BookIcon
+    },
+    {
+      title: "Market",
+      url: "/market",
       icon: BookIcon
     },
     // {
@@ -87,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out">
             <Ratio className="h-6 w-6 bg-[#B1E116] text-black p-1 rounded-md transition-all duration-300 ease-in-out" />
           </div>
-          <span className="font-light text-lg text-[#B1E116] opacity-100 transition-all duration-300 ease-in-out group-data-[state=collapsed]:hidden">
+          <span className={`${instrumentSerif.className} font-light text-2xl text-[#B1E116] opacity-100 transition-all duration-300 ease-in-out group-data-[state=collapsed]:hidden`}>
             vendere
           </span>
         </div>

@@ -68,6 +68,60 @@ export type Database = {
         }
         Relationships: []
       }
+      citation_research: {
+        Row: {
+          buying_stage: string
+          competitor_brands: string[]
+          created_at: string | null
+          id: string
+          image_url: string
+          intent_summary: string
+          key_features: Json
+          keywords: string[]
+          market_segments: Json
+          price_points: Json
+          primary_intent: string
+          seasonal_factors: string[] | null
+          secondary_intents: string[]
+          site_url: string
+          user_id: string | null
+        }
+        Insert: {
+          buying_stage: string
+          competitor_brands: string[]
+          created_at?: string | null
+          id?: string
+          image_url: string
+          intent_summary: string
+          key_features: Json
+          keywords: string[]
+          market_segments: Json
+          price_points: Json
+          primary_intent: string
+          seasonal_factors?: string[] | null
+          secondary_intents: string[]
+          site_url: string
+          user_id?: string | null
+        }
+        Update: {
+          buying_stage?: string
+          competitor_brands?: string[]
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          intent_summary?: string
+          key_features?: Json
+          keywords?: string[]
+          market_segments?: Json
+          price_points?: Json
+          primary_intent?: string
+          seasonal_factors?: string[] | null
+          secondary_intents?: string[]
+          site_url?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       features: {
         Row: {
           ad_output_id: string
@@ -108,6 +162,7 @@ export type Database = {
       }
       google_image_ads: {
         Row: {
+          ad_description: string | null
           advertisement_url: string
           advertiser_name: string | null
           advertiser_url: string | null
@@ -117,6 +172,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ad_description?: string | null
           advertisement_url: string
           advertiser_name?: string | null
           advertiser_url?: string | null
@@ -126,6 +182,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ad_description?: string | null
           advertisement_url?: string
           advertiser_name?: string | null
           advertiser_url?: string | null
@@ -174,6 +231,93 @@ export type Database = {
           preview_url?: string | null
           sentiment_tones?: string[] | null
           type?: Database["public"]["Enums"]["library_item_type"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      market_research_v2: {
+        Row: {
+          buying_stage: string
+          citations: string[]
+          competitive_advantages: Json
+          created_at: string
+          id: string
+          image_url: string
+          intent_summary: string
+          key_features: Json
+          keywords: Array<{
+            keyword: string;
+            intent_reflected: string;
+            likelihood_score: number;
+          }>
+          new_headlines: Array<{
+            improved: string;
+            original: string;
+            improvements: string[];
+            expected_impact: string[];
+            target_audience: string[];
+            pain_point_addressed: string[];
+          }>
+          original_headlines: Json[] | null
+          pain_points: Json
+          perplexity_insights: string
+          target_audience: Json
+          user_id: string | null
+        }
+        Insert: {
+          buying_stage: string
+          citations: string[]
+          competitive_advantages: Json
+          created_at?: string
+          id?: string
+          image_url: string
+          intent_summary: string
+          key_features: Json
+          keywords?: Array<{
+            keyword: string;
+            intent_reflected: string;
+            likelihood_score: number;
+          }>
+          new_headlines?: Array<{
+            improved: string;
+            original: string;
+            improvements: string[];
+            expected_impact: string[];
+            target_audience: string[];
+            pain_point_addressed: string[];
+          }>
+          original_headlines?: Json[] | null
+          pain_points: Json
+          perplexity_insights: string
+          target_audience: Json
+          user_id?: string | null
+        }
+        Update: {
+          buying_stage?: string
+          citations?: string[]
+          competitive_advantages?: Json
+          created_at?: string
+          id?: string
+          image_url?: string
+          intent_summary?: string
+          key_features?: Json
+          keywords?: Array<{
+            keyword: string;
+            intent_reflected: string;
+            likelihood_score: number;
+          }>
+          new_headlines?: Array<{
+            improved: string;
+            original: string;
+            improvements: string[];
+            expected_impact: string[];
+            target_audience: string[];
+            pain_point_addressed: string[];
+          }>
+          original_headlines?: Json[] | null
+          pain_points?: Json
+          perplexity_insights?: string
+          target_audience?: Json
           user_id?: string | null
         }
         Relationships: []

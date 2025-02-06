@@ -42,7 +42,7 @@ export function SearchContainer() {
 
     return (
         <div className={cn(
-            "fixed bottom-6 right-6 z-50 transition-all duration-300 ease-in-out",
+            "fixed bottom-[70px] right-6 z-50 transition-all duration-300 ease-in-out",
             "bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/60",
             "rounded-lg shadow-lg border w-[400px]",
             !isExpanded && "h-[45px]"

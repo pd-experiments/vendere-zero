@@ -1,0 +1,17 @@
+aiohttp
+python-dotenv
+supabase
+openai
+pydantic
+selenium
+webdriver-manager
+tqdm
+matplotlib
+seaborn
+pandas
+numpy
+tenacity
+requests
+playwright
+pillow
+opencv-python 

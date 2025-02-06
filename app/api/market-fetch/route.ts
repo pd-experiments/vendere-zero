@@ -16,15 +16,15 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Use parallel requests for count and data
+        // Parallel requests for count and data
         const [countResult, dataResult] = await Promise.all([
             supabase
-                .from('library_items')
+                .from('citation_research')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', user.id),
             
             supabase
-                .from('library_items')
+                .from('citation_research')
                 .select('*')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
@@ -38,31 +38,24 @@ export async function GET(request: Request) {
 
         if (dataResult.error) {
             console.error("Data error:", dataResult.error);
-            return NextResponse.json({ error: "Error fetching library items" }, { status: 500 });
+            return NextResponse.json({ error: "Error fetching research data" }, { status: 500 });
         }
 
         const transformedItems = dataResult.data.map(item => ({
             id: item.id,
-            type: item.type,
-            name: item.name,
-            image_url: item.preview_url,
-            video: item.type === 'video' ? {
-                id: item.item_id,
-                name: item.name,
-                description: item.description,
-            } : undefined,
-            image_description: item.description || 'No description',
-            features: item.features || [],
-            sentiment_analysis: {
-                tones: item.sentiment_tones || [],
-                confidence: item.avg_sentiment_confidence || 0
-            },
-            created_at: item.created_at ?? (() => {
-                const daysAgo = Math.floor(Math.random() * (15 - 10 + 1)) + 10;
-                const date = new Date();
-                date.setDate(date.getDate() - daysAgo);
-                return date.toISOString();
-            })()
+            imageUrl: item.image_url,
+            siteUrl: item.site_url,
+            intentSummary: item.intent_summary,
+            primaryIntent: item.primary_intent,
+            secondaryIntents: item.secondary_intents,
+            buyingStage: item.buying_stage,
+            competitorBrands: item.competitor_brands,
+            keyFeatures: item.key_features,
+            keywords: item.keywords,
+            marketSegments: item.market_segments,
+            pricePoints: item.price_points,
+            seasonalFactors: item.seasonal_factors,
+            created_at: item.created_at || new Date().toISOString()
         }));
 
         return NextResponse.json({
@@ -72,8 +65,9 @@ export async function GET(request: Request) {
             pageSize,
             totalPages: Math.ceil((countResult.count || 0) / pageSize)
         });
+
     } catch (error) {
-        console.error("Error fetching library data:", error);
+        console.error("Error fetching citation research data:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

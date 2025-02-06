@@ -545,7 +545,7 @@ export default function Library() {
                             if (record.type === 'video') {
                                 router.push(`/library/video/${record.id}`);
                             } else {
-                                router.push(`/library/${record.id}`);
+                                router.push(`/library/${record.id}?image_url=${encodeURIComponent(record.image_url || '')}`);
                             }
                         }}
                         filters={[
