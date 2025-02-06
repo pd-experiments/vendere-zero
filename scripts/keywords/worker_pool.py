@@ -54,3 +54,7 @@ class WorkerPool:
         # Cancel all tasks
         for task in self.tasks:
             task.cancel()
+
+    def get_queue_size(self) -> int:
+        """Get total number of items remaining in all worker queues"""
+        return sum(worker.queue.qsize() for worker in self.workers)

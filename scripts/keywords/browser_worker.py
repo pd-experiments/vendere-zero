@@ -1,3 +1,5 @@
+from functools import lru_cache
+import time
 from playwright.async_api import Browser, async_playwright
 import asyncio
 from typing import Optional, Callable, Any, Union, Awaitable
@@ -27,10 +29,12 @@ class BrowserWorker:
         self.browser = await p.chromium.launch()
         print(f"Browser {self.worker_id} initialized")
 
+    @lru_cache(maxsize=1000)
     async def extract_content(self, url: str) -> Optional[str]:
         if not self.browser:
             raise ValueError("Browser not initialized")
         page = await self.browser.new_page()
+        start_time = time.time()
         try:
             await page.goto(url, wait_until="load")
             # Remove script tags, style tags, and nav elements
@@ -53,24 +57,28 @@ class BrowserWorker:
             print(f"Worker {self.worker_id} error extracting content from {url}: {e}")
             return None
         finally:
+            end_time = time.time()
+            print(
+                f"Worker {self.worker_id} took {end_time - start_time} seconds to extract content from {url}"
+            )
             await page.close()
 
     async def process_queue(self):
         while self.running:
             try:
                 work_item = await self.queue.get()
-                print(f"Worker {self.worker_id} processing {work_item.url}")
+                # print(f"Worker {self.worker_id} processing {work_item.url}")
                 content = await self.extract_content(work_item.url)
-                print(f"Worker {self.worker_id} extracted content")
+                # print(f"Worker {self.worker_id} extracted content")
                 if content:
                     if asyncio.iscoroutinefunction(work_item.callback):
                         await work_item.callback(content, work_item.context)
-                        print(
-                            f"Worker {self.worker_id} async processed {work_item.url}"
-                        )
+                        # print(
+                        #     f"Worker {self.worker_id} async processed {work_item.url}"
+                        # )
                     else:
                         work_item.callback(content, work_item.context)
-                        print(f"Worker {self.worker_id} sync processed {work_item.url}")
+                        # print(f"Worker {self.worker_id} sync processed {work_item.url}")
                 else:
                     print(f"Worker {self.worker_id} no content for {work_item.url}")
                 self.queue.task_done()
