@@ -111,3 +111,52 @@ class AdStructuredOutput(BaseModel):
     id: UUID4 = Field(default_factory=UUID4)
     image_url: str
     image_description: str
+
+
+class Keyword(BaseModel):
+    keyword: str = Field(
+        description="The keyword that is being targeted. This is a single word or phrase that captures the main idea of the keyword."
+    )
+    intent_reflected: str = Field(
+        description="The intent of the keyword. This is a single word or phrase that captures the main idea of the keyword."
+    )
+    likelihood_score: float = Field(
+        description="A score between 0 and 1 indicating the likelihood of the keyword being used in a search query"
+    )
+
+
+class Keywords(BaseModel):
+    keywords: List[Keyword]
+
+
+class OriginalImageHeadline(BaseModel):
+    headline_text: str = Field(description="The original headline.")
+    headline_type: str = Field(description="The type of headline.")
+    visual_context: str = Field(description="The visual context of the headline.")
+
+
+class OriginalImageHeadlines(BaseModel):
+    headlines: list[OriginalImageHeadline] = Field(
+        description="A list of text (e.g. headlines)."
+    )
+
+
+class ImprovedHeadline(BaseModel):
+    original: str = Field(description="The original headline.")
+    improved: str = Field(description="The improved headline.")
+    improvements: list[str] = Field(description="A list of text (e.g. improvements).")
+    target_audience: list[str] = Field(
+        description="A list of text (e.g. target audience)."
+    )
+    pain_point_addressed: list[str] = Field(
+        description="A list of text (e.g. pain point addressed)."
+    )
+    expected_impact: list[str] = Field(
+        description="A list of text (e.g. expected impact)."
+    )
+
+
+class ImprovedHeadlines(BaseModel):
+    headlines: list[ImprovedHeadline] = Field(
+        description="A list of text (e.g. improved headlines)."
+    )

@@ -1,10 +1,10 @@
 from functools import lru_cache
 import time
-from playwright.async_api import Browser, async_playwright
-import asyncio
+import httpx
 from typing import Optional, Callable, Any, Union, Awaitable
-import os
+import asyncio
 from dataclasses import dataclass
+from bs4 import BeautifulSoup
 
 
 @dataclass
@@ -17,68 +17,76 @@ class WorkItem:
 class BrowserWorker:
     def __init__(self, worker_id: int):
         self.worker_id = worker_id
-        self.browser: Optional[Browser] = None
         self.queue: asyncio.Queue[WorkItem] = asyncio.Queue()
         self.running = True
+        self.client = httpx.AsyncClient(
+            timeout=10.0,
+            follow_redirects=True,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            },
+        )
 
     async def initialize(self):
-        p = await async_playwright().start()
-        # self.browser = await p.chromium.connect_over_cdp(
-        #     f"wss://connect.browserbase.com?apiKey={os.getenv('BROWSERBASE_API_KEY')}"
-        # )
-        self.browser = await p.chromium.launch()
-        print(f"Browser {self.worker_id} initialized")
+        print(f"Worker {self.worker_id} initialized")
 
     @lru_cache(maxsize=1000)
     async def extract_content(self, url: str) -> Optional[str]:
-        if not self.browser:
-            raise ValueError("Browser not initialized")
-        page = await self.browser.new_page()
         start_time = time.time()
+        retries = 2
         try:
-            await page.goto(url, wait_until="load")
-            # Remove script tags, style tags, and nav elements
-            await page.evaluate(
-                """() => {
-                const elements = document.querySelectorAll('script, style, nav, footer, header');
-                elements.forEach(el => el.remove());
-            }"""
-            )
+            response = await self.client.get(url)
+            response.raise_for_status()
 
-            # Get main content
-            content = await page.evaluate(
-                """() => {
-                const main = document.querySelector('main') || document.querySelector('article') || document.body;
-                return main.innerText;
-            }"""
-            )
-            return content
+            for attempt in range(retries):
+                # Parse with BeautifulSoup
+                soup = BeautifulSoup(response.text, "html.parser")
+
+                # Remove unwanted elements
+                for tag in soup(
+                    ["script", "style", "nav", "footer", "header", "iframe", "noscript"]
+                ):
+                    tag.decompose()
+
+                # Get main content
+                main = soup.find("main") or soup.find("article") or soup.find("body")
+                if not main:
+                    return None
+
+                # Extract text content
+                text = " ".join(main.stripped_strings)
+                if len(text.strip()) > 100:  # Check if we got meaningful content
+                    return text
+
+                # If content is too short, wait and retry
+                if attempt < retries - 1:
+                    await asyncio.sleep(1)
+                    response = await self.client.get(url)
+                    response.raise_for_status()
+
+            return None  # Return None if we couldn't get meaningful content
+
         except Exception as e:
             print(f"Worker {self.worker_id} error extracting content from {url}: {e}")
             return None
+
         finally:
-            end_time = time.time()
-            print(
-                f"Worker {self.worker_id} took {end_time - start_time} seconds to extract content from {url}"
-            )
-            await page.close()
+            duration = time.time() - start_time
+            if duration > 3:
+                print(
+                    f"Warning: Worker {self.worker_id} took {duration:.2f}s to extract content from {url}"
+                )
 
     async def process_queue(self):
         while self.running:
             try:
                 work_item = await self.queue.get()
-                # print(f"Worker {self.worker_id} processing {work_item.url}")
                 content = await self.extract_content(work_item.url)
-                # print(f"Worker {self.worker_id} extracted content")
                 if content:
                     if asyncio.iscoroutinefunction(work_item.callback):
                         await work_item.callback(content, work_item.context)
-                        # print(
-                        #     f"Worker {self.worker_id} async processed {work_item.url}"
-                        # )
                     else:
                         work_item.callback(content, work_item.context)
-                        # print(f"Worker {self.worker_id} sync processed {work_item.url}")
                 else:
                     print(f"Worker {self.worker_id} no content for {work_item.url}")
                 self.queue.task_done()
@@ -87,5 +95,4 @@ class BrowserWorker:
 
     async def stop(self):
         self.running = False
-        if self.browser:
-            await self.browser.close()
+        await self.client.aclose()
