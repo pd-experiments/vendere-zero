@@ -125,10 +125,13 @@ export function SearchContainer() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-sm font-medium truncate">
-                                                        {result.name || 'Untitled'}
+                                                        {result.name || result.sentiment_analysis?.tones?.[0]
+                                                            ? `Untitled ('${result.sentiment_analysis.tones[0]}')`
+                                                            : "Untitled"
+                                                        }
                                                     </span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {Math.round(result.similarity * 100)}% match
+                                                    <span className="text-xs rounded-md bg-muted px-1 py-0.5 text-muted-foreground">
+                                                        {Math.round(result.similarity * 100)}%
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground truncate">
