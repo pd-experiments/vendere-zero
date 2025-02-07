@@ -572,7 +572,11 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={cn(
+          sidebarMenuButtonVariants({ variant, size }),
+          isActive && "bg-transparent border-dashed border-[1px] border-sidebar-accent-foreground text-sidebar-accent-foreground",
+          className
+        )}
         {...props}
       />
     )

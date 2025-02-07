@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
+import Link from 'next/link'
 
 import {
   Collapsible,
@@ -43,8 +44,9 @@ export function NavMain({ items }: { items: NavItem[] }) {
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton 
+                    <SidebarMenuButton
                       tooltip={item.title}
+                      isActive={item.isActive}
                       className="text-muted-foreground/70 hover:text-foreground hover:bg-muted/30 transition-colors duration-200"
                     >
                       {item.icon && <item.icon className="text-muted-foreground/60" />}
@@ -56,13 +58,13 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     <SidebarMenuSub>
                       {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton 
+                          <SidebarMenuSubButton
                             asChild
                             className="text-muted-foreground/60 hover:text-foreground hover:bg-muted/20 transition-colors duration-200"
                           >
-                            <a href={subItem.url}>
+                            <Link href={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
@@ -75,15 +77,16 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton 
-                asChild 
+              <SidebarMenuButton
+                asChild
                 tooltip={item.title}
+                isActive={item.isActive}
                 className="text-muted-foreground/70 hover:text-foreground hover:bg-muted/30 transition-colors duration-200"
               >
-                <a href={item.url}>
+                <Link href={item.url}>
                   {item.icon && <item.icon className="text-muted-foreground/60" />}
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )

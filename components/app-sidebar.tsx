@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/lib/auth-context"
 import _ from "lodash"
 import { Instrument_Serif } from 'next/font/google';
+import { usePathname } from 'next/navigation'
 
 const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
 
@@ -88,6 +89,14 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
+  const pathname = usePathname()
+
+  console.log('Current pathname:', pathname)
+  const items = data.navMain.map(item => ({
+    ...item,
+    isActive: pathname === item.url
+  }))
+  console.log('Nav items with active state:', items)
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -103,7 +112,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Separator className="mt-2 opacity-50" />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={items} />
       </SidebarContent>
       <SidebarFooter>
         <div className="mt-auto px-3 py-1 group-data-[state=collapsed]:hidden">
