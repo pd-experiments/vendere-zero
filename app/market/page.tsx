@@ -46,13 +46,22 @@ type PaginatedResponse = {
     totalPages: number;
 };
 
+const faviconCache: Record<string, string> = {};
+
 const getSiteInfo = (url: string) => {
     try {
         const urlObj = new URL(url);
+        const domain = urlObj.hostname;
+
+        // Use cached favicon URL if available
+        if (!faviconCache[domain]) {
+            faviconCache[domain] = `https://${domain}/favicon.ico`;
+        }
+
         return {
-            domain: urlObj.hostname,
+            domain: domain,
             path: urlObj.pathname + urlObj.search,
-            faviconUrl: `https://${urlObj.hostname}/favicon.ico`
+            faviconUrl: faviconCache[domain]
         };
     } catch (e) {
         return {
@@ -113,18 +122,25 @@ export default function Market() {
             header: "Source",
             cell: ({ row }) => {
                 const siteInfo = getSiteInfo(row.original.siteUrl);
+                const [imgSrc, setImgSrc] = useState(siteInfo.faviconUrl);
+
+                // Handle favicon error only once
+                const handleError = () => {
+                    if (imgSrc !== '/placeholder-favicon.png') {
+                        setImgSrc('/placeholder-favicon.png');
+                        faviconCache[siteInfo.domain] = '/placeholder-favicon.png';
+                    }
+                };
+
                 return (
                     <div className="py-1">
                         <div className="flex items-center gap-2">
                             <div className="relative h-4 w-4 flex-none">
                                 <img
-                                    src={siteInfo.faviconUrl}
+                                    src={imgSrc}
                                     alt="Site Icon"
                                     className="rounded-full w-4 h-4"
-                                    onError={(e) => {
-                                        e.currentTarget.onerror = null;
-                                        e.currentTarget.src = '/placeholder-favicon.png';
-                                    }}
+                                    onError={handleError}
                                 />
                             </div>
                             <span className="text-xs text-muted-foreground truncate max-w-[200px]">
