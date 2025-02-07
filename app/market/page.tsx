@@ -72,6 +72,35 @@ const getSiteInfo = (url: string) => {
     }
 };
 
+const FaviconDisplay = ({ siteInfo }: { siteInfo: ReturnType<typeof getSiteInfo> }) => {
+    const [imgSrc, setImgSrc] = useState(siteInfo.faviconUrl);
+
+    const handleError = () => {
+        if (imgSrc !== '/placeholder-favicon.png') {
+            setImgSrc('/placeholder-favicon.png');
+            faviconCache[siteInfo.domain] = '/placeholder-favicon.png';
+        }
+    };
+
+    return (
+        <div className="py-1">
+            <div className="flex items-center gap-2">
+                <div className="relative h-4 w-4 flex-none">
+                    <img
+                        src={imgSrc}
+                        alt="Site Icon"
+                        className="rounded-full w-4 h-4"
+                        onError={handleError}
+                    />
+                </div>
+                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                    {siteInfo.domain}
+                </span>
+            </div>
+        </div>
+    );
+};
+
 export default function Market() {
     const router = useRouter();
     const [records, setRecords] = useState<MarketItem[]>([]);
@@ -122,33 +151,7 @@ export default function Market() {
             header: "Source",
             cell: ({ row }) => {
                 const siteInfo = getSiteInfo(row.original.siteUrl);
-                const [imgSrc, setImgSrc] = useState(siteInfo.faviconUrl);
-
-                // Handle favicon error only once
-                const handleError = () => {
-                    if (imgSrc !== '/placeholder-favicon.png') {
-                        setImgSrc('/placeholder-favicon.png');
-                        faviconCache[siteInfo.domain] = '/placeholder-favicon.png';
-                    }
-                };
-
-                return (
-                    <div className="py-1">
-                        <div className="flex items-center gap-2">
-                            <div className="relative h-4 w-4 flex-none">
-                                <img
-                                    src={imgSrc}
-                                    alt="Site Icon"
-                                    className="rounded-full w-4 h-4"
-                                    onError={handleError}
-                                />
-                            </div>
-                            <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                {siteInfo.domain}
-                            </span>
-                        </div>
-                    </div>
-                );
+                return <FaviconDisplay siteInfo={siteInfo} />;
             },
         },
         {
