@@ -244,7 +244,11 @@ export default function AdDetail({
 
         const record = {
             id: adOutput.id,
-            name: adOutput.name ?? 'Untitled',
+            name: adOutput.name ?? (
+                features?.[0]?.keyword && sentiment?.tone
+                    ? `Untitled ('${features[0].keyword}' + '${sentiment.tone}')`
+                    : "Untitled"
+            ),            
             image_url: adOutput.image_url,
             image_description: adOutput.image_description,
             created_at: new Date().toISOString(),

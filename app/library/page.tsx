@@ -310,17 +310,17 @@ export default function Library() {
                 </div>
             ),
         },
-        {
-            accessorKey: "name",
-            header: "Name",
-            cell: ({ row }) => (
-                <div className="py-1">
-                    <span className="text-xs font-medium truncate block max-w-[200px]">
-                        {row.original.name ?? 'Untitled'}
-                    </span>
-                </div>
-            ),
-        },
+        // {
+        //     accessorKey: "name",
+        //     header: "Name",
+        //     cell: ({ row }) => (
+        //         <div className="py-1">
+        //             <span className="text-xs font-medium truncate block max-w-[200px]">
+        //                 {row.original.name ?? 'Untitled'}
+        //             </span>
+        //         </div>
+        //     ),
+        // },
         {
             accessorKey: "preview",
             header: "Preview",
