@@ -288,16 +288,25 @@ export default function MarketDetail({ params }: { params: { id: string } }) {
                     {/* Right Column */}
                     <div className="space-y-4">
                         <div className="bg-card border">
+                            <div className="px-4 py-2 border-b bg-muted/50">
+                                <h2 className="font-medium">Profile</h2>
+                            </div>
                             <Tabs defaultValue="segments" className="w-full">
                                 <div className="px-4 pt-4">
-                                    <TabsList className="w-full justify-start">
-                                        <TabsTrigger value="segments">Market Segments</TabsTrigger>
-                                        <TabsTrigger value="features">Key Features</TabsTrigger>
-                                        <TabsTrigger value="competition">Competition</TabsTrigger>
+                                    <TabsList className="mb-4 w-full justify-start h-auto gap-2 bg-transparent p-0 flex-wrap shrink-0">
+                                        <TabsTrigger value="segments" className="data-[state=active]:bg-primary/10 px-3 py-1.5 text-xs">
+                                            Market Segments
+                                        </TabsTrigger>
+                                        <TabsTrigger value="features" className="data-[state=active]:bg-primary/10 px-3 py-1.5 text-xs">
+                                            Key Features
+                                        </TabsTrigger>
+                                        <TabsTrigger value="competition" className="data-[state=active]:bg-primary/10 px-3 py-1.5 text-xs">
+                                            Competition
+                                        </TabsTrigger>
                                     </TabsList>
                                 </div>
 
-                                <TabsContent value="segments" className="p-4 space-y-6">
+                                <TabsContent value="segments" className="px-4 space-y-6">
                                     {record.marketSegments.map((segment, index) => (
                                         <div key={index} className="border bg-muted/50 p-4">
                                             <h3 className="text-sm font-medium mb-4">{segment.name}</h3>
@@ -341,7 +350,7 @@ export default function MarketDetail({ params }: { params: { id: string } }) {
                                 </TabsContent>
 
                                 {record.keyFeatures.length > 0 && (
-                                    <TabsContent value="features" className="p-4">
+                                    <TabsContent value="features" className="px-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {record.keyFeatures.map((feature, index) => (
                                                 <div key={index} className="border bg-muted/50 p-3 space-y-2">
@@ -365,9 +374,9 @@ export default function MarketDetail({ params }: { params: { id: string } }) {
                                 )}
 
                                 {(record.competitorBrands.length > 0 || record.seasonalFactors.length > 0) && (
-                                    <TabsContent value="competition" className="p-4 space-y-4">
+                                    <TabsContent value="competition" className="px-4 pb-4 space-y-4">
                                         {record.competitorBrands.length > 0 && (
-                                            <div>
+                                            <div className="border bg-muted/50 p-3 space-y-2">
                                                 <h3 className="text-sm font-medium mb-3">Competitor Brands</h3>
                                                 <div className="flex flex-wrap gap-2">
                                                     {record.competitorBrands.map((brand, index) => (
@@ -379,7 +388,7 @@ export default function MarketDetail({ params }: { params: { id: string } }) {
                                             </div>
                                         )}
                                         {record.seasonalFactors.length > 0 && (
-                                            <div>
+                                            <div className="border bg-muted/50 p-3 space-y-2">
                                                 <h3 className="text-sm font-medium mb-3">Seasonal Factors</h3>
                                                 <div className="flex flex-wrap gap-2">
                                                     {record.seasonalFactors.map((factor, index) => (

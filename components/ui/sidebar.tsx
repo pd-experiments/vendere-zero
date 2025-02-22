@@ -57,7 +57,7 @@ const SidebarProvider = React.forwardRef<
 >(
   (
     {
-      defaultOpen = true,
+      defaultOpen = false,
       open: openProp,
       onOpenChange: setOpenProp,
       className,
@@ -70,15 +70,8 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    // Get initial state from localStorage if available
-    const getInitialState = () => {
-      if (typeof window === 'undefined') return defaultOpen
-      const stored = localStorage.getItem(SIDEBAR_COOKIE_NAME)
-      return stored ? stored === 'true' : defaultOpen
-    }
-
     // This is the internal state of the sidebar
-    const [_open, _setOpen] = React.useState(getInitialState)
+    const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -90,10 +83,8 @@ const SidebarProvider = React.forwardRef<
 
         _setOpen(newValue)
 
-        // Store in localStorage instead of cookie
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(SIDEBAR_COOKIE_NAME, String(newValue))
-        }
+        // Store in cookie instead of localStorage
+        document.cookie = `${SIDEBAR_COOKIE_NAME}=${String(newValue)}; path=/; max-age=31536000`
       },
       [setOpenProp, open]
     )
@@ -273,24 +264,33 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
 
   return (
-    <Button
-      ref={ref}
-      data-sidebar="trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("h-7 w-7", className)}
-      onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
-      }}
-      {...props}
-    >
-      <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            ref={ref}
+            data-sidebar="trigger"
+            variant="ghost"
+            size="icon"
+            className={cn("h-7 w-7", className)}
+            onClick={(event) => {
+              onClick?.(event)
+              toggleSidebar()
+            }}
+            {...props}
+          >
+            <PanelLeft />
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          {state === "expanded" ? "Collapse Sidebar" : "Expand Sidebar"}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 })
 SidebarTrigger.displayName = "SidebarTrigger"
@@ -574,7 +574,7 @@ const SidebarMenuButton = React.forwardRef<
         data-active={isActive}
         className={cn(
           sidebarMenuButtonVariants({ variant, size }),
-          isActive && "bg-transparent border-dashed border-[1px] border-sidebar-accent-foreground text-sidebar-accent-foreground",
+          isActive && "bg-transparent border-none border-sidebar-accent-foreground text-sidebar-accent-foreground",
           className
         )}
         {...props}

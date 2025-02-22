@@ -20,6 +20,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const SIDEBAR_STATE_COOKIE = "sidebar:state";
+
 export default async function RootLayout({
   children,
 }: {
@@ -41,12 +43,14 @@ export default async function RootLayout({
 
   const { data: { session } } = await supabase.auth.getSession();
 
+  const sidebarState = cookieStore.get(SIDEBAR_STATE_COOKIE)?.value === 'true';
+
   return (
     <html lang="en" className="dark">
       <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
         <Providers>
           <AuthProvider>
-            <SidebarProvider>
+            <SidebarProvider defaultOpen={sidebarState}>
               <div className="flex h-screen w-[100%]">
                 <AppSidebar />
                 <div className="flex flex-col flex-1 overflow-hidden w-[100%]">
