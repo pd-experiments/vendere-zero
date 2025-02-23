@@ -1,16 +1,24 @@
 from llama_index.core.storage import StorageContext
 from llama_index.core import VectorStoreIndex, Document
 from llama_index.vector_stores.supabase import SupabaseVectorStore
-from supabase.client import create_client, ClientOptions
+from supabase.client import Client, create_client, ClientOptions
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import json
-from typing import List
 import os
-from llama_index.llms.groq import Groq
+from typing import List
+
+# from llama_index.llms.groq import Groq
+from pathlib import Path
+from dotenv import load_dotenv
+from llama_index.core import PromptTemplate
+# from llama_index.core.query_engine import CitationQueryEngine
 
 app = FastAPI(title="Knowledge Base API")
+
+env_path = Path(__file__).parents[2] / ".env.local"
+load_dotenv(env_path)
 
 
 class QueryRequest(BaseModel):
@@ -32,12 +40,12 @@ class KnowledgeBase:
         # Initialize the index
         self._initialize_index()
 
-    def _fetch_all_data(self) -> List[Document]:
+    def _fetch_all_data(self, supabase: Client) -> List[Document]:
         """Fetch all relevant data from Supabase and convert to Documents"""
         documents = []
 
         # Fetch ad library data
-        ad_data = self.supabase.table("ad_structured_output").select("*").execute().data
+        ad_data = supabase.table("ad_structured_output").select("*").execute().data
         for ad in ad_data:
             doc = Document(
                 text=f"Ad Description: {ad['image_description']}\nImage URL: {ad['image_url']}",
@@ -46,9 +54,7 @@ class KnowledgeBase:
             documents.append(doc)
 
         # Fetch market research data
-        research_data = (
-            self.supabase.table("market_research_v2").select("*").execute().data
-        )
+        research_data = supabase.table("market_research_v2").select("*").execute().data
         for research in research_data:
             research_text = f"""
             Intent Summary: {research["intent_summary"]}
@@ -69,9 +75,7 @@ class KnowledgeBase:
             documents.append(doc)
 
         # Fetch citation research
-        citation_data = (
-            self.supabase.table("citation_research").select("*").execute().data
-        )
+        citation_data = supabase.table("citation_research").select("*").execute().data
         for citation in citation_data:
             citation_text = f"""
             Intent Summary: {citation["intent_summary"]}
@@ -97,37 +101,62 @@ class KnowledgeBase:
 
     def _initialize_index(self):
         """Initialize the vector store and index"""
-        documents = self._fetch_all_data()
+        documents = self._fetch_all_data(self.supabase)
         vector_store = SupabaseVectorStore(
             postgres_connection_string=os.getenv("DB_CONNECTION"),
             collection_name="library_items",
         )
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-        llm = Groq(
-            model="llama-3.3-70b-versatile",
-            temperature=0.1,
-            max_tokens=512,
-            api_key=os.getenv("GROQ_API_KEY"),
+        qa_template = PromptTemplate(
+            """You are a specialized AI assistant focused on analyzing marketing and competitive data. 
+            Your responses should be based solely on the provided database information about ads, market research, and competitor citations.
+            
+            Context information is below:
+            ---------------------
+            {context_str}
+            ---------------------
+
+            Using only this context, please answer the question: {query_str}
+            
+            Provide specific examples and references from the data when possible. If information isn't available in the context, acknowledge that limitation."""
         )
 
         self.index = VectorStoreIndex.from_documents(
-            documents, storage_context=storage_context, llm=llm
+            documents, storage_context=storage_context
         )
-        self.query_engine = self.index.as_query_engine()
 
-    def query(self, query: str) -> str:
+        self.query_engine = self.index.as_query_engine(
+            similarity_top_k=50,
+            response_mode="refine",
+            text_qa_template=qa_template,
+            temperature=0.1,
+        )
+
+    def query(self, query: str) -> dict:
         """
-        Query the knowledge base and return the response
+        Query the knowledge base and return the response with citations
 
         Args:
             query: The question to ask the knowledge base
 
         Returns:
-            str: The response from the knowledge base
+            dict: Dictionary containing response text and source information
         """
         response = self.query_engine.query(query)
-        return str(response)
+
+        sources = []
+        for source_node in response.source_nodes:
+            source = {
+                "text": source_node.node.text,
+                "score": float(
+                    source_node.score
+                ),
+                "extra_info": source_node.node.extra_info,
+            }
+            sources.append(source)
+
+        return {"response": str(response), "sources": sources}
 
 
 # Create a global instance of KnowledgeBase
@@ -151,7 +180,7 @@ async def query_endpoint(request: QueryRequest):
 
     try:
         response = kb.query(request.query)
-        return {"response": response}
+        return response 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
