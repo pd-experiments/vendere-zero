@@ -9,9 +9,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from supabase import create_client, ClientOptions
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from contextlib import asynccontextmanager
 import logging
 import os
 from pathlib import Path
@@ -425,58 +423,58 @@ class MarketResearchAnalyzer:
         ]
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Lifespan context manager for FastAPI"""
-    # Initialize on startup
-    global market_analyzer
-    market_analyzer = MarketResearchAnalyzer()
-    yield
-    # Clean up on shutdown
-    market_analyzer = None
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     """Lifespan context manager for FastAPI"""
+#     # Initialize on startup
+#     global market_analyzer
+#     market_analyzer = MarketResearchAnalyzer()
+#     yield
+#     # Clean up on shutdown
+#     market_analyzer = None
 
 
-app = FastAPI(title="Market Research Analysis API", lifespan=lifespan)
+# app = FastAPI(title="Market Research Analysis API", lifespan=lifespan)
 
-# Global instance
-market_analyzer = None
-
-
-@app.post("/generate-market-insight", response_model=MarketInsightResponse)
-async def generate_market_insight_endpoint(request: MarketInsightRequest):
-    """Generate market insight based on request parameters"""
-    try:
-        if not market_analyzer:
-            raise HTTPException(
-                status_code=500, detail="Market analyzer not initialized"
-            )
-
-        logger.info(f"Received market insight request for user {request.user_id}")
-
-        insight = await market_analyzer.generate_market_insight(
-            user_id=request.user_id, filters=request.filters
-        )
-
-        logger.info(f"Successfully generated market insight for user {request.user_id}")
-        return insight
-
-    except Exception as e:
-        logger.error(f"Error in generate_market_insight_endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+# # Global instance
+# market_analyzer = None
 
 
-@app.get("/health")
-async def health_check():
-    """Simple health check endpoint"""
-    return {"status": "healthy"}
+# @app.post("/generate-market-insight", response_model=MarketInsightResponse)
+# async def generate_market_insight_endpoint(request: MarketInsightRequest):
+#     """Generate market insight based on request parameters"""
+#     try:
+#         if not market_analyzer:
+#             raise HTTPException(
+#                 status_code=500, detail="Market analyzer not initialized"
+#             )
+
+#         logger.info(f"Received market insight request for user {request.user_id}")
+
+#         insight = await market_analyzer.generate_market_insight(
+#             user_id=request.user_id, filters=request.filters
+#         )
+
+#         logger.info(f"Successfully generated market insight for user {request.user_id}")
+#         return insight
+
+#     except Exception as e:
+#         logger.error(f"Error in generate_market_insight_endpoint: {str(e)}")
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
-def main():
-    """Run the FastAPI server"""
-    import uvicorn
+# @app.get("/health")
+# async def health_check():
+#     """Simple health check endpoint"""
+#     return {"status": "healthy"}
 
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+
+# def main():
+#     """Run the FastAPI server"""
+#     import uvicorn
+
+#     uvicorn.run(app, host="0.0.0.0", port=8002)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

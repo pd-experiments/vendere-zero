@@ -305,58 +305,58 @@ class VariantGenerator:
             raise
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Lifespan context manager for FastAPI"""
-    # Initialize on startup
-    global variant_generator
-    variant_generator = VariantGenerator()
-    yield
-    # Clean up on shutdown
-    variant_generator = None
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     """Lifespan context manager for FastAPI"""
+#     # Initialize on startup
+#     global variant_generator
+#     variant_generator = VariantGenerator()
+#     yield
+#     # Clean up on shutdown
+#     variant_generator = None
 
 
-app = FastAPI(title="Variant Generation API", lifespan=lifespan)
+# app = FastAPI(title="Variant Generation API", lifespan=lifespan)
 
-# Global instance
-variant_generator = None
-
-
-@app.post("/generate-variants", response_model=List[GeneratedVariant])
-async def generate_variants_endpoint(input_data: VariantInput):
-    """Generate variants based on input keywords, elements, and markets"""
-    try:
-        if not variant_generator:
-            raise HTTPException(
-                status_code=500, detail="Variant generator not initialized"
-            )
-
-        logger.info(
-            f"Received variant generation request with {len(input_data.keywords)} keywords"
-        )
-
-        variants = await variant_generator.generate_variants(input_data)
-
-        logger.info(f"Returning {len(variants)} generated variants")
-        return variants
-
-    except Exception as e:
-        logger.error(f"Error in generate_variants_endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+# # Global instance
+# variant_generator = None
 
 
-@app.get("/health")
-async def health_check():
-    """Simple health check endpoint"""
-    return {"status": "healthy"}
+# @app.post("/generate-variants", response_model=List[GeneratedVariant])
+# async def generate_variants_endpoint(input_data: VariantInput):
+#     """Generate variants based on input keywords, elements, and markets"""
+#     try:
+#         if not variant_generator:
+#             raise HTTPException(
+#                 status_code=500, detail="Variant generator not initialized"
+#             )
+
+#         logger.info(
+#             f"Received variant generation request with {len(input_data.keywords)} keywords"
+#         )
+
+#         variants = await variant_generator.generate_variants(input_data)
+
+#         logger.info(f"Returning {len(variants)} generated variants")
+#         return variants
+
+#     except Exception as e:
+#         logger.error(f"Error in generate_variants_endpoint: {str(e)}")
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
-def main():
-    """Run the FastAPI server"""
-    import uvicorn
+# @app.get("/health")
+# async def health_check():
+#     """Simple health check endpoint"""
+#     return {"status": "healthy"}
 
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+
+# def main():
+#     """Run the FastAPI server"""
+#     import uvicorn
+
+#     uvicorn.run(app, host="0.0.0.0", port=8001)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

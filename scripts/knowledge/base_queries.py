@@ -2,9 +2,8 @@ from llama_index.core.storage import StorageContext
 from llama_index.core import VectorStoreIndex, Document
 from llama_index.vector_stores.supabase import SupabaseVectorStore
 from supabase.client import Client, create_client, ClientOptions
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
-import uvicorn
 import json
 import os
 import asyncio
@@ -545,34 +544,34 @@ class KnowledgeBase:
 
 
 # Create a global instance of KnowledgeBase
-kb = None
+# kb = None
 
 
-@app.post("/query")
-async def query_endpoint(request: QueryRequest):
-    """Enhanced endpoint that supports both simple queries and detailed reports"""
-    if not kb:
-        raise HTTPException(status_code=500, detail="Knowledge base not initialized")
+# @app.post("/query")
+# async def query_endpoint(request: QueryRequest):
+#     """Enhanced endpoint that supports both simple queries and detailed reports"""
+#     if not kb:
+#         raise HTTPException(status_code=500, detail="Knowledge base not initialized")
 
-    try:
-        response = await kb.query(request.query, request.deep_research)
-        return response
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/health")
-async def health_check():
-    """
-    Simple health check endpoint
-    """
-    return {"status": "healthy"}
+#     try:
+#         response = await kb.query(request.query, request.deep_research)
+#         return response
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
-def main():
-    """Run the FastAPI server"""
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# @app.get("/health")
+# async def health_check():
+#     """
+#     Simple health check endpoint
+#     """
+#     return {"status": "healthy"}
 
 
-if __name__ == "__main__":
-    main()
+# def main():
+#     """Run the FastAPI server"""
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+# if __name__ == "__main__":
+#     main()
