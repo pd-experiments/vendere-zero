@@ -42,6 +42,7 @@ FORMAT_STR = """The output should be formatted as a JSON object with the followi
 class KeywordData(BaseModel):
     """Represents a keyword with its metrics"""
 
+    # TODO: pick the right fields here, supposedly this is what semrush returns
     term: str = Field(description="The keyword phrase")
     volume: int = Field(description="Monthly search volume")
     intent: str = Field(description="Search intent classification")
