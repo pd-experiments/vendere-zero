@@ -9,13 +9,13 @@ from dotenv import load_dotenv
 from typing import List
 import os
 
-from scripts.knowledge.base_queries import KnowledgeBase, QueryRequest
-from scripts.knowledge.market_view import (
+from base_queries import KnowledgeBase, QueryRequest
+from market_view import (
     MarketResearchAnalyzer,
     MarketInsightRequest,
     MarketInsightResponse,
 )
-from scripts.knowledge.variants import VariantGenerator, VariantInput, GeneratedVariant
+from variants import VariantGenerator, VariantInput, GeneratedVariant
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
