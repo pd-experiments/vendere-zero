@@ -3,6 +3,8 @@ uvicorn
 python-dotenv
 supabase
 llama-index
+llama-index-vector-stores-supabase
+llama-index-llms-openai
 openai
 pydantic
 python-multipart
