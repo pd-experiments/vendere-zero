@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-dotenv
+supabase
+llama-index
+openai
+pydantic
