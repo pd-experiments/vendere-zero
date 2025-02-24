@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 import uvicorn
@@ -5,14 +7,15 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from typing import List
+import os
 
-from .base_queries import KnowledgeBase, QueryRequest
-from .market_view import (
+from scripts.knowledge.base_queries import KnowledgeBase, QueryRequest
+from scripts.knowledge.market_view import (
     MarketResearchAnalyzer,
     MarketInsightRequest,
     MarketInsightResponse,
 )
-from .variants import VariantGenerator, VariantInput, GeneratedVariant
+from scripts.knowledge.variants import VariantGenerator, VariantInput, GeneratedVariant
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -127,7 +130,8 @@ async def health_check():
 
 def main():
     """Run the FastAPI server"""
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", "8000"))  # Heroku sets PORT environment variable
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":

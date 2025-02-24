@@ -22,7 +22,7 @@ from llama_index.core import PromptTemplate
 from llama_index.program.openai import OpenAIPydanticProgram
 import sys
 
-sys.path.append(str(Path(__file__).parents[2])) 
+sys.path.append(str(Path(__file__).parents[2]))
 from scripts.knowledge.company_context import COMPANY_CONTEXT
 
 

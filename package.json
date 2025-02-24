@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"PYTHONPATH=$PYTHONPATH:. python3 scripts/knowledge/api_server.py\"",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "api": "PYTHONPATH=$PYTHONPATH:. python3 scripts/knowledge/api_server.py"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",
