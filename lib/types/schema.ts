@@ -245,19 +245,8 @@ export type Database = {
           image_url: string
           intent_summary: string
           key_features: Json
-          keywords: Array<{
-            keyword: string;
-            intent_reflected: string;
-            likelihood_score: number;
-          }>
-          new_headlines: Array<{
-            improved: string;
-            original: string;
-            improvements: string[];
-            expected_impact: string[];
-            target_audience: string[];
-            pain_point_addressed: string[];
-          }>
+          keywords: Json[] | null
+          new_headlines: Json[] | null
           original_headlines: Json[] | null
           pain_points: Json
           perplexity_insights: string
@@ -273,19 +262,8 @@ export type Database = {
           image_url: string
           intent_summary: string
           key_features: Json
-          keywords?: Array<{
-            keyword: string;
-            intent_reflected: string;
-            likelihood_score: number;
-          }>
-          new_headlines?: Array<{
-            improved: string;
-            original: string;
-            improvements: string[];
-            expected_impact: string[];
-            target_audience: string[];
-            pain_point_addressed: string[];
-          }>
+          keywords?: Json[] | null
+          new_headlines?: Json[] | null
           original_headlines?: Json[] | null
           pain_points: Json
           perplexity_insights: string
@@ -301,23 +279,33 @@ export type Database = {
           image_url?: string
           intent_summary?: string
           key_features?: Json
-          keywords?: Array<{
-            keyword: string;
-            intent_reflected: string;
-            likelihood_score: number;
-          }>
-          new_headlines?: Array<{
-            improved: string;
-            original: string;
-            improvements: string[];
-            expected_impact: string[];
-            target_audience: string[];
-            pain_point_addressed: string[];
-          }>
+          keywords?: Json[] | null
+          new_headlines?: Json[] | null
           original_headlines?: Json[] | null
           pain_points?: Json
           perplexity_insights?: string
           target_audience?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      markets_overview: {
+        Row: {
+          created_at: string
+          id: string
+          insights: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insights?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insights?: Json | null
           user_id?: string | null
         }
         Relationships: []
