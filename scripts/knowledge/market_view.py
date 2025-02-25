@@ -1,10 +1,11 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from llama_index.core import Document, VectorStoreIndex
 from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.llms.openai import OpenAI
 from llama_index.core.storage import StorageContext
 from llama_index.vector_stores.supabase import SupabaseVectorStore
 from llama_index.core.settings import Settings
+from llama_index.embeddings.openai import OpenAIEmbedding
 import json
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,6 +15,13 @@ import logging
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Required dependencies for semantic deduplication:
+# - numpy
+# - scikit-learn
+# - llama-index with OpenAI embeddings
 
 # Load environment variables
 env_path = Path(__file__).parents[2] / ".env.local"
@@ -79,6 +87,9 @@ class MarketResearchAnalyzer:
             self.llm = OpenAI(temperature=0.1, model="gpt-4")
             Settings.llm = self.llm
             Settings.node_parser = SimpleNodeParser()
+
+            # Initialize embedding model for semantic deduplication
+            self.embed_model = OpenAIEmbedding()
 
             # Initialize vector store and index
             self._initialize_index()
@@ -256,6 +267,34 @@ class MarketResearchAnalyzer:
                 },
             )
 
+            # Store the response in markets_overview table
+            try:
+                response_dict = response.dict()
+                result = (
+                    self.supabase.table("markets_overview")
+                    .insert(
+                        {
+                            "user_id": user_id,
+                            "insights": response_dict,
+                            "created_at": datetime.now().isoformat(),
+                        }
+                    )
+                    .execute()
+                )
+
+                # Check if the operation was successful
+                if hasattr(result, "data") and result.data:
+                    logger.info(
+                        f"Successfully stored market insight in markets_overview table for user {user_id}"
+                    )
+                else:
+                    logger.warning(
+                        f"Market insight storage completed but may not have been successful for user {user_id}"
+                    )
+            except Exception as e:
+                logger.error(f"Error storing market insight in database: {str(e)}")
+                # Continue execution even if storage fails
+
             # Log response for debugging
             logger.debug(f"Generated response: {json.dumps(response.dict(), indent=2)}")
             logger.info(f"Successfully generated market insight for user {user_id}")
@@ -269,12 +308,238 @@ class MarketResearchAnalyzer:
         """Fetch all market research data from the market_research_v2 table"""
         return research_data
 
+    def _semantic_deduplication(
+        self, items: List[Dict], key_field: str, similarity_threshold: float = 0.85
+    ) -> List[Dict]:
+        """
+        Perform semantic deduplication on a list of items based on a specific field.
+
+        Args:
+            items: List of dictionaries containing the items to deduplicate
+            key_field: The field name to use for semantic comparison
+            similarity_threshold: Threshold above which items are considered duplicates (0.0 to 1.0)
+
+        Returns:
+            List of deduplicated items
+        """
+        if not items:
+            return []
+
+        try:
+            # Extract the text values to compare
+            texts = [item.get(key_field, "") for item in items]
+
+            # Generate embeddings for all texts
+            embeddings = self.embed_model.get_text_embedding_batch(texts)
+            embeddings_array = np.array(embeddings)
+
+            # Calculate similarity matrix
+            similarity_matrix = cosine_similarity(embeddings_array)
+
+            # Track which items to keep
+            to_keep = [True] * len(items)
+
+            # For each pair of items, mark duplicates
+            for i in range(len(items)):
+                if not to_keep[i]:
+                    continue  # Skip if already marked as duplicate
+
+                for j in range(i + 1, len(items)):
+                    if similarity_matrix[i, j] >= similarity_threshold:
+                        # Mark the item with lower "frequency" or "likelihood" as duplicate
+                        # If these fields don't exist, keep the first occurrence
+                        item_i_score = items[i].get(
+                            "frequency", items[i].get("likelihood", 1)
+                        )
+                        item_j_score = items[j].get(
+                            "frequency", items[j].get("likelihood", 0)
+                        )
+
+                        if item_i_score >= item_j_score:
+                            to_keep[j] = False
+                        else:
+                            to_keep[i] = False
+                            break  # No need to compare i with other items
+
+            # Filter the items based on the to_keep mask
+            deduplicated_items = [
+                item for idx, item in enumerate(items) if to_keep[idx]
+            ]
+
+            logger.info(
+                f"Semantic deduplication reduced {len(items)} items to {len(deduplicated_items)} items"
+            )
+            return deduplicated_items
+
+        except Exception as e:
+            logger.error(f"Error in semantic deduplication: {str(e)}")
+            # Fall back to returning original items if deduplication fails
+            return items
+
+    def _deduplicate_target_audiences(self, audiences: List[Dict]) -> List[Dict]:
+        """
+        Deduplicate target audiences based on segment name similarity.
+        Preserves and merges citations from similar audiences.
+        """
+        try:
+            if not audiences:
+                return []
+
+            # Create a list of dictionaries with the segment name as the key field for deduplication
+            audience_for_dedup = []
+            for idx, audience in enumerate(audiences):
+                audience_for_dedup.append(
+                    {
+                        "name": audience["segment"],
+                        "original": audience,
+                        "original_index": idx,
+                    }
+                )
+
+            # Perform semantic deduplication
+            deduplicated_indices = set()
+            similarity_threshold = 0.85  # Same threshold as in _semantic_deduplication
+
+            # Extract the text values to compare
+            texts = [item["name"] for item in audience_for_dedup]
+
+            # Generate embeddings for all texts
+            embeddings = self.embed_model.get_text_embedding_batch(texts)
+            embeddings_array = np.array(embeddings)
+
+            # Calculate similarity matrix
+            similarity_matrix = cosine_similarity(embeddings_array)
+
+            # Track which items to keep and which to merge
+            to_keep = [True] * len(audience_for_dedup)
+            merge_map = {}  # Maps indices to be merged with
+
+            # For each pair of items, mark duplicates and track merges
+            for i in range(len(audience_for_dedup)):
+                if not to_keep[i]:
+                    continue  # Skip if already marked as duplicate
+
+                for j in range(i + 1, len(audience_for_dedup)):
+                    if similarity_matrix[i, j] >= similarity_threshold:
+                        # Mark the second item as duplicate
+                        to_keep[j] = False
+                        # Track that j should be merged with i
+                        merge_map[j] = i
+
+            # Merge citations for similar audiences
+            for j, i in merge_map.items():
+                # Get citations from both audiences
+                original_citations = audience_for_dedup[i]["original"].get(
+                    "citations", []
+                )
+                duplicate_citations = audience_for_dedup[j]["original"].get(
+                    "citations", []
+                )
+
+                # Merge citations (avoid duplicates)
+                merged_citations = list(set(original_citations + duplicate_citations))
+
+                # Update the original audience with merged citations
+                audience_for_dedup[i]["original"]["citations"] = merged_citations
+
+            # Filter the items based on the to_keep mask
+            deduplicated_items = [
+                item["original"]
+                for idx, item in enumerate(audience_for_dedup)
+                if to_keep[idx]
+            ]
+
+            logger.info(
+                f"Target audience deduplication reduced {len(audiences)} audiences to {len(deduplicated_items)} audiences"
+            )
+            return deduplicated_items
+
+        except Exception as e:
+            logger.error(f"Error in target audience deduplication: {str(e)}")
+            # Return original data if deduplication fails
+            return audiences
+
+    def _deduplicate_keywords(self, keywords: List[Dict]) -> List[Dict]:
+        """
+        Deduplicate keywords based on keyword text similarity.
+        Preserves and merges citations from similar keywords.
+        """
+        try:
+            if not keywords:
+                return []
+
+            # Extract the text values to compare
+            texts = [item.get("keyword", "") for item in keywords]
+
+            # Generate embeddings for all texts
+            embeddings = self.embed_model.get_text_embedding_batch(texts)
+            embeddings_array = np.array(embeddings)
+
+            # Calculate similarity matrix
+            similarity_matrix = cosine_similarity(embeddings_array)
+            similarity_threshold = 0.85
+
+            # Track which items to keep and which to merge
+            to_keep = [True] * len(keywords)
+            merge_map = {}  # Maps indices to be merged with
+
+            # For each pair of items, mark duplicates and track merges
+            for i in range(len(keywords)):
+                if not to_keep[i]:
+                    continue  # Skip if already marked as duplicate
+
+                for j in range(i + 1, len(keywords)):
+                    if similarity_matrix[i, j] >= similarity_threshold:
+                        # Compare likelihood scores to decide which to keep
+                        item_i_score = keywords[i].get("likelihood", 0)
+                        item_j_score = keywords[j].get("likelihood", 0)
+
+                        if item_i_score >= item_j_score:
+                            # Keep i, merge j into i
+                            to_keep[j] = False
+                            merge_map[j] = i
+                        else:
+                            # Keep j, merge i into j
+                            to_keep[i] = False
+                            merge_map[i] = j
+                            break  # No need to compare i with other items
+
+            # Merge citations for similar keywords
+            for source_idx, target_idx in merge_map.items():
+                # Get citations from both keywords
+                target_citations = keywords[target_idx].get("citations", [])
+                source_citations = keywords[source_idx].get("citations", [])
+
+                # Merge citations (avoid duplicates)
+                merged_citations = list(set(target_citations + source_citations))
+
+                # Update the target keyword with merged citations
+                keywords[target_idx]["citations"] = merged_citations
+
+            # Filter the items based on the to_keep mask
+            deduplicated_items = [
+                item for idx, item in enumerate(keywords) if to_keep[idx]
+            ]
+
+            logger.info(
+                f"Keyword deduplication reduced {len(keywords)} keywords to {len(deduplicated_items)} keywords"
+            )
+            return deduplicated_items
+
+        except Exception as e:
+            logger.error(f"Error in keyword deduplication: {str(e)}")
+            # Return original data if deduplication fails
+            return keywords
+
     def analyze_target_audiences(self, research_data: List[Dict]) -> List[Dict]:
-        """Aggregate and analyze target audience information"""
+        """Aggregate and analyze target audience information with semantic deduplication"""
         audiences = []
         for entry in research_data:
             if isinstance(entry.get("target_audience"), list):
                 for audience in entry["target_audience"]:
+                    # Get citations if available
+                    citations = entry.get("citations", [])
+
                     audiences.append(
                         {
                             "segment": audience.get("name", ""),
@@ -284,9 +549,14 @@ class MarketResearchAnalyzer:
                             },
                             "pain_points": audience.get("pain_points", []),
                             "buying_stage": entry.get("buying_stage", ""),
+                            "citations": citations,  # Include citations for this audience
                         }
                     )
-        return audiences
+
+        # Apply semantic deduplication to target audiences
+        deduplicated_audiences = self._deduplicate_target_audiences(audiences)
+
+        return deduplicated_audiences
 
     def analyze_competitive_landscape(self, research_data: List[Dict]) -> Dict:
         """Analyze competitive advantages and market positioning"""
@@ -366,21 +636,33 @@ class MarketResearchAnalyzer:
         return feature_analysis
 
     def analyze_keywords(self, research_data: List[Dict]) -> List[Dict]:
-        """Analyze keyword patterns and intent mapping"""
+        """Analyze keyword patterns and intent mapping with semantic deduplication"""
         keyword_analysis = []
 
         for entry in research_data:
-            if isinstance(entry["keywords"], list):
-                for keyword_data in entry["keywords"]:
-                    keyword_analysis.append(
-                        {
-                            "keyword": keyword_data["keyword"],
-                            "intent": keyword_data["intent_reflected"],
-                            "likelihood": keyword_data["likelihood_score"],
-                        }
-                    )
+            if isinstance(entry.get("keywords"), list):
+                # Get citations if available
+                citations = entry.get("citations", [])
 
-        return keyword_analysis
+                for keyword_data in entry["keywords"]:
+                    if (
+                        isinstance(keyword_data, dict)
+                        and "keyword" in keyword_data
+                        and "intent_reflected" in keyword_data
+                    ):
+                        keyword_analysis.append(
+                            {
+                                "keyword": keyword_data["keyword"],
+                                "intent": keyword_data["intent_reflected"],
+                                "likelihood": keyword_data.get("likelihood_score", 0),
+                                "citations": citations,  # Include citations for this keyword
+                            }
+                        )
+
+        # Apply semantic deduplication to keywords
+        deduplicated_keywords = self._deduplicate_keywords(keyword_analysis)
+
+        return deduplicated_keywords
 
     def analyze_competitive_positioning(self, index: VectorStoreIndex) -> Dict:
         """Analyze competitive positioning and market opportunities"""
