@@ -8,3 +8,5 @@ llama-index-llms-openai
 openai
 pydantic
 python-multipart
+scikit-learn
+numpy
