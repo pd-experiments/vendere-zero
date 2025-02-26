@@ -2,6 +2,10 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
+  "[env]": {
+    "editor.formatOnSave": false
+
+  },
   "deno.enablePaths": [
     "supabase/functions"
   ],

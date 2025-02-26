@@ -412,6 +412,7 @@ class KnowledgeBase:
                     # Wait briefly before retrying
                     await asyncio.sleep(1)
                     continue
+        return None
 
     async def generate_report(self, query: str) -> Report:
         """Generates a structured report using OpenAI"""
