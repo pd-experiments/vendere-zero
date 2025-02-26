@@ -49,14 +49,14 @@ const data = {
   ],
   navMain: [
     {
-      title: "Library",
-      url: "/library",
-      icon: BookIcon
-    },
-    {
       title: "Market",
       url: "/market",
       icon: GlobeIcon
+    },
+    {
+      title: "Library",
+      url: "/library",
+      icon: BookIcon
     },
     // {
     //   title: "Simulations",

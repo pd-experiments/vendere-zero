@@ -1,4 +1,5 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Union
+from typing_extensions import TypedDict
 from llama_index.core import Document, VectorStoreIndex
 from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.llms.openai import OpenAI
@@ -17,11 +18,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-
-# Required dependencies for semantic deduplication:
-# - numpy
-# - scikit-learn
-# - llama-index with OpenAI embeddings
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from company_context import COMPANY_CONTEXT
 
 # Load environment variables
 env_path = Path(__file__).parents[2] / ".env.local"
@@ -54,6 +53,29 @@ class MarketInsightRequest(BaseModel):
     filters: Dict = {}
 
 
+class BrandInsightDetails(TypedDict):
+    brand: str
+    segments: List[str]
+    features: List[str]
+
+
+class MarketInsightDetails(TypedDict):
+    key_segments: List[str]
+    price_ranges: List[str]
+
+
+class BrandInsight(TypedDict):
+    insight: str
+    source_urls: List[str]
+    details: BrandInsightDetails
+
+
+class MarketInsight(TypedDict):
+    insight: str
+    source_urls: List[str]
+    details: MarketInsightDetails
+
+
 class MarketInsightResponse(BaseModel):
     """Response model for market insights"""
 
@@ -61,7 +83,24 @@ class MarketInsightResponse(BaseModel):
     market_summary: Dict
     market_analysis: Dict
     keyword_insights: Dict
+    brand_insights: List[BrandInsight]
+    market_insights: List[MarketInsight]
     metadata: Dict
+
+
+class InsightOutput(TypedDict):
+    insight: str
+    source_urls: List[str]
+    details: List[str]
+
+
+@dataclass
+class CompetitorData:
+    brand: str
+    urls: List[str]
+    features: List[Dict]
+    price_points: Dict
+    market_segments: Dict
 
 
 class MarketResearchAnalyzer:
@@ -84,7 +123,7 @@ class MarketResearchAnalyzer:
             )
 
             # Initialize LLM and settings
-            self.llm = OpenAI(temperature=0.1, model="gpt-4")
+            self.llm = OpenAI(temperature=0.1, model="gpt-4o-mini")
             Settings.llm = self.llm
             Settings.node_parser = SimpleNodeParser()
 
@@ -183,7 +222,17 @@ class MarketResearchAnalyzer:
 
             trend_analysis = {}
             for query in trend_queries:
-                response = self.query_engine.query(query)
+                prompt = f"""
+                Provide a detailed analysis of the following trend for {COMPANY_CONTEXT["name"]}:
+                {query}
+
+                Format as a clear, actionable trend with no "1.", "2.", or "3." prefixes, just provide the trend.
+                
+                Here's a compilation of key company context for {COMPANY_CONTEXT["name"]}. 
+                {COMPANY_CONTEXT}
+                """
+
+                response = self.query_engine.query(prompt)
                 trend_analysis[query] = response.response
 
             return trend_analysis
@@ -228,6 +277,9 @@ class MarketResearchAnalyzer:
             trend_analysis = await self.analyze_market_trends()
             strategic_recommendations = await self.generate_strategic_insights()
 
+            # Generate brand and market insights
+            brand_market_insights = await self.generate_brand_market_insights(user_id)
+
             # Use stored research data instead of fetching again
             research_data = self.research_data
 
@@ -259,11 +311,13 @@ class MarketResearchAnalyzer:
                 keyword_insights={
                     "analysis": self.analyze_keywords(research_data),
                 },
+                brand_insights=brand_market_insights["brand_insights"],
+                market_insights=brand_market_insights["market_insights"],
                 metadata={
                     "generated_at": datetime.now().isoformat(),
                     "user_id": user_id,
                     "filters_applied": filters,
-                    "data_sources": ["market_research_v2"],
+                    "data_sources": ["market_research_v2", "citation_research"],
                 },
             )
 
@@ -703,6 +757,336 @@ class MarketResearchAnalyzer:
             for finding in response.response.split("\n")
             if finding.strip()
         ]
+
+    async def generate_brand_market_insights(
+        self, user_id: str
+    ) -> Dict[str, List[InsightOutput]]:
+        """Generate brand and market insights from citation research data"""
+        try:
+            # Fetch citation research data
+            citation_data = (
+                self.supabase.table("citation_research")
+                .select("*")
+                .order("created_at", desc=True)  # Get most recent data
+                .limit(15)  # Limit to 15 most recent entries
+                .execute()
+                .data
+            )
+
+            if not citation_data:
+                logger.warning("No citation research data found")
+                return {"brand_insights": [], "market_insights": []}
+
+            # Get key competitors from company context
+            key_competitors = [
+                comp["name"]
+                for comp in COMPANY_CONTEXT["market_position"]["key_competitors"]
+            ]
+
+            # Extract unique brands from recent data, prioritizing key competitors
+            unique_brands = set()
+            key_competitor_entries = []
+            other_entries = []
+
+            for entry in citation_data:
+                brands = entry.get("competitor_brands", [])
+                for brand in brands:
+                    if brand in key_competitors:
+                        key_competitor_entries.append(entry)
+                        unique_brands.add(brand)
+                    else:
+                        other_entries.append(entry)
+                        unique_brands.add(brand)
+
+            # Prioritize key competitors first, then add other brands up to limit
+            top_brands = (
+                [brand for brand in key_competitors if brand in unique_brands]
+                + list(unique_brands - set(key_competitors))
+            )[:10]  # Limit to 10 brands total
+
+            # Simplified competitor data collection with company context awareness
+            competitor_data: Dict[str, CompetitorData] = {}
+            for brand in top_brands:
+                # For each brand, fetch entries that contain this brand
+                # We'll use a filter to find entries where the brand is in the competitor_brands array
+                brand_entries = []
+
+                # Since we can't do complex SQL queries directly, we'll filter the data we already have
+                for entry in citation_data:
+                    competitor_brands = entry.get("competitor_brands", [])
+                    if not competitor_brands:
+                        continue
+
+                    # Check if brand is in competitor_brands (exact match or partial match)
+                    if brand in competitor_brands or any(
+                        brand.lower() in cb.lower() for cb in competitor_brands
+                    ):
+                        brand_entries.append(entry)
+
+                # Randomly sample up to 15 entries if we have more
+                import random
+
+                if len(brand_entries) > 15:
+                    brand_entries = random.sample(brand_entries, 15)
+
+                if not brand_entries:
+                    continue
+
+                # Get competitor context if available
+                competitor_context = next(
+                    (
+                        comp
+                        for comp in COMPANY_CONTEXT["market_position"][
+                            "key_competitors"
+                        ]
+                        if comp["name"] == brand
+                    ),
+                    None,
+                )
+
+                # Collect all URLs for this brand
+                brand_urls = []
+                for entry in brand_entries:
+                    if entry.get("site_url") and entry["site_url"] not in brand_urls:
+                        brand_urls.append(entry["site_url"])
+
+                # Use the first entry for other data
+                latest_entry = brand_entries[0]
+
+                # Extract market segments names and features
+                market_segments = [
+                    segment.get("name", "")
+                    for segment in latest_entry.get("market_segments", [])
+                    if isinstance(segment, dict)
+                ]
+
+                # If this is a key competitor, add their primary competition areas
+                if competitor_context:
+                    market_segments.extend(
+                        competitor_context["primary_competition_areas"]
+                    )
+                    market_segments = list(set(market_segments))  # Remove duplicates
+
+                # Extract price points
+                price_points = [
+                    {
+                        "range": f"${point.get('range_min', 0)}-${point.get('range_max', 0)}",
+                        "segment": point.get("target_segment", ""),
+                    }
+                    for point in latest_entry.get("price_points", [])
+                    if isinstance(point, dict)
+                ]
+
+                competitor_data[brand] = CompetitorData(
+                    brand=brand,
+                    urls=brand_urls[:3],  # Limit to 3 URLs per brand
+                    features=latest_entry.get("key_features", []),
+                    price_points=price_points,
+                    market_segments=market_segments,
+                )
+
+            # Generate insights in parallel with company context
+            brand_insights = await self._generate_brand_insights(competitor_data)
+            market_insights = await self._generate_market_insights(
+                citation_data, company_context=COMPANY_CONTEXT
+            )
+
+            return {
+                "brand_insights": brand_insights,
+                "market_insights": market_insights,
+            }
+
+        except Exception as e:
+            logger.error(f"Error generating brand and market insights: {str(e)}")
+            raise
+
+    async def _generate_brand_insights(
+        self, competitor_data: Dict[str, CompetitorData]
+    ) -> List[InsightOutput]:
+        """Generate brand-specific insights using parallel processing"""
+
+        async def process_brand(
+            brand: str, data: CompetitorData
+        ) -> List[InsightOutput]:
+            try:
+                # Extract feature names and importance scores
+                features = [
+                    f"{f.get('name', '')} ({f.get('importance_score', 0):.1f})"
+                    for f in data.features[:3]
+                    if isinstance(f, dict) and "name" in f and "importance_score" in f
+                ]
+
+                segments = data.market_segments[:3] if data.market_segments else []
+
+                # Create a focused prompt for actionable insights
+                prompt = f"""
+                Generate 2 concise insights about {brand}'s market actions or strategy.
+                Format example: "{brand} [action/strategy] [specific detail] in [market/segment], responding to [trend/need]"
+                Keep it tweet-length but specific and actionable.
+                Example: "Nike launches eco-friendly running line 'GreenStride' in European market, responding to sustainability demand"
+
+                Use these details:
+                Features: {", ".join(features) if features else "N/A"}
+                Segments: {", ".join(segments) if segments else "N/A"}
+                """
+
+                response = self.query_engine.query(prompt)
+
+                # Clean and format insights
+                insights = [
+                    text.strip()
+                    for text in response.response.split("\n")
+                    if text.strip()
+                    and not text.strip().startswith(("1.", "2.", "3.", "-", "•"))
+                ]
+
+                return [
+                    {
+                        "insight": insight,
+                        "source_urls": data.urls,
+                        "details": {
+                            "brand": brand,
+                            "segments": segments,
+                            "features": features,
+                        },
+                    }
+                    for insight in insights
+                    if len(insight) > 20 and len(insight) < 150  # Ensure concise length
+                ][:2]
+
+            except Exception as e:
+                logger.error(f"Error processing brand {brand}: {str(e)}")
+                return []
+
+        tasks = [process_brand(brand, data) for brand, data in competitor_data.items()]
+        results = await asyncio.gather(*tasks)
+        return [insight for brand_insights in results for insight in brand_insights]
+
+    async def _generate_market_insights(
+        self, citation_data: List[Dict], company_context: Dict
+    ) -> List[InsightOutput]:
+        """Generate market-wide insights using parallel processing"""
+        try:
+            # Aggregate key market data with company context awareness
+            market_data = {
+                "segments": set(
+                    company_context["core_business"]["target_segments"]
+                ),  # Start with company's target segments
+                "price_ranges": set(),
+                "trends": set(
+                    company_context["market_position"]["market_trends"][
+                        "consumer_preferences"
+                    ]
+                ),  # Include known trends
+            }
+
+            for entry in citation_data:
+                # Add segments and their pain points
+                segments = entry.get("market_segments", [])
+                if isinstance(segments, list):
+                    for segment in segments:
+                        if isinstance(segment, dict):
+                            segment_name = segment.get("name")
+                            if segment_name:
+                                market_data["segments"].add(segment_name)
+                                # Add pain points if available
+                                pain_points = segment.get("pain_points", [])
+                                if isinstance(pain_points, list):
+                                    market_data["trends"].update(pain_points)
+
+                # Add price ranges
+                price_points = entry.get("price_points", [])
+                if isinstance(price_points, list):
+                    for point in price_points:
+                        if isinstance(point, dict):
+                            min_price = point.get("range_min")
+                            max_price = point.get("range_max")
+                            if min_price is not None and max_price is not None:
+                                price_range = f"${min_price}-${max_price}"
+                                market_data["price_ranges"].add(price_range)
+
+            # Convert sets to sorted lists and ensure we have data
+            market_data = {
+                "segments": sorted(list(market_data["segments"]))[:3],
+                "price_ranges": sorted(list(market_data["price_ranges"]))[:3]
+                if market_data["price_ranges"]
+                else ["$0-$100"],
+                "trends": sorted(list(market_data["trends"]))[:3],
+            }
+
+            # Generate focused market insights with company context
+            market_prompt = f"""
+            Generate 3 concise market insights about trends and opportunities for {company_context["name"]}.
+            Format: "[Market segment/trend] drives [specific change/action] in [product/service area], leading to [impact/opportunity]"
+            Example: "Rising athleisure demand drives 40% growth in premium sports apparel, leading to new DTC brand launches"
+
+            Company Context:
+            Industry: {company_context["industry"]}
+            Core Products: {", ".join(company_context["core_business"]["primary_products"])}
+            Strategic Priorities: {", ".join(company_context["strategic_priorities"]["innovation"]["focus_areas"])}
+
+            Market Details:
+            Key Segments: {", ".join(market_data["segments"])}
+            Price Ranges: {", ".join(market_data["price_ranges"])}
+            Market Trends: {", ".join(market_data["trends"])}
+
+            Each insight should be specific, actionable, and aligned with the company's strategic priorities.
+            """
+
+            response = self.query_engine.query(market_prompt)
+            logger.debug(f"LLM Response for market insights: {response.response}")
+
+            # Clean and format insights
+            insights = [
+                text.strip()
+                for text in response.response.split("\n")
+                if text.strip()
+                and not text.strip().startswith(("1.", "2.", "3.", "-", "•"))
+            ]
+
+            # Ensure we have at least one insight
+            if not insights:
+                insights = [
+                    f"{market_data['segments'][0]} segment shows growing demand for {company_context['core_business']['primary_products'][0]}, aligning with {company_context['strategic_priorities']['innovation']['focus_areas'][0]}"
+                ]
+
+            source_urls = list(
+                set(
+                    entry.get("site_url", "")
+                    for entry in citation_data
+                    if entry.get("site_url")
+                )
+            )[:2]
+            if not source_urls:
+                source_urls = ["market analysis"]
+
+            return [
+                {
+                    "insight": insight,
+                    "source_urls": source_urls,
+                    "details": {
+                        "key_segments": market_data["segments"],
+                        "price_ranges": market_data["price_ranges"],
+                    },
+                }
+                for insight in insights
+                if len(insight) > 20 and len(insight) < 150  # Ensure concise length
+            ][:3]
+
+        except Exception as e:
+            logger.error(f"Error generating market insights: {str(e)}")
+            return [
+                {
+                    "insight": f"Market analysis indicates opportunities for {company_context['name']} in core segments",
+                    "source_urls": ["market analysis"],
+                    "details": {
+                        "key_segments": company_context["core_business"][
+                            "target_segments"
+                        ][:2],
+                        "price_ranges": ["$0-$100"],
+                    },
+                }
+            ]
 
 
 # @asynccontextmanager
