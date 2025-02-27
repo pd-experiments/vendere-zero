@@ -108,7 +108,7 @@ export function NavMain({
                       {item.isActive && (
                         <motion.div
                           layoutId="activeIndicator"
-                          className="absolute inset-0 border-l-2 border-sidebar-accent-foreground"
+                          className="absolute inset-0 border-l-[0.5px] border-sidebar-accent-foreground"
                           variants={activeIndicatorVariants}
                           initial="initial"
                           animate="animate"
@@ -182,7 +182,7 @@ export function NavMain({
                     {item.isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute inset-0 border-l-2 border-sidebar-accent-foreground"
+                        className="absolute inset-0 border-l-[1.5px] border-sidebar-accent-foreground/70"
                         variants={activeIndicatorVariants}
                         initial="initial"
                         animate="animate"
@@ -204,7 +204,7 @@ export function NavMain({
                     {item.isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute inset-0 border-l-2 border-sidebar-accent-foreground"
+                        className="absolute inset-0 border-l-2 border-sidebar-accent-background"
                         variants={activeIndicatorVariants}
                         initial="initial"
                         animate="animate"
