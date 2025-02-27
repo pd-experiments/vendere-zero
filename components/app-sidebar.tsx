@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   Command,
@@ -8,26 +8,29 @@ import {
   GalleryVerticalEnd,
   BookIcon,
   GlobeIcon,
+  KeyboardIcon,
   // SquareTerminal,
   // AudioLines,
-} from "lucide-react"
+  ListIcon,
+  PlusCircleIcon,
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/lib/auth-context"
-import _ from "lodash"
-import { Instrument_Serif } from 'next/font/google';
-import { usePathname } from 'next/navigation'
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/auth-context";
+import _ from "lodash";
+import { Instrument_Serif } from "next/font/google";
+import { usePathname } from "next/navigation";
 
-const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
+const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ["latin"] });
 
 const data = {
   teams: [
@@ -51,12 +54,29 @@ const data = {
     {
       title: "Market",
       url: "/market",
-      icon: GlobeIcon
+      icon: GlobeIcon,
     },
     {
       title: "Library",
       url: "/library",
-      icon: BookIcon
+      icon: BookIcon,
+    },
+    {
+      title: "Keywords",
+      url: "#",
+      icon: KeyboardIcon,
+      items: [
+        {
+          title: "Keywords List",
+          url: "/keywords/list",
+          icon: ListIcon,
+        },
+        {
+          title: "New Variant",
+          url: "/keywords",
+          icon: PlusCircleIcon,
+        },
+      ],
     },
     // {
     //   title: "Simulations",
@@ -85,18 +105,18 @@ const data = {
     //   ],
     // },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth()
-  const pathname = usePathname()
+  const { user } = useAuth();
+  const pathname = usePathname();
 
-  console.log('Current pathname:', pathname)
-  const items = data.navMain.map(item => ({
+  console.log("Current pathname:", pathname);
+  const items = data.navMain.map((item) => ({
     ...item,
-    isActive: pathname === item.url
-  }))
-  console.log('Nav items with active state:', items)
+    isActive: pathname === item.url,
+  }));
+  console.log("Nav items with active state:", items);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -105,7 +125,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out">
             <Ratio className="h-6 w-6 bg-[#B1E116] text-black p-1 rounded-md transition-all duration-300 ease-in-out" />
           </div>
-          <span className={`${instrumentSerif.className} font-light text-2xl text-[#B1E116] whitespace-nowrap overflow-hidden transition-opacity duration-300 ease-in-out group-data-[state=collapsed]:opacity-0`}>
+          <span
+            className={`${instrumentSerif.className} font-light text-2xl text-[#B1E116] whitespace-nowrap overflow-hidden transition-opacity duration-300 ease-in-out group-data-[state=collapsed]:opacity-0`}
+          >
             vendere labs
           </span>
         </div>
@@ -124,8 +146,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {user && (
           <NavUser
             user={{
-              name: _.startCase(_.toLower(user.email?.split('@')[0] ?? 'User')),
-              email: user.email ?? '',
+              name: _.startCase(_.toLower(user.email?.split("@")[0] ?? "User")),
+              email: user.email ?? "",
               avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`,
             }}
           />
@@ -133,5 +155,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

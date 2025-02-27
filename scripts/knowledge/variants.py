@@ -267,42 +267,38 @@ class VariantGenerator:
     async def generate_variants(
         self, input_data: VariantInput
     ) -> List[GeneratedVariant]:
-        """Generate variants for all combinations of inputs"""
+        """Generate multiple variants based on input data"""
         try:
-            logger.info(
-                f"Starting variant generation for {len(input_data.keywords)} keywords"
-            )
+            logger.info(f"Generating variants for {len(input_data.keywords)} keywords")
 
-            # Create tasks for all combinations
-            tasks = []
+            variants: List[GeneratedVariant] = []
+
+            # Process each combination of keyword, element, and market
             for keyword in input_data.keywords:
                 for element in input_data.elements:
                     for market in input_data.target_markets:
-                        tasks.append(
-                            self.generate_variant(
+                        try:
+                            # Generate variant for this combination
+                            variant = await self.generate_variant(
                                 keyword=keyword, element=element, geo_target=market
                             )
-                        )
-
-            logger.info(f"Created {len(tasks)} variant generation tasks")
-
-            # Execute tasks concurrently
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            # Filter and log successful results
-            variants = []
-            for result in results:
-                if isinstance(result, GeneratedVariant):
-                    variants.append(result)
-                elif isinstance(result, Exception):
-                    logger.error(f"Task failed with error: {str(result)}")
+                            variants.append(variant)
+                            logger.info(
+                                f"Generated variant for {keyword.term} in {market}"
+                            )
+                        except Exception as e:
+                            logger.error(
+                                f"Error generating variant for {keyword.term} in {market}: {str(e)}"
+                            )
+                            # Continue processing other combinations even if one fails
+                            continue
 
             logger.info(f"Successfully generated {len(variants)} variants")
             return variants
 
         except Exception as e:
             logger.error(f"Error in generate_variants: {str(e)}")
-            raise
+            return []  # Return empty list on error
 
 
 # @asynccontextmanager

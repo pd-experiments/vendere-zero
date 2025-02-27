@@ -53,6 +53,7 @@ class KeywordVariant(BaseModel):
     confidence_score: float = 0.0  # confidence in the metric estimates
     similar_keywords: List[Dict] = []  # List of similar keywords from database
     explanation: str = ""
+    image_url: Optional[str] = None  # URL of the image associated with this keyword
 
 
 class KeywordVariantGenerator:
@@ -905,79 +906,72 @@ class KeywordVariantGenerator:
     def _estimate_metrics(self, keyword: str, similar_keywords: List[Dict]) -> Dict:
         """Estimate metrics for a keyword based on similar keywords"""
         try:
-            # If no similar keywords found, return default values
             if not similar_keywords:
+                # Default values for keywords with no similar matches
                 return {
-                    "search_volume": 0,
-                    "cpc": 0.0,
-                    "keyword_difficulty": 0.0,
-                    "competition": 0.0,
-                    "confidence": 0.0,
+                    "search_volume": 100,  # Conservative estimate
+                    "cpc": 1.0,
+                    "keyword_difficulty": 50.0,
+                    "competition_percentage": 0.5,  # Changed from "competition" to "competition_percentage"
+                    "confidence_score": 0.2,  # Low confidence if no similar keywords
                 }
 
-            # Check if we have an exact match (100% similarity)
-            for kw in similar_keywords:
-                if kw["similarity"] > 0.99:  # Exact or near-exact match
-                    return {
-                        "search_volume": kw["metrics"]["search_volume"],
-                        "cpc": kw["metrics"]["cpc"],
-                        "keyword_difficulty": kw["metrics"]["keyword_difficulty"],
-                        "competition": kw["metrics"]["competition"],
-                        "confidence": 1.0,  # High confidence for exact match
-                    }
+            # Calculate average metrics from similar keywords
+            search_volume = 0
+            cpc = 0.0
+            keyword_difficulty = 0.0
+            competition = 0.0
+            confidence = 0.0
+            num_valid_metrics = 0
 
-            # Calculate weighted average based on similarity scores
-            total_weight = sum(kw["similarity"] for kw in similar_keywords)
+            for similar in similar_keywords:
+                metrics = similar.get("metrics", {})
+                if metrics:
+                    search_volume += int(metrics.get("search_volume", 0))
+                    cpc += float(metrics.get("cpc", 0.0))
+                    keyword_difficulty += float(metrics.get("keyword_difficulty", 0.0))
+                    competition += float(metrics.get("competition", 0.0))
+                    num_valid_metrics += 1
 
-            # If total weight is too low, confidence will be low
-            confidence = min(1.0, total_weight / len(similar_keywords) * 2)
-
-            # Calculate weighted metrics
-            search_volume = (
-                sum(
-                    kw["metrics"]["search_volume"] * kw["similarity"]
-                    for kw in similar_keywords
-                )
-                / total_weight
-            )
-            cpc = (
-                sum(kw["metrics"]["cpc"] * kw["similarity"] for kw in similar_keywords)
-                / total_weight
-            )
-            keyword_difficulty = (
-                sum(
-                    kw["metrics"]["keyword_difficulty"] * kw["similarity"]
-                    for kw in similar_keywords
-                )
-                / total_weight
-            )
-            competition = (
-                sum(
-                    kw["metrics"]["competition"] * kw["similarity"]
-                    for kw in similar_keywords
-                )
-                / total_weight
-            )
+            # Calculate averages if we have valid metrics
+            if num_valid_metrics > 0:
+                search_volume = int(search_volume / num_valid_metrics)
+                cpc = float(cpc / num_valid_metrics)
+                keyword_difficulty = float(keyword_difficulty / num_valid_metrics)
+                competition = float(competition / num_valid_metrics)
+                # More similar keywords means higher confidence
+                confidence = float(min(0.9, 0.3 + (0.1 * num_valid_metrics)))
+            else:
+                # Default values if metrics parsing failed
+                search_volume = 100
+                cpc = 1.0
+                keyword_difficulty = 50.0
+                competition = 0.5
+                confidence = 0.3  # Low confidence
 
             # Apply adjustments based on keyword characteristics
-            # Longer keywords typically have lower volume but higher conversion
             word_count = len(keyword.split())
+
             if word_count > 3:  # Long-tail keyword
-                search_volume = search_volume * 0.8  # Typically lower volume
-                competition = competition * 0.7  # Typically lower competition
+                search_volume = int(search_volume * 0.8)  # Typically lower volume
+                competition = float(competition * 0.7)  # Typically lower competition
 
             # Question-based keywords often have different metrics
             if any(
                 q in keyword.lower()
                 for q in ["how", "what", "why", "when", "where", "which"]
             ):
-                search_volume = search_volume * 0.9  # Often lower volume
-                cpc = cpc * 0.9  # Often lower CPC
+                search_volume = int(search_volume * 0.9)  # Often lower volume
+                cpc = float(cpc * 0.9)  # Often lower CPC
 
             # Brand keywords (containing "nike") have different characteristics
             if "nike" in keyword.lower():
-                search_volume = search_volume * 1.2  # Higher volume for brand terms
-                competition = competition * 1.1  # Higher competition for brand terms
+                search_volume = int(
+                    search_volume * 1.2
+                )  # Higher volume for brand terms
+                competition = float(
+                    competition * 1.1
+                )  # Higher competition for brand terms
 
             return {
                 "search_volume": int(
@@ -987,8 +981,12 @@ class KeywordVariantGenerator:
                 "keyword_difficulty": float(
                     max(0, min(100, keyword_difficulty))
                 ),  # 0-100 range
-                "competition": float(max(0, min(1, competition))),  # 0-1 range
-                "confidence": float(confidence),  # Confidence in the estimate
+                "competition_percentage": float(
+                    max(0, min(1, competition))
+                ),  # Changed from "competition" to "competition_percentage", 0-1 range
+                "confidence_score": float(
+                    confidence
+                ),  # Changed from "confidence" to "confidence_score", Confidence in the estimate
             }
 
         except Exception as e:
@@ -997,52 +995,42 @@ class KeywordVariantGenerator:
                 "search_volume": 0,
                 "cpc": 0.0,
                 "keyword_difficulty": 0.0,
-                "competition": 0.0,
-                "confidence": 0.0,
+                "competition_percentage": 0.0,  # Changed from "competition" to "competition_percentage"
+                "confidence_score": 0.0,  # Changed from "confidence" to "confidence_score"
             }
 
     async def _enrich_keywords(
-        self, keywords: List[str], source: str = "generated"
+        self,
+        keywords: List[str],
+        source: str = "generated",
+        image_url: Optional[str] = None,
     ) -> List[KeywordVariant]:
-        """Enrich keywords with estimated metrics based on similar keywords"""
-        try:
-            enriched_keywords = []
+        """Enrich keywords with metrics from similar keywords"""
+        enriched_keywords = []
 
-            # Process keywords in batches to avoid overwhelming logs
-            batch_size = 10
-            for i in range(0, len(keywords), batch_size):
-                batch = keywords[i : i + batch_size]
-                logger.info(
-                    f"Enriching batch of {len(batch)} keywords ({i+1}-{min(i+batch_size, len(keywords))} of {len(keywords)})"
-                )
+        for keyword in keywords:
+            # Find similar keywords in database
+            similar_keywords = self._find_similar_keywords(keyword)
 
-                for keyword in batch:
-                    # Find similar keywords in our database
-                    similar_keywords = self._find_similar_keywords(keyword)
+            # Estimate metrics based on similar keywords
+            metrics = self._estimate_metrics(keyword, similar_keywords)
 
-                    # Estimate metrics based on similar keywords
-                    metrics = self._estimate_metrics(keyword, similar_keywords)
+            # Create KeywordVariant object
+            variant = KeywordVariant(
+                keyword=keyword,
+                source=source,
+                search_volume=metrics["search_volume"],
+                cpc=metrics["cpc"],
+                keyword_difficulty=metrics["keyword_difficulty"],
+                competition_percentage=metrics["competition_percentage"],
+                similar_keywords=similar_keywords,
+                confidence_score=metrics["confidence_score"],
+                image_url=image_url,  # Pass the image URL to the variant
+            )
 
-                    # Create KeywordVariant object
-                    variant = KeywordVariant(
-                        keyword=keyword,
-                        source=source,
-                        search_volume=metrics["search_volume"],
-                        cpc=metrics["cpc"],
-                        keyword_difficulty=metrics["keyword_difficulty"],
-                        competition_percentage=metrics["competition"],
-                        confidence_score=metrics["confidence"],
-                        similar_keywords=similar_keywords,
-                    )
+            enriched_keywords.append(variant)
 
-                    enriched_keywords.append(variant)
-
-            logger.info(f"Enriched {len(enriched_keywords)} keywords with metrics")
-            return enriched_keywords
-
-        except Exception as e:
-            logger.error(f"Error in _enrich_keywords: {str(e)}")
-            return []
+        return enriched_keywords
 
     async def _calculate_composite_metrics(
         self, keywords: List[KeywordVariant]
@@ -1339,62 +1327,99 @@ class KeywordVariantGenerator:
             return False
 
     async def generate_keyword_variants(
-        self, ad_features: AdFeatures
+        self, ad_features: AdFeatures, specific_keyword: Optional[str] = None
     ) -> List[KeywordVariant]:
-        """Main method to generate keyword variants"""
+        """
+        Generate keyword variants based on ad features.
+        If specific_keyword is provided, only generate variants for that keyword.
+        """
         try:
-            logger.info(
-                f"Starting keyword variant generation for ad with intent: {ad_features.visitor_intent}"
-            )
+            # If specific_keyword is provided, use it instead of generating keywords
+            if specific_keyword:
+                logger.info(
+                    f"Generating variants for specific keyword: {specific_keyword}"
+                )
+                keywords_to_process = [specific_keyword]
+            else:
+                # Use existing logic to generate keywords
+                generated_keywords = self._generate_keywords(ad_features)
+                keywords_to_process = (
+                    [kw.term for kw in generated_keywords] if generated_keywords else []
+                )
 
-            # 1. Retrieve similar content and their keywords
+            if not keywords_to_process:
+                logger.warning("No keywords were extracted or provided")
+                return []
+
+            # Continue with the original method from here
+            logger.info("Generating keyword variants...")
+
+            # Initialize vector index if not already done
+            if not hasattr(self, "ad_index") or not self.ad_index:
+                self._initialize_ad_index()
+
+            # Initialize keyword similarity index if not already done
+            if not hasattr(self, "keyword_similarity") or not self.keyword_similarity:
+                self._initialize_keyword_similarity()
+
+            # Step 1: Find similar content from the database
             similar_content = await self._retrieve_similar_content(ad_features)
-            retrieved_keywords = [
-                kw for content in similar_content for kw in content.get("keywords", [])
-            ]
-            logger.info(
-                f"Retrieved {len(retrieved_keywords)} keywords from similar content"
-            )
+            logger.info(f"Retrieved {len(similar_content)} similar content items")
 
-            # 2. Generate new keyword variants
+            # Step 2: Generate keyword variants based on ad features and similar content
             generated_keywords = await self._generate_keyword_variants(ad_features)
-            logger.info(f"Generated {len(generated_keywords)} new keyword variants")
+            logger.info(f"Generated {len(generated_keywords)} keyword variants")
 
-            # 3. Combine and deduplicate keywords
-            all_keywords = list(set(retrieved_keywords + generated_keywords))
-            logger.info(f"Combined into {len(all_keywords)} unique keywords")
-
-            # 4. Enrich keywords with estimated metrics
-            retrieved_enriched = await self._enrich_keywords(
-                retrieved_keywords, source="retrieved"
+            # Step 3: Enrich keywords with metrics
+            # Pass the image URL from ad_features to _enrich_keywords
+            image_url = ad_features.image_url if ad_features.image_url else None
+            enriched_keywords = await self._enrich_keywords(
+                generated_keywords, "generated", image_url
             )
-            generated_enriched = await self._enrich_keywords(
-                generated_keywords, source="generated"
-            )
-            enriched_keywords = retrieved_enriched + generated_enriched
             logger.info(f"Enriched {len(enriched_keywords)} keywords with metrics")
 
-            # 5. Calculate composite metrics
-            scored_keywords = await self._calculate_composite_metrics(enriched_keywords)
+            # Additional enrichment for similar content keywords if needed
+            similar_keywords = []
+            if similar_content:
+                # Extract keywords from similar content
+                retrieved_keywords = []
+                for content in similar_content:
+                    if "keywords" in content:
+                        retrieved_keywords.extend(content["keywords"])
 
-            # 6. Generate explanations
-            explained_keywords = await self._generate_explanations(
-                scored_keywords, ad_features
+                # Deduplicate keywords
+                retrieved_keywords = list(set(retrieved_keywords))[
+                    :20
+                ]  # Limit to top 20
+
+                # Enrich with metrics
+                # Pass the image URL from ad_features to _enrich_keywords for retrieved keywords
+                similar_keywords = await self._enrich_keywords(
+                    retrieved_keywords, "retrieved", image_url
+                )
+                logger.info(f"Enriched {len(similar_keywords)} similar keywords")
+
+            # Step 4: Calculate composite metrics
+            all_keywords = enriched_keywords + similar_keywords
+            all_keywords = await self._calculate_composite_metrics(all_keywords)
+            logger.info(
+                f"Calculated composite metrics for {len(all_keywords)} keywords"
             )
 
-            # 7. Rank and prioritize
-            ranked_keywords = await self._rank_and_prioritize(explained_keywords)
-            logger.info(f"Returning {len(ranked_keywords)} ranked keyword variants")
+            # Step 5: Generate explanations
+            all_keywords = await self._generate_explanations(all_keywords, ad_features)
+            logger.info(f"Generated explanations for {len(all_keywords)} keywords")
 
-            # 8. Save keywords to database (optional)
-            # Uncomment the following line to save keywords to database
-            # await self.save_keywords_to_database(ranked_keywords, ad_features)
+            # Step 6: Rank and prioritize
+            ranked_keywords = await self._rank_and_prioritize(all_keywords)
+            logger.info(f"Ranked and prioritized {len(ranked_keywords)} keywords")
 
+            logger.info("Keyword variant generation completed successfully")
             return ranked_keywords
 
         except Exception as e:
             logger.error(f"Error in generate_keyword_variants: {str(e)}")
-            raise
+            return []
 
     async def export_to_json(
         self,
@@ -1422,37 +1447,25 @@ class KeywordVariantGenerator:
                 path_obj.parent.mkdir(exist_ok=True, parents=True)
                 output_path = str(path_obj)
 
-            # Prepare data for export with proper typing
-            export_data: Dict[str, Any] = {
-                "ad_context": {
-                    "visual_cues": ad_features.visual_cues,
-                    "pain_points": ad_features.pain_points,
-                    "visitor_intent": ad_features.visitor_intent,
-                    "target_audience": ad_features.target_audience,
-                    "product_category": ad_features.product_category,
-                    "campaign_objective": ad_features.campaign_objective,
-                },
-                "image_url": (
-                    ad_features.image_url if ad_features.image_url else "Not specified"
-                ),
-                "keywords": [],  # Will be populated with keyword data
-                "export_timestamp": datetime.datetime.now().isoformat(),
-                "total_keywords": len(generated_keywords),
-                "metrics_explanation": {
-                    "search_volume": "Monthly search volume for the keyword",
-                    "cpc": "Average cost per click in USD",
-                    "keyword_difficulty": "SEO difficulty score (0-100)",
-                    "competition_percentage": "Percentage of competing ads (0-100)",
-                    "efficiency_index": "Composite score of volume vs. difficulty (higher is better)",
-                    "confidence_score": "Confidence in the metric estimates (0-1)",
-                },
-            }
+            # Get absolute path for more informative logging
+            abs_path = str(Path(output_path).absolute())
 
-            # Create a list to hold keyword data
-            keywords_list: List[Dict[str, Any]] = []
-
-            # Add each keyword with its metrics
+            # Organize keywords by image URL
+            keywords_by_image: Dict[str, List[Dict[str, Any]]] = {}
             for kw in generated_keywords:
+                # Find the image URL for this keyword by examining its AdFeatures
+                # Get any image_url property from the keyword object if it exists
+                if hasattr(kw, "image_url") and kw.image_url:
+                    image_url = kw.image_url
+                else:
+                    # Default to "Not specified" if no image URL is found
+                    image_url = "Not specified"
+
+                # Initialize the image URL entry if it doesn't exist
+                if image_url not in keywords_by_image:
+                    keywords_by_image[image_url] = []
+
+                # Add the keyword data
                 keyword_data = {
                     "keyword": kw.keyword,
                     "metrics": {
@@ -1472,18 +1485,45 @@ class KeywordVariantGenerator:
                     ],
                     "explanation": kw.explanation,
                 }
-                keywords_list.append(keyword_data)
+                keywords_by_image[image_url].append(keyword_data)
 
-            # Assign the keywords list to the export data
-            export_data["keywords"] = keywords_list
+            # Prepare data for export with proper typing
+            export_data: Dict[str, Any] = {
+                "export_timestamp": datetime.datetime.now().isoformat(),
+                "total_keywords": len(generated_keywords),
+                "unique_images": len(keywords_by_image),
+                "images": [],
+                "metrics_explanation": {
+                    "search_volume": "Monthly search volume for the keyword",
+                    "cpc": "Average cost per click in USD",
+                    "keyword_difficulty": "SEO difficulty score (0-100)",
+                    "competition_percentage": "Percentage of competing ads (0-100)",
+                    "efficiency_index": "Composite score of volume vs. difficulty (higher is better)",
+                    "confidence_score": "Confidence in the metric estimates (0-1)",
+                },
+            }
+
+            # Add data for each image URL
+            for image_url, keyword_list in keywords_by_image.items():
+                image_data = {
+                    "image_url": image_url,
+                    "total_keywords": len(keyword_list),
+                    "keywords": keyword_list,
+                }
+                export_data["images"].append(image_data)
 
             # Write to JSON file
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
 
-            logger.info(
-                f"Successfully exported {len(generated_keywords)} keywords to {output_path}"
+            # Log the number of keywords for each image URL
+            image_counts = ", ".join(
+                [f"{url}: {len(kws)}" for url, kws in keywords_by_image.items()]
             )
+            logger.info(
+                f"Successfully exported {len(generated_keywords)} keywords across {len(keywords_by_image)} image URLs ({image_counts}) to JSON file at:\n{abs_path}"
+            )
+
             return output_path
 
         except Exception as e:
@@ -1516,6 +1556,9 @@ class KeywordVariantGenerator:
                 path_obj.parent.mkdir(exist_ok=True, parents=True)
                 output_path = str(path_obj)
 
+            # Get absolute path for more informative logging
+            abs_path = str(Path(output_path).absolute())
+
             # Define CSV headers with clear descriptions
             headers = [
                 "Image URL",
@@ -1530,14 +1573,18 @@ class KeywordVariantGenerator:
                 "Explanation (including metric estimation reasoning)",
             ]
 
+            # Organize keywords by image URL for counting
+            keywords_by_image: Dict[str, List[KeywordVariant]] = {}
+            for kw in generated_keywords:
+                image_url = kw.image_url if kw.image_url else "Not specified"
+                if image_url not in keywords_by_image:
+                    keywords_by_image[image_url] = []
+                keywords_by_image[image_url].append(kw)
+
             # Write to CSV file
             with open(output_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(headers)
-
-                image_url = (
-                    ad_features.image_url if ad_features.image_url else "Not specified"
-                )
 
                 # Sort keywords by efficiency index for better readability
                 sorted_keywords = sorted(
@@ -1545,6 +1592,9 @@ class KeywordVariantGenerator:
                 )
 
                 for kw in sorted_keywords:
+                    # Get image URL from the keyword itself
+                    image_url = kw.image_url if kw.image_url else "Not specified"
+
                     # Format similar keywords as a semicolon-separated list
                     similar_kws = "; ".join(
                         [
@@ -1568,14 +1618,129 @@ class KeywordVariantGenerator:
                         ]
                     )
 
+            # Log the number of keywords for each image URL
+            image_counts = ", ".join(
+                [f"{url}: {len(kws)}" for url, kws in keywords_by_image.items()]
+            )
             logger.info(
-                f"Successfully exported {len(generated_keywords)} keywords for image URL '{image_url}' to {output_path}"
+                f"Successfully exported {len(generated_keywords)} keywords across {len(keywords_by_image)} image URLs ({image_counts}) to CSV file at:\n{abs_path}"
             )
             return output_path
 
         except Exception as e:
             logger.error(f"Error exporting keywords to CSV: {str(e)}")
             return None
+
+    async def save_to_database(
+        self, variants: List[KeywordVariant], user_id: str
+    ) -> List[str]:
+        """Save generated variants to the database and return their IDs"""
+        try:
+            logger.info(
+                f"Saving {len(variants)} variants to database for user {user_id}"
+            )
+
+            variant_records = []
+            for v in variants:
+                geo_target = getattr(v, "geo_target", "global")
+                variant_records.append(
+                    {
+                        "variant_id": f"v1_{geo_target}_{v.keyword.replace(' ', '_')}",
+                        "keyword": v.keyword,
+                        "image_url": v.image_url,
+                        "search_volume": v.search_volume,
+                        "cpc": v.cpc,
+                        "keyword_difficulty": v.keyword_difficulty,
+                        "competition_percentage": v.competition_percentage,
+                        "efficiency_index": v.efficiency_index,
+                        "confidence_score": v.confidence_score,
+                        "source": v.source,
+                        "explanation": v.explanation,
+                        "geo_target": geo_target,
+                        "user_id": user_id,
+                    }
+                )
+
+            # Use upsert to handle duplicates
+            result = (
+                self.supabase.table("keyword_variants")
+                .upsert(
+                    variant_records, on_conflict=["variant_id", "keyword", "geo_target"]
+                )
+                .execute()
+            )
+
+            if hasattr(result, "error") and result.error:
+                raise Exception(f"Supabase error: {result.error}")
+
+            logger.info(f"Successfully saved variants to database")
+            return [r.get("id") for r in result.data]
+        except Exception as e:
+            logger.error(f"Error saving variants to database: {str(e)}")
+            raise
+
+    async def get_variants_for_keyword(self, keyword: str, user_id: str) -> List[Dict]:
+        """Retrieve variants for a specific keyword from the database"""
+        try:
+            logger.info(
+                f"Retrieving variants for keyword '{keyword}' and user {user_id}"
+            )
+
+            result = (
+                self.supabase.table("keyword_variants")
+                .select("*")
+                .eq("keyword", keyword)
+                .eq("user_id", user_id)
+                .execute()
+            )
+
+            if hasattr(result, "error") and result.error:
+                raise Exception(f"Supabase error: {result.error}")
+
+            logger.info(
+                f"Retrieved {len(result.data)} variants for keyword '{keyword}'"
+            )
+            return result.data
+        except Exception as e:
+            logger.error(f"Error retrieving variants: {str(e)}")
+            return []
+
+    async def get_all_keywords(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get all unique keywords with variant counts from the database"""
+        try:
+            logger.info(f"Retrieving all keywords for user {user_id}")
+
+            # First, get all keyword variants for the user
+            result = (
+                self.supabase.table("keyword_variants")
+                .select("keyword")
+                .eq("user_id", user_id)
+                .execute()
+            )
+
+            if hasattr(result, "error") and result.error:
+                raise Exception(f"Supabase error: {result.error}")
+
+            # Group by keyword and count variants
+            keywords_dict: Dict[str, int] = {}
+            for item in result.data:
+                keyword = item.get("keyword")
+                if keyword:
+                    if keyword in keywords_dict:
+                        keywords_dict[keyword] += 1
+                    else:
+                        keywords_dict[keyword] = 1
+
+            # Format the result
+            keyword_list = [
+                {"keyword": k, "variant_count": v} for k, v in keywords_dict.items()
+            ]
+
+            logger.info(f"Retrieved {len(keyword_list)} unique keywords")
+            return keyword_list
+        except Exception as e:
+            logger.error(f"Error retrieving keywords: {str(e)}")
+            return []
 
 
 class KeywordDashboard:
@@ -1878,112 +2043,149 @@ async def main():
         # Initialize the generator
         generator = KeywordVariantGenerator()
 
-        # Create sample ad features for first image
-        ad_features1 = AdFeatures(
-            visual_cues=["running shoes", "athlete in motion", "track field"],
-            pain_points=["foot discomfort", "slow performance", "lack of endurance"],
-            visitor_intent="purchase",
-            target_audience={
-                "age_range": "18-35",
-                "interests": ["running", "fitness", "athletics"],
-                "gender": "all",
-                "income_level": "middle to high",
-            },
-            product_category="athletic footwear",
-            campaign_objective="increase sales of premium running shoes",
-            image_url="https://example.com/nike_running_shoes.jpg",
-        )
+        # Process multiple images
+        all_variants = []
+        image_urls = [
+            "https://example.com/nike_running_shoes.jpg",
+            "https://example.com/nike_basketball_shoes.jpg",
+            "https://example.com/nike_casual_shoes.jpg",
+        ]
 
-        # Generate keyword variants for first image
-        print("Generating keyword variants for first image...")
-        variants1 = await generator.generate_keyword_variants(ad_features1)
+        print(f"Processing {len(image_urls)} images for keyword generation...")
 
-        # Filter to only include generated keywords
-        generated_variants1 = [kw for kw in variants1 if kw.source == "generated"]
-        print(f"Generated {len(generated_variants1)} keyword variants for first image")
+        # Create exports directory if it doesn't exist
+        exports_dir = Path("exports")
+        exports_dir.mkdir(exist_ok=True)
+        print(f"Exports will be saved to: {exports_dir.absolute()}")
 
-        # Create sample ad features for second image
-        ad_features2 = AdFeatures(
-            visual_cues=["basketball shoes", "court", "jumping athlete"],
-            pain_points=["ankle support", "court grip", "impact protection"],
-            visitor_intent="research",
-            target_audience={
-                "age_range": "16-30",
-                "interests": ["basketball", "streetwear", "urban culture"],
-                "gender": "all",
-                "income_level": "middle",
-            },
-            product_category="basketball footwear",
-            campaign_objective="increase awareness of new basketball shoe line",
-            image_url="https://example.com/nike_basketball_shoes.jpg",
-        )
+        # Generate variants for each image URL
+        for idx, image_url in enumerate(image_urls):
+            print(f"\nProcessing image {idx+1}/{len(image_urls)}: {image_url}")
 
-        # Generate keyword variants for second image
-        print("\nGenerating keyword variants for second image...")
-        variants2 = await generator.generate_keyword_variants(ad_features2)
+            # Create sample ad features with different data for each image
+            if "running" in image_url:
+                ad_features = AdFeatures(
+                    visual_cues=["running shoes", "athlete in motion", "track field"],
+                    pain_points=[
+                        "foot discomfort",
+                        "slow performance",
+                        "lack of endurance",
+                    ],
+                    visitor_intent="purchase",
+                    target_audience={
+                        "age_range": "18-35",
+                        "interests": ["running", "fitness", "athletics"],
+                        "gender": "all",
+                        "income_level": "middle to high",
+                    },
+                    product_category="athletic footwear",
+                    campaign_objective="increase sales of premium running shoes",
+                    image_url=image_url,
+                )
+            elif "basketball" in image_url:
+                ad_features = AdFeatures(
+                    visual_cues=["basketball shoes", "court", "jumping athlete"],
+                    pain_points=["ankle support", "court grip", "impact protection"],
+                    visitor_intent="research",
+                    target_audience={
+                        "age_range": "16-30",
+                        "interests": ["basketball", "streetwear", "urban culture"],
+                        "gender": "all",
+                        "income_level": "middle",
+                    },
+                    product_category="basketball footwear",
+                    campaign_objective="increase awareness of new basketball shoe line",
+                    image_url=image_url,
+                )
+            else:
+                ad_features = AdFeatures(
+                    visual_cues=["casual shoes", "lifestyle", "urban setting"],
+                    pain_points=["comfort", "style", "versatility"],
+                    visitor_intent="browse",
+                    target_audience={
+                        "age_range": "18-40",
+                        "interests": ["fashion", "lifestyle", "urban culture"],
+                        "gender": "all",
+                        "income_level": "middle",
+                    },
+                    product_category="casual footwear",
+                    campaign_objective="improve brand perception in lifestyle category",
+                    image_url=image_url,
+                )
 
-        # Filter to only include generated keywords
-        generated_variants2 = [kw for kw in variants2 if kw.source == "generated"]
-        print(f"Generated {len(generated_variants2)} keyword variants for second image")
+            try:
+                # Generate keyword variants for this image
+                variants = await generator.generate_keyword_variants(ad_features)
 
-        # Combine all variants for export
-        all_variants = variants1 + variants2
-        all_generated_variants = generated_variants1 + generated_variants2
+                # Filter to only include generated keywords
+                generated_variants = [kw for kw in variants if kw.source == "generated"]
+                print(
+                    f"Generated {len(generated_variants)} keyword variants for image {idx+1}"
+                )
 
-        # Create dashboard for first image (as an example)
+                # Add these variants to our collection
+                all_variants.extend(variants)
+            except Exception as e:
+                print(f"Error generating keywords for image {idx+1}: {str(e)}")
+                import traceback
+
+                traceback.print_exc()
+                print("Continuing with other images...")
+                continue
+
+        # Filter all generated variants
+        all_generated_variants = [kw for kw in all_variants if kw.source == "generated"]
         print(
-            f"\nCreating dashboard for first image ({len(generated_variants1)} variants)..."
-        )
-        dashboard = KeywordDashboard().generate_dashboard(
-            ad_features1, generated_variants1
+            f"\nTotal generated variants across all images: {len(all_generated_variants)}"
         )
 
-        # Print summary for first image
-        print("\nKeyword Variant Generation Summary (First Image):")
-        print(
-            f"Total generated variants: {dashboard['summary_stats']['total_keywords']}"
-        )
-        print(f"Categories: {dashboard['summary_stats']['keyword_categories']}")
-        print(f"Top keywords:")
-        for category, keyword in dashboard["summary_stats"]["top_keywords"].items():
-            print(f"  - {category}: {keyword}")
+        # Export all keywords to a single CSV and JSON file
+        print("\nExporting all generated keywords to a single CSV and JSON file...")
 
-        # Print top 5 keywords by efficiency for first image
-        print("\nTop 5 Generated Keywords by Efficiency (First Image):")
-        top_keywords = sorted(
-            generated_variants1, key=lambda k: k.efficiency_index, reverse=True
-        )[:5]
-        for i, kw in enumerate(top_keywords, 1):
-            print(
-                f"{i}. {kw.keyword} (Efficiency: {kw.efficiency_index:.2f}, Volume: {kw.search_volume})"
+        # Use a common timestamp for both exports
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        export_basename = f"all_keywords_{timestamp}"
+
+        csv_output_path = str(exports_dir / f"{export_basename}.csv")
+        json_output_path = str(exports_dir / f"{export_basename}.json")
+
+        print(f"CSV will be saved to: {Path(csv_output_path).absolute()}")
+        print(f"JSON will be saved to: {Path(json_output_path).absolute()}")
+
+        if not all_generated_variants:
+            print("No keywords were generated. Nothing to export.")
+        else:
+            # Export all variants to a single CSV file
+            csv_path = await generator.export_to_csv(
+                all_variants,
+                AdFeatures(  # Just used as a container for the export method
+                    visual_cues=["combined"],
+                    pain_points=["combined"],
+                    visitor_intent="combined",
+                    target_audience={"combined": True},
+                    image_url="combined",  # This won't affect the individual image URLs in the export
+                ),
+                output_path=csv_output_path,
             )
-            print(f"   Explanation: {kw.explanation[:100]}...")
 
-        # Export all keywords to CSV and JSON
-        print("\nExporting all generated keywords to CSV and JSON...")
+            # Export all variants to a single JSON file
+            json_path = await generator.export_to_json(
+                all_variants,
+                AdFeatures(  # Just used as a container for the export method
+                    visual_cues=["combined"],
+                    pain_points=["combined"],
+                    visitor_intent="combined",
+                    target_audience={"combined": True},
+                    image_url="combined",  # This won't affect the individual image URLs in the export
+                ),
+                output_path=json_output_path,
+            )
 
-        # Export each image's keywords separately to demonstrate image-keyword pairing
-        csv_path1 = await generator.export_to_csv(
-            variants1, ad_features1, output_path="exports/nike_running_keywords.csv"
-        )
-        csv_path2 = await generator.export_to_csv(
-            variants2, ad_features2, output_path="exports/nike_basketball_keywords.csv"
-        )
-
-        # Export all keywords combined to demonstrate multiple image URLs in one file
-        csv_path_combined = await generator.export_to_csv(all_variants, ad_features1)
-        json_path_combined = await generator.export_to_json(all_variants, ad_features1)
-
-        # Print export paths
-        print("\nExport files:")
-        if csv_path1:
-            print(f"Running shoes keywords CSV: {csv_path1}")
-        if csv_path2:
-            print(f"Basketball shoes keywords CSV: {csv_path2}")
-        if csv_path_combined:
-            print(f"Combined keywords CSV: {csv_path_combined}")
-        if json_path_combined:
-            print(f"Combined keywords JSON: {json_path_combined}")
+            # Print export paths
+            if csv_path:
+                print(f"All keywords exported to CSV: {Path(csv_path).absolute()}")
+            if json_path:
+                print(f"All keywords exported to JSON: {Path(json_path).absolute()}")
 
         # Print explanation of metrics
         print("\nMetrics Explanation:")
@@ -2003,18 +2205,21 @@ async def main():
         )
 
         # Print image-keyword relationship explanation
-        print("\nImage-Keyword Relationship:")
-        print("- Each image URL can have multiple generated keywords")
+        print("\nImage-Keyword Relationship in Exports:")
+        print("- The CSV and JSON files contain keywords for ALL image URLs")
+        print("- Each row/entry shows which image URL a keyword belongs to")
+        print("- The exports group multiple keywords under each image URL")
         print(
-            "- Keywords are tailored to the specific visual elements and context of each image"
+            "- You can filter or sort by image URL to analyze keywords for specific images"
         )
-        print("- The CSV exports show which keywords belong to which image URLs")
-        print("- Metrics are estimated based on similar keywords in our database")
 
         print("\nKeyword variant generation completed successfully!")
 
     except Exception as e:
         print(f"Error in example: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

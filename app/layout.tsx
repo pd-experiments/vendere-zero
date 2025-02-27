@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/lib/auth-context"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
-import { GeistSans } from 'geist/font/sans';
+import { AuthProvider } from "@/lib/auth-context";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { GeistSans } from "geist/font/sans";
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
 import { ConditionalSearch } from "@/components/conditional-search";
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Vendere Labs",
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
 };
 
@@ -41,13 +42,17 @@ export default async function RootLayout({
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const sidebarState = cookieStore.get(SIDEBAR_STATE_COOKIE)?.value === 'true';
+  const sidebarState = cookieStore.get(SIDEBAR_STATE_COOKIE)?.value === "true";
 
   return (
     <html lang="en" className="dark">
-      <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
+      <body
+        className={`${GeistSans.className} dark:bg-background dark:text-white`}
+      >
         <Providers>
           <AuthProvider>
             <SidebarProvider defaultOpen={sidebarState}>
@@ -60,6 +65,7 @@ export default async function RootLayout({
                   <main className="flex-1 overflow-auto w-[100%]">
                     {children}
                   </main>
+                  <Toaster />
                 </div>
               </div>
             </SidebarProvider>

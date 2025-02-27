@@ -1,0 +1,2444 @@
+{
+  "export_timestamp": "2025-02-27T01:00:27.195660",
+  "total_keywords": 76,
+  "unique_images": 3,
+  "images": [
+    {
+      "image_url": "https://example.com/nike_running_shoes.jpg",
+      "total_keywords": 26,
+      "keywords": [
+        {
+          "keyword": "what makes nike shoes unique",
+          "metrics": {
+            "search_volume": 475200,
+            "cpc": 0.819,
+            "keyword_difficulty": 58.0,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.42577818532818534,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"what makes nike shoes unique\" aligns with the ad's intent and audience by addressing specific pain points like foot discomfort and performance, appealing to the active 18-35 demographic. The high search volume (475,200) indicates strong interest, while the CPC ($0.82) suggests a cost-effective opportunity compared to similar keywords. The keyword difficulty (58) and competition (0.77) imply moderate challenge, indicating potential for visibility with strategic optimization. To enhance performance, consider incorporating user testimonials or unique selling points in the ad copy to resonate with the audience's desire for quality and differentiation."
+        },
+        {
+          "keyword": "nike shoes for better endurance",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.3938420253723111,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"nike shoes for better endurance\" aligns perfectly with the ad's intent and target audience, as it directly addresses the pain points of foot discomfort and lack of endurance for athletes aged 18-35. The high search volume of 431,904 indicates strong interest, while the CPC of $0.79 suggests a reasonable investment for potential returns, especially compared to similar keywords. The keyword difficulty of 61.4 and competition of 0.77 imply moderate competition, making it feasible to rank well. To optimize, consider incorporating long-tail variations and focusing on content that highlights endurance benefits, enhancing relevance and engagement."
+        },
+        {
+          "keyword": "best nike shoes for fitness enthusiasts",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.3938420253723111,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"best nike shoes for fitness enthusiasts\" aligns perfectly with the ad's intent and audience, targeting active individuals aged 18-35 who seek premium athletic footwear. The high search volume (431,904) indicates strong interest, while the CPC of $0.79 suggests a reasonable cost for competitive visibility. The keyword difficulty of 61.4 reflects moderate competition, likely due to similar keywords like \"nike shoes,\" which have higher volumes but also higher difficulty. To optimize performance, consider incorporating long-tail variations and focusing on specific pain points, such as comfort and endurance, to enhance relevance and engagement."
+        },
+        {
+          "keyword": "nike shoes for foot support",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.3938420253723111,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"nike shoes for foot support\" aligns with the ad's intent and target audience, as it addresses pain points like foot discomfort while appealing to fitness enthusiasts aged 18-35. The high search volume (431,904) indicates strong interest, while the CPC of $0.79 suggests a reasonable cost for targeting this niche. The keyword difficulty of 61.4 reflects moderate competition, likely due to similar keywords like \"nike shoes,\" which have higher volume but also higher competition. To optimize, consider using long-tail variations or local targeting to reduce competition and improve ad relevance, potentially enhancing conversion rates."
+        },
+        {
+          "keyword": "nike shoes for diverse athletes",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.3938420253723111,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"nike shoes for diverse athletes\" aligns with the ad's intent and audience by targeting a broad demographic interested in running and fitness, addressing pain points like foot discomfort and performance. The high search volume (431,904) indicates strong interest, while the CPC ($0.79) suggests a reasonable cost for competitive visibility. The keyword difficulty (61.4) and competition (0.77) reflect a moderately challenging landscape, likely due to similar keywords like \"nike shoes,\" which have higher volume but also higher competition. To optimize, consider incorporating long-tail variations or specific athlete types to capture niche segments and improve ad relevance."
+        },
+        {
+          "keyword": "best running shoes for comfort",
+          "metrics": {
+            "search_volume": 60544,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21045281963596252,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"best running shoes for comfort\" aligns perfectly with the ad's intent and target audience, as it directly addresses the pain points of foot discomfort and performance issues for active individuals aged 18-35. The high search volume of 60,544 suggests strong interest, while the CPC of $0.68 indicates a reasonable cost for targeting this competitive niche. The keyword difficulty of 58.6 and competition of 0.70 reflect a moderately challenging landscape, likely influenced by similar keywords like \"running shoes for women.\" To optimize, consider incorporating long-tail variations and focusing on unique selling points of Nike's premium shoes to enhance visibility and conversion rates."
+        },
+        {
+          "keyword": "how to select running shoes for your needs",
+          "metrics": {
+            "search_volume": 54489,
+            "cpc": 0.6083999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20547221039963898,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"how to select running shoes for your needs\" aligns perfectly with the ad's intent and target audience, as it addresses common pain points like foot discomfort and performance issues while appealing to fitness enthusiasts aged 18-35. The high search volume (54,489) indicates strong interest, while the CPC ($0.61) suggests a cost-effective investment compared to similar keywords. The keyword difficulty (58.6) and competition (0.70) reflect a moderately competitive landscape, indicating potential for visibility. To optimize, consider incorporating long-tail variations and content that directly addresses specific needs, enhancing relevance and engagement."
+        },
+        {
+          "keyword": "affordable premium running shoes",
+          "metrics": {
+            "search_volume": 56032,
+            "cpc": 0.7419999999999999,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20422989750789755,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"affordable premium running shoes\" aligns with the ad's intent to target middle to high-income individuals aged 18-35 who are interested in running and fitness, addressing their pain points of discomfort and performance. The estimated search volume of 56,032 suggests a strong interest, while the CPC of $0.74 indicates a cost-effective opportunity compared to similar keywords, which have higher CPCs. The difficulty score of 61 and competition of 0.70 suggest moderate competition, indicating potential for effective targeting. To optimize, consider incorporating long-tail variations and focusing on ad copy that emphasizes comfort and performance benefits to attract clicks."
+        },
+        {
+          "keyword": "how to choose the right running shoes",
+          "metrics": {
+            "search_volume": 50428,
+            "cpc": 0.6678,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1993314713934714,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"how to choose the right running shoes\" aligns with the ad's intent and audience by addressing common pain points like foot discomfort and performance, appealing to the 18-35 age group interested in running. The search volume of 50,428 indicates significant interest, while a CPC of $0.67 suggests cost-effectiveness compared to similar keywords. The keyword difficulty of 61 and competition of 0.70 imply moderate competition, allowing for potential visibility. To optimize, incorporate this keyword in engaging content that educates consumers on selecting shoes, enhancing relevance and driving conversions."
+        },
+        {
+          "keyword": "nike running shoes",
+          "metrics": {
+            "search_volume": 162000,
+            "cpc": 0.98,
+            "keyword_difficulty": 64.0,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.15064619164619164,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"nike running shoes\" aligns perfectly with the ad's intent and target audience, as it directly addresses individuals aged 18-35 interested in running and fitness, who are likely seeking premium athletic footwear. The high search volume of 162,000 indicates strong demand, while the CPC of $0.98 suggests a competitive but manageable cost for ads. The difficulty score of 64 and competition level of 1.00 reflect a saturated market, necessitating strategic ad placements. To optimize performance, consider using long-tail variations or local targeting to reduce competition and enhance relevance, while addressing specific pain points like foot discomfort and performance enhancement in the ad copy."
+        },
+        {
+          "keyword": "trendy running shoes for active lifestyle",
+          "metrics": {
+            "search_volume": 60544,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21045281963596252,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"trendy running shoes for active lifestyle\" aligns perfectly with the ad's intent and target audience, appealing to young, fitness-oriented consumers seeking stylish, high-performance footwear. The high search volume of 60,544 indicates strong interest, while the CPC of $0.68 suggests a reasonable cost for targeting this competitive niche. The keyword difficulty of 58.6 reflects a moderately challenging landscape, likely due to similar keywords like \"running shoes for women,\" which have lower volumes but higher competition. To optimize performance, consider incorporating long-tail variations or localized terms to capture niche segments and improve ad relevance."
+        },
+        {
+          "keyword": "comfortable running shoes for all-day wear",
+          "metrics": {
+            "search_volume": 60544,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21045281963596252,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"comfortable running shoes for all-day wear\" aligns perfectly with the ad's intent and target audience, as it addresses the pain points of foot discomfort and endurance while appealing to fitness enthusiasts aged 18-35. The high search volume (60,544) indicates strong interest, while the CPC ($0.68) suggests a reasonable cost for targeting this competitive niche. The keyword difficulty (58.6) and competition (0.70) reflect a moderately challenging landscape, likely influenced by similar keywords that cater to specific demographics. To optimize, consider incorporating long-tail variations or localized terms to enhance visibility and reduce competition."
+        },
+        {
+          "keyword": "high-quality running shoes for performance",
+          "metrics": {
+            "search_volume": 60544,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21045281963596252,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"high-quality running shoes for performance\" aligns perfectly with the ad's intent and target audience, as it directly addresses the needs of athletes seeking premium footwear to enhance their running experience. The high search volume of 60,544 indicates strong interest, while the CPC of $0.68 suggests a reasonable cost for targeting this engaged audience. The keyword difficulty of 58.6 and competition of 0.70 reflect a competitive landscape, likely due to similar keywords like \"running shoes for women,\" which indicates a saturated market. To optimize, consider incorporating long-tail variations or localized terms to improve visibility and reduce competition."
+        },
+        {
+          "keyword": "stylish running shoes for young adults",
+          "metrics": {
+            "search_volume": 60544,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21045281963596252,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            }
+          ],
+          "explanation": "The keyword \"stylish running shoes for young adults\" aligns perfectly with the ad's intent and audience, targeting 18-35-year-olds interested in fitness and athletics. The high search volume (60,544) indicates strong interest, while the CPC ($0.68) suggests a reasonable cost for reaching this demographic. The keyword difficulty (58.6) and competition (0.70) reflect a competitive market, likely due to similar keywords like \"running shoes for women,\" which have lower volumes but higher competition. To optimize, consider incorporating long-tail variations or specific styles to capture niche searches and improve ad relevance."
+        },
+        {
+          "keyword": "running shoes that fit well",
+          "metrics": {
+            "search_volume": 56032,
+            "cpc": 0.7419999999999999,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20422989750789755,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"running shoes that fit well\" aligns with the ad's intent and audience by addressing specific pain points like foot discomfort, appealing to the 18-35 age range interested in running and fitness. Its search volume of 56,032 indicates strong interest, while a CPC of $0.74 suggests cost-effectiveness compared to similar keywords, which have higher CPCs. The difficulty score of 61 and competition of 0.70 indicate a moderately competitive landscape, suggesting potential for good performance. To optimize, consider incorporating this keyword into ad copy and landing pages, emphasizing fit and comfort to resonate with the target audience's needs."
+        },
+        {
+          "keyword": "running shoes that enhance performance",
+          "metrics": {
+            "search_volume": 56032,
+            "cpc": 0.7419999999999999,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20422989750789755,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"running shoes that enhance performance\" aligns perfectly with the ad's intent and target audience, as it directly addresses the pain points of foot discomfort and slow performance while appealing to fitness enthusiasts aged 18-35. The estimated search volume of 56,032 suggests a strong interest in performance-enhancing footwear, while the CPC of $0.74 indicates a cost-effective opportunity compared to similar keywords. The difficulty score of 61 and competition of 0.70 suggest moderate competition, allowing for potential visibility. To optimize, consider incorporating this keyword into ad copy and landing pages, and use targeted ads to reach the specified demographic effectively."
+        },
+        {
+          "keyword": "nike running shoes for foot discomfort",
+          "metrics": {
+            "search_volume": 72652,
+            "cpc": 0.6759999999999999,
+            "keyword_difficulty": 58.6,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.20130718327232613,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            }
+          ],
+          "explanation": "The keyword \"nike running shoes for foot discomfort\" aligns with the ad's intent and target audience, as it directly addresses the pain points of foot discomfort while appealing to fitness enthusiasts aged 18-35. The high search volume (72,652) indicates strong interest, while the CPC of $0.68 suggests a reasonable cost for targeting this niche. The keyword difficulty of 58.6 and competition of 0.77 imply moderate competition, making it a viable option for standing out. To optimize, consider incorporating long-tail variations and focusing on content that highlights comfort features, which can enhance relevance and improve conversion rates."
+        },
+        {
+          "keyword": "how to find stylish running shoes",
+          "metrics": {
+            "search_volume": 50428,
+            "cpc": 0.6678,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1993314713934714,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"how to find stylish running shoes\" aligns with the ad's intent and audience by addressing the target demographic's desire for both performance and aesthetics in athletic footwear. The estimated search volume of 50,428 indicates strong interest, while a CPC of $0.67 suggests a cost-effective opportunity compared to similar keywords. The keyword difficulty of 61 and competition of 0.70 imply a moderate challenge, indicating potential for effective targeting. To optimize, consider incorporating this keyword into engaging content that highlights style and performance benefits, and use it in ad copy to attract clicks from users actively seeking stylish options."
+        },
+        {
+          "keyword": "best shoes for long-distance running",
+          "metrics": {
+            "search_volume": 46864,
+            "cpc": 0.5439999999999999,
+            "keyword_difficulty": 60.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1947646638920925,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            }
+          ],
+          "explanation": "The keyword \"best shoes for long-distance running\" aligns perfectly with the ad's intent and audience, targeting active individuals aged 18-35 who seek premium athletic footwear to address pain points like foot discomfort and performance issues. The high search volume (46,864) indicates strong interest, while the CPC ($0.54) suggests a cost-effective investment compared to similar keywords. The keyword difficulty (60.8) and competition (0.70) reflect a competitive landscape, emphasizing the need for compelling ad copy and visuals to stand out. To optimize, consider incorporating long-tail variations and user-generated content to enhance relevance and engagement."
+        },
+        {
+          "keyword": "why choose nike running shoes",
+          "metrics": {
+            "search_volume": 61671,
+            "cpc": 0.738,
+            "keyword_difficulty": 60.0,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.19370643273328988,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "mens nike running shoes",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike running",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running shoes men",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"why choose nike running shoes\" aligns with the ad's intent and audience by addressing common pain points like foot discomfort and performance, appealing to the 18-35 age range interested in fitness. Its estimated search volume of 61,671 suggests strong interest, while a CPC of $0.74 indicates a reasonable cost for targeting this audience. The keyword difficulty of 60 and competition of 0.77 reflect a competitive landscape, suggesting that while challenging, there's significant potential for visibility. To optimize, consider incorporating customer testimonials or performance statistics in the ad to enhance relevance and engagement."
+        },
+        {
+          "keyword": "what are the best shoes for running",
+          "metrics": {
+            "search_volume": 42177,
+            "cpc": 0.4895999999999999,
+            "keyword_difficulty": 60.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.19085787023015596,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            }
+          ],
+          "explanation": "The keyword \"what are the best shoes for running\" aligns perfectly with the ad's intent and target audience, as it directly addresses the pain points of foot discomfort and performance issues faced by runners aged 18-35. The high search volume (42,177) indicates strong interest, while the CPC of $0.49 suggests a cost-effective opportunity compared to similar keywords. The keyword difficulty of 60.8 reflects moderate competition, likely due to established brands like Nike. To optimize, consider incorporating long-tail variations or localized targeting to capture niche audiences and improve ad relevance, potentially enhancing click-through rates and conversions."
+        },
+        {
+          "keyword": "how to improve running performance with shoes",
+          "metrics": {
+            "search_volume": 52070,
+            "cpc": 0.8838,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.18263838740410168,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "shoes with nike",
+              "volume": 8100
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike running",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"how to improve running performance with shoes\" aligns with the ad's intent and audience by addressing common pain points like foot discomfort and slow performance, appealing to active individuals aged 18-35. The estimated search volume of 52,070 indicates strong interest, while the CPC of $0.88 suggests cost-effectiveness compared to similar keywords, indicating a competitive yet accessible market. The difficulty score of 71.2 reflects moderate competition, suggesting that while it's challenging, there's potential for visibility. To optimize, incorporate this keyword in engaging content that highlights shoe benefits and performance enhancements, and consider using long-tail variations to capture niche searches."
+        },
+        {
+          "keyword": "running shoes with good support",
+          "metrics": {
+            "search_volume": 56496,
+            "cpc": 0.9,
+            "keyword_difficulty": 72.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.18185466519580806,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "shoes with nike",
+              "volume": 8100
+            },
+            {
+              "keyword": "running shoes",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike running shoes",
+              "volume": 135000
+            },
+            {
+              "keyword": "running shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "good nike shoes",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"running shoes with good support\" aligns with the ad's intent and audience by addressing specific pain points like foot discomfort and performance, appealing to active individuals aged 18-35. The estimated search volume of 56,496 indicates strong interest, while the CPC of $0.90 suggests a cost-effective investment compared to similar keywords. The difficulty score of 72.8 and competition of 0.70 indicate a moderately competitive landscape, implying potential for effective targeting. To optimize, consider incorporating long-tail variations or localized terms to enhance visibility and reduce competition while maintaining relevance to the target audience."
+        },
+        {
+          "keyword": "premium athletic footwear for athletes",
+          "metrics": {
+            "search_volume": 10608,
+            "cpc": 0.9540000000000001,
+            "keyword_difficulty": 64.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.17751516692573838,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike for men",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike for women",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "jordan air for 1",
+              "volume": 4400
+            },
+            {
+              "keyword": "jordans for women",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"premium athletic footwear for athletes\" aligns perfectly with the ad's intent and target audience, as it directly addresses the needs of active individuals aged 18-35 seeking high-quality running shoes. The estimated search volume of 10,608 indicates significant interest, while the CPC of $0.95 suggests a reasonable cost for targeting this competitive niche. The keyword difficulty of 64.2 reflects a moderately challenging landscape, likely influenced by similar keywords like \"nike shoes for men,\" which has high volume but also high competition. To optimize, consider incorporating long-tail variations or localized terms to enhance visibility and reduce competition."
+        },
+        {
+          "keyword": "durable athletic footwear for fitness enthusiasts",
+          "metrics": {
+            "search_volume": 10608,
+            "cpc": 0.9540000000000001,
+            "keyword_difficulty": 64.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.17751516692573838,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike for men",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike for women",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "jordan air for 1",
+              "volume": 4400
+            },
+            {
+              "keyword": "jordans for women",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"durable athletic footwear for fitness enthusiasts\" aligns with the ad's intent and audience by addressing the specific needs of active individuals aged 18-35 who prioritize performance and comfort. The estimated search volume of 10,608 indicates a solid interest level, while the CPC of $0.95 suggests a moderate investment for potential returns, reflecting the competitive landscape of athletic footwear. The difficulty score of 64.2 indicates a challenging but achievable ranking opportunity, given the high competition (0.70) from similar keywords. To optimize, consider incorporating long-tail variations or localized terms to enhance visibility and reduce competition."
+        },
+        {
+          "keyword": "nike athletic footwear for urban dwellers",
+          "metrics": {
+            "search_volume": 12729,
+            "cpc": 0.9540000000000001,
+            "keyword_difficulty": 64.2,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.16292207601664743,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike for men",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike for women",
+              "volume": 4400
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "jordan air for 1",
+              "volume": 4400
+            },
+            {
+              "keyword": "jordans for women",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"nike athletic footwear for urban dwellers\" aligns well with the ad's intent and audience, targeting young, fitness-focused individuals seeking premium running shoes. The estimated search volume of 12,729 suggests a strong interest, while the CPC of $0.95 indicates a reasonable cost for competitive visibility. The keyword difficulty of 64.2 reflects moderate competition, likely influenced by similar keywords like \"nike shoes for men\" with high volume but higher difficulty. To optimize, consider incorporating urban lifestyle imagery in the ad and using location-based targeting to enhance relevance for urban dwellers, potentially improving engagement and conversion rates."
+        }
+      ]
+    },
+    {
+      "image_url": "https://example.com/nike_basketball_shoes.jpg",
+      "total_keywords": 25,
+      "keywords": [
+        {
+          "keyword": "Nike PG 1 review",
+          "metrics": {
+            "search_volume": 11616,
+            "cpc": 0.59,
+            "keyword_difficulty": 40.0,
+            "competition_percentage": 0.1925,
+            "efficiency_index": 0.2884215746268657,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "pg 6",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"Nike PG 1 review\" aligns with the ad's intent and audience as it targets basketball enthusiasts aged 16-30 who are researching footwear options, addressing their pain points like ankle support and grip. The estimated search volume of 11,616 indicates strong interest, while a CPC of $0.59 and a competition score of 0.19 suggest a cost-effective opportunity for visibility. The keyword difficulty of 40 indicates moderate competition, similar to \"pg 6,\" which can help gauge performance expectations. To optimize, consider incorporating user-generated content or testimonials in the ad to enhance credibility and engagement."
+        },
+        {
+          "keyword": "basketball footwear for all-day comfort",
+          "metrics": {
+            "search_volume": 56992,
+            "cpc": 0.43,
+            "keyword_difficulty": 48.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.22695376119402988,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shorts",
+              "volume": 40500
+            }
+          ],
+          "explanation": "The keyword \"basketball footwear for all-day comfort\" aligns with the ad's intent and audience by addressing the pain points of ankle support and impact protection, appealing to the active lifestyle of 16-30-year-olds interested in basketball. The estimated search volume of 56,992 suggests strong interest, while the CPC of $0.43 indicates a reasonable cost for targeting this audience. The difficulty score of 48.6 and competition of 0.70 suggest moderate competition, allowing for effective targeting without excessive bidding. To optimize, consider incorporating related long-tail keywords and focusing on content that highlights comfort features to enhance relevance and engagement."
+        },
+        {
+          "keyword": "basketball shoes for jumping",
+          "metrics": {
+            "search_volume": 52016,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21291814925373137,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes for jumping\" aligns with the ad's intent and audience by targeting young basketball enthusiasts seeking performance-enhancing footwear. The high search volume (52,016) indicates strong interest, while the CPC ($0.38) suggests cost-effectiveness compared to similar keywords. The keyword difficulty (52.8) and competition (0.70) reflect a moderately competitive landscape, indicating room for visibility. To optimize, consider incorporating specific pain points like \"ankle support\" in ad copy and landing pages to enhance relevance and engagement, potentially improving conversion rates."
+        },
+        {
+          "keyword": "durable basketball shoes for young athletes",
+          "metrics": {
+            "search_volume": 52016,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21291814925373137,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"durable basketball shoes for young athletes\" aligns with the ad's intent and audience by addressing specific pain points like ankle support and impact protection, appealing to the active lifestyle of 16-30-year-olds interested in basketball. The estimated search volume of 52,016 suggests strong interest, while the CPC of $0.38 indicates a cost-effective opportunity compared to similar keywords. The keyword difficulty of 52.8 and competition at 0.70 suggest moderate competition, allowing for potential visibility. To optimize, consider incorporating long-tail variations or local targeting to enhance relevance and reduce competition."
+        },
+        {
+          "keyword": "basketball shoes for ankle support",
+          "metrics": {
+            "search_volume": 52016,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21291814925373137,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes for ankle support\" aligns with the ad's intent and audience by addressing specific pain points—ankle support—important to basketball players aged 16-30. The high search volume (52,016) indicates strong interest, while the CPC of $0.38 suggests a cost-effective investment compared to similar keywords. The keyword difficulty (52.8) and competition (0.70) imply moderate competition, allowing for potential visibility. To optimize, consider incorporating related terms like \"impact protection\" in ad copy and targeting specific demographics within the audience to enhance relevance and engagement."
+        },
+        {
+          "keyword": "comfortable basketball shoes for streetwear",
+          "metrics": {
+            "search_volume": 52016,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21291814925373137,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"comfortable basketball shoes for streetwear\" aligns with the ad's intent and audience by addressing the target demographic's interests in basketball and urban culture while emphasizing comfort, a key pain point. The estimated search volume of 52,016 suggests strong interest, likely influenced by similar keywords like \"basketball shoes\" and \"nike basketball shoes,\" which have high volumes. The CPC of $0.38 indicates a cost-effective opportunity, while a difficulty of 52.8 and competition of 0.70 suggest moderate competition, allowing for potential visibility. To optimize, consider incorporating related terms like \"urban\" or \"fashionable\" in ad copy to enhance relevance and attract clicks."
+        },
+        {
+          "keyword": "top-rated basketball shoes for casual players",
+          "metrics": {
+            "search_volume": 52016,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21291814925373137,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"top-rated basketball shoes for casual players\" aligns perfectly with the ad's intent and audience, targeting young basketball enthusiasts seeking quality footwear that addresses their pain points like ankle support and court grip. The high search volume (52,016) indicates strong interest, while the CPC ($0.38) suggests cost-effective advertising compared to similar keywords. The keyword difficulty (52.8) and competition (0.70) imply a moderately competitive landscape, allowing for effective positioning. To optimize, consider incorporating user reviews or testimonials in the ad to enhance credibility and appeal to the target audience's desire for quality and style."
+        },
+        {
+          "keyword": "impact protection basketball shoes",
+          "metrics": {
+            "search_volume": 53632,
+            "cpc": 0.372,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21063286567164183,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"impact protection basketball shoes\" aligns perfectly with the ad's intent and target audience, as it addresses specific pain points like ankle support and impact protection that resonate with basketball players aged 16-30. The search volume of 53,632 suggests strong interest, while the CPC of $0.37 indicates a cost-effective opportunity compared to similar keywords. The difficulty score of 53.4 and competition of 0.70 suggest moderate competition, allowing for potential visibility. To optimize, consider incorporating related terms like \"basketball shoes\" in the ad copy to enhance relevance and capture broader searches while maintaining focus on impact protection features."
+        },
+        {
+          "keyword": "what to look for in basketball shoes",
+          "metrics": {
+            "search_volume": 46814,
+            "cpc": 0.3456,
+            "keyword_difficulty": 52.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.2089962985074627,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"what to look for in basketball shoes\" aligns well with the ad's intent and audience, as it addresses common pain points like ankle support and court grip, appealing to young basketball enthusiasts. The estimated search volume of 46,814 indicates strong interest, while the CPC of $0.35 suggests cost-effectiveness compared to similar keywords. The difficulty score of 52.8 and competition of 0.70 imply moderate competition, allowing for potential visibility. To optimize, consider incorporating this keyword in blog content or FAQs on the product page to enhance organic reach and educate consumers about the new shoe line."
+        },
+        {
+          "keyword": "what makes a good basketball shoe",
+          "metrics": {
+            "search_volume": 45014,
+            "cpc": 0.4086,
+            "keyword_difficulty": 55.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20820510447761195,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "good nike shoes",
+              "volume": 3600
+            },
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"what makes a good basketball shoe\" aligns with the ad's intent and audience by addressing common pain points like ankle support and grip, appealing to the 16-30 age range interested in basketball. The estimated search volume of 45,014 indicates strong interest, while the CPC of $0.41 suggests a reasonable cost for targeted traffic. The keyword difficulty of 55.6 indicates moderate competition, likely influenced by similar keywords like \"basketball shoes\" with higher volume but also higher competition. To optimize, consider incorporating this keyword into engaging content that highlights product features and benefits, enhancing SEO and user engagement."
+        },
+        {
+          "keyword": "how to choose basketball shoes",
+          "metrics": {
+            "search_volume": 48268,
+            "cpc": 0.3348,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20680450746268658,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"how to choose basketball shoes\" aligns with the ad's intent and audience by addressing common pain points like ankle support and grip, appealing to the 16-30 age range interested in basketball. The metrics reflect a solid search volume (48,268) indicating strong interest, while a CPC of $0.33 suggests cost-effectiveness compared to similar keywords. The difficulty score of 53.4 indicates moderate competition, making it a viable target for awareness campaigns. To optimize, consider incorporating long-tail variations and educational content to enhance engagement and improve search rankings."
+        },
+        {
+          "keyword": "Nike basketball footwear",
+          "metrics": {
+            "search_volume": 76104,
+            "cpc": 0.406,
+            "keyword_difficulty": 46.4,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.16395528358208955,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike basketball shorts",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball bag",
+              "volume": 5400
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            }
+          ],
+          "explanation": "The keyword \"Nike basketball footwear\" aligns perfectly with the ad's intent and target audience, as it directly addresses the product category and resonates with basketball enthusiasts aged 16-30. The high search volume of 76,104 indicates strong interest, while the CPC of $0.41 suggests cost-effective advertising compared to similar keywords. The keyword difficulty of 46.4 indicates moderate competition, which, combined with a confidence score of 0.80, suggests good potential for performance. To optimize, consider incorporating long-tail variations like \"Nike basketball shoes for ankle support\" to capture specific pain points and improve relevance."
+        },
+        {
+          "keyword": "best basketball shoes",
+          "metrics": {
+            "search_volume": 67040,
+            "cpc": 0.372,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.14433358208955224,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"best basketball shoes\" aligns perfectly with the ad's intent and target audience, as it addresses the needs of young basketball enthusiasts seeking high-quality footwear. The estimated search volume of 67,040 indicates strong interest, while the CPC of $0.37 suggests cost-effectiveness compared to similar keywords. The keyword difficulty of 53.4 reflects moderate competition, indicating a viable opportunity for visibility. To optimize, consider incorporating long-tail variations like \"best Nike basketball shoes\" to capture more specific searches and enhance relevance, potentially improving click-through rates and conversions."
+        },
+        {
+          "keyword": "high-performance basketball shoes",
+          "metrics": {
+            "search_volume": 67040,
+            "cpc": 0.372,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.14433358208955224,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"high-performance basketball shoes\" aligns with the ad's intent and audience by addressing specific pain points like ankle support and court grip, appealing to the active, basketball-focused demographic aged 16-30. The estimated search volume of 67,040 indicates strong interest, while the CPC of $0.37 suggests a cost-effective investment compared to similar keywords. The difficulty score of 53.4 reflects moderate competition, indicating potential for visibility. To optimize, consider incorporating this keyword in ad copy and landing pages, and leverage related terms like \"basketball shoes\" to capture broader searches while maintaining relevance."
+        },
+        {
+          "keyword": "basketball shoes for fitness enthusiasts",
+          "metrics": {
+            "search_volume": 53632,
+            "cpc": 0.41400000000000003,
+            "keyword_difficulty": 54.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.2126128656716418,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes for fitness enthusiasts\" aligns perfectly with the ad's intent and target audience, as it directly addresses the needs of active individuals aged 16-30 interested in basketball and fitness. The estimated search volume of 53,632 suggests strong interest, while the CPC of $0.41 indicates a cost-effective opportunity compared to similar keywords. The keyword difficulty of 54.2 and competition of 0.70 imply moderate competition, allowing for potential visibility. To optimize, consider incorporating long-tail variations or localized terms to capture niche audiences and improve ad relevance."
+        },
+        {
+          "keyword": "basketball shoes that enhance performance",
+          "metrics": {
+            "search_volume": 53632,
+            "cpc": 0.372,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.21063286567164183,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes that enhance performance\" aligns perfectly with the ad's intent and target audience, as it addresses specific pain points like ankle support and court grip, appealing to young basketball enthusiasts. The estimated search volume of 53,632 suggests strong interest, while the CPC of $0.37 indicates a cost-effective opportunity compared to similar keywords. The difficulty score of 53.4 reflects moderate competition, suggesting a balanced chance for visibility. To optimize, consider incorporating this keyword into engaging content that highlights performance benefits, and use targeted ads to reach the defined audience effectively."
+        },
+        {
+          "keyword": "why ankle support matters in basketball shoes",
+          "metrics": {
+            "search_volume": 48268,
+            "cpc": 0.3348,
+            "keyword_difficulty": 53.4,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20680450746268658,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            },
+            {
+              "keyword": "mens basketball shoes",
+              "volume": 22200
+            }
+          ],
+          "explanation": "The keyword \"why ankle support matters in basketball shoes\" aligns with the ad's intent and audience by addressing a specific pain point—ankle support—relevant to basketball players aged 16-30. The search volume of 48,268 indicates strong interest, while a CPC of $0.33 suggests cost-effectiveness compared to similar keywords. The keyword difficulty of 53.4 indicates moderate competition, likely due to the popularity of related terms like \"basketball shoes.\" To optimize, consider incorporating this keyword into educational content or blog posts that highlight the benefits of ankle support, enhancing engagement and driving traffic to the ad."
+        },
+        {
+          "keyword": "basketball shoes with stylish design",
+          "metrics": {
+            "search_volume": 51376,
+            "cpc": 0.49800000000000005,
+            "keyword_difficulty": 60.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20557083582089555,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "shoes with nike",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes with stylish design\" aligns well with the ad's intent and target audience, as it appeals to young, urban basketball enthusiasts who value both performance and aesthetics. The estimated search volume of 51,376 indicates strong interest, while the CPC of $0.50 suggests cost-effectiveness compared to similar keywords. The difficulty score of 60.6 reflects moderate competition, likely due to the popularity of basketball footwear. To optimize performance, consider incorporating visuals that highlight style alongside functionality, and use targeted social media campaigns to engage the audience further."
+        },
+        {
+          "keyword": "basketball shoes with court grip",
+          "metrics": {
+            "search_volume": 51376,
+            "cpc": 0.49800000000000005,
+            "keyword_difficulty": 60.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20557083582089555,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "shoes with nike",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "jordan basketball shoes",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes with court grip\" aligns with the ad's intent and audience by addressing specific pain points like court grip and ankle support, appealing to young basketball enthusiasts. The estimated search volume of 51,376 indicates strong interest, while a CPC of $0.50 suggests cost-effectiveness compared to similar keywords. The difficulty score of 60.6 and competition of 0.70 indicate moderate competition, allowing for potential visibility. To optimize, consider incorporating this keyword in ad copy and landing pages, and leverage long-tail variations to capture niche searches and improve ranking."
+        },
+        {
+          "keyword": "best shoes for recreational basketball players",
+          "metrics": {
+            "search_volume": 58000,
+            "cpc": 0.4,
+            "keyword_difficulty": 58.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20319402985074628,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            }
+          ],
+          "explanation": "The keyword \"best shoes for recreational basketball players\" aligns perfectly with the ad's intent and audience, targeting young basketball enthusiasts seeking quality footwear. The estimated search volume of 58,000 indicates strong interest, while the CPC of $0.40 suggests cost-effectiveness compared to similar keywords. The keyword difficulty of 58 and competition of 0.70 reflect a moderately competitive landscape, indicating potential for visibility. To optimize, consider incorporating long-tail variations and focusing on specific pain points like ankle support and court grip in the ad copy to enhance relevance and engagement."
+        },
+        {
+          "keyword": "how to improve basketball skills with shoes",
+          "metrics": {
+            "search_volume": 45662,
+            "cpc": 0.44820000000000004,
+            "keyword_difficulty": 60.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.20192713432835824,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "shoes with nike",
+              "volume": 8100
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            }
+          ],
+          "explanation": "The keyword \"how to improve basketball skills with shoes\" aligns with the ad's intent and audience by addressing common pain points like ankle support and grip, appealing to young basketball enthusiasts. Its search volume of 45,662 indicates strong interest, while a CPC of $0.45 suggests cost-effectiveness compared to similar keywords. The difficulty score of 60 and competition of 0.70 imply moderate challenges, indicating room for optimization. To enhance performance, consider creating content that directly addresses skill improvement through specific shoe features, and utilize engaging visuals to capture the target audience's attention effectively."
+        },
+        {
+          "keyword": "Nike basketball shoes for dribbling",
+          "metrics": {
+            "search_volume": 61651,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.2,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.19938098507462684,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"Nike basketball shoes for dribbling\" aligns with the ad's intent and target audience, as it addresses specific pain points like ankle support and court grip, appealing to young basketball enthusiasts. The estimated search volume of 61,651 suggests strong interest, while a CPC of $0.38 indicates cost-effectiveness compared to similar keywords, which have higher CPCs. The keyword difficulty of 52.2 and competition of 0.77 suggest moderate competition, allowing for potential visibility. To optimize, consider incorporating long-tail variations and focusing on content that highlights the shoe's features related to dribbling, enhancing relevance and engagement."
+        },
+        {
+          "keyword": "Nike basketball shoes for urban culture",
+          "metrics": {
+            "search_volume": 61651,
+            "cpc": 0.384,
+            "keyword_difficulty": 52.2,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.19938098507462684,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball",
+              "volume": 8100
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"Nike basketball shoes for urban culture\" aligns perfectly with the ad's intent and target audience, as it directly addresses the interests of young basketball enthusiasts immersed in urban culture. The high search volume (61,651) indicates strong interest, while the CPC ($0.38) suggests cost-effectiveness compared to similar keywords. The moderate difficulty (52.2) and high competition (0.77) reflect a competitive landscape, indicating that while it’s popular, there’s room for effective targeting. To optimize, consider incorporating urban culture-related content in the ad and using social media platforms popular among the target demographic to enhance visibility and engagement."
+        },
+        {
+          "keyword": "Nike shoes for competitive basketball",
+          "metrics": {
+            "search_volume": 69600,
+            "cpc": 0.4,
+            "keyword_difficulty": 58.0,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.18848283582089553,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            },
+            {
+              "keyword": "nike basketball shoes",
+              "volume": 49500
+            },
+            {
+              "keyword": "basketball shoes nike",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"Nike shoes for competitive basketball\" aligns perfectly with the ad's intent and target audience, as it directly addresses the needs of young basketball players seeking high-performance footwear. The high search volume of 69,600 indicates strong interest, while the CPC of $0.40 suggests a cost-effective investment compared to similar keywords. The keyword difficulty of 58 and competition of 0.77 imply moderate challenge, indicating room for visibility. To optimize, consider incorporating long-tail variations or localizing the ad to target specific urban areas where basketball culture thrives, enhancing relevance and engagement."
+        },
+        {
+          "keyword": "basketball shoes",
+          "metrics": {
+            "search_volume": 246000,
+            "cpc": 0.24,
+            "keyword_difficulty": 50.0,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.12143432835820894,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "basketball shoes",
+              "volume": 246000
+            }
+          ],
+          "explanation": "The keyword \"basketball shoes\" aligns perfectly with the ad's intent and target audience, as it directly addresses the interests of young basketball enthusiasts seeking footwear that offers ankle support, court grip, and impact protection. The high search volume of 246,000 indicates strong demand, while the CPC of $0.24 suggests cost-effective advertising potential. The keyword difficulty of 50 and competition level of 1.0 imply a competitive landscape, but also highlight the keyword's relevance. To optimize performance, consider incorporating long-tail variations like \"best basketball shoes for ankle support\" to capture more specific searches and reduce competition."
+        }
+      ]
+    },
+    {
+      "image_url": "https://example.com/nike_casual_shoes.jpg",
+      "total_keywords": 25,
+      "keywords": [
+        {
+          "keyword": "comfortable lifestyle shoes",
+          "metrics": {
+            "search_volume": 550000,
+            "cpc": 0.8620000000000001,
+            "keyword_difficulty": 66.4,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.4823349397590362,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"comfortable lifestyle shoes\" aligns perfectly with the ad's intent and target audience, as it addresses their desire for comfort, style, and versatility in casual footwear. The high search volume of 550,000 indicates strong interest, while the CPC of $0.86 suggests a reasonable cost for targeting this audience, reflecting competitive interest in lifestyle footwear. The keyword difficulty of 66.4 indicates moderate competition, likely due to similar keywords like \"shoes\" and \"nike shoes,\" which have high volume but higher difficulty. To optimize, consider using long-tail variations or localizing the ad to urban settings to enhance relevance and reduce competition."
+        },
+        {
+          "keyword": "nike shoes for fashion-forward adults",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.46424055903614453,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"nike shoes for fashion-forward adults\" aligns perfectly with the ad's intent and target audience, appealing to 18-40-year-olds interested in fashion and urban culture. The high search volume (431,904) indicates strong interest, while the CPC of $0.79 suggests a moderate cost for clicks, reflecting competitive interest without being prohibitively expensive. The keyword difficulty of 61.4 indicates a challenging landscape, likely due to similar keywords like \"nike shoes,\" which have higher volumes but also higher competition. To optimize, consider using long-tail variations or localizing the ad to capture niche audiences, enhancing relevance and potentially lowering competition."
+        },
+        {
+          "keyword": "nike shoes for urban culture",
+          "metrics": {
+            "search_volume": 431904,
+            "cpc": 0.792,
+            "keyword_difficulty": 61.4,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.46424055903614453,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            },
+            {
+              "keyword": "nike shoes",
+              "volume": 550000
+            }
+          ],
+          "explanation": "The keyword \"nike shoes for urban culture\" aligns perfectly with the ad's intent and target audience, as it directly appeals to the lifestyle and fashion interests of individuals aged 18-40 in urban settings. The high search volume (431,904) indicates strong interest, while the CPC of $0.79 suggests a reasonable cost for targeting this niche. The keyword difficulty (61.4) and competition (0.77) reflect a competitive landscape, likely due to its relevance to urban fashion trends. To optimize, consider incorporating localized content or influencer partnerships to enhance visibility and engagement within this demographic."
+        },
+        {
+          "keyword": "what makes a sneaker versatile",
+          "metrics": {
+            "search_volume": 109728,
+            "cpc": 0.4650000000000001,
+            "keyword_difficulty": 48.666666666666664,
+            "competition_percentage": 0.6906666666666667,
+            "efficiency_index": 0.25078471734209573,
+            "confidence_score": 0.6000000000000001
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike womens sneaker",
+              "volume": 3600
+            },
+            {
+              "keyword": "shop sneaker deals",
+              "volume": 450000
+            },
+            {
+              "keyword": "nike al8 sneaker - women's",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"what makes a sneaker versatile\" aligns with the ad's intent and audience by addressing the pain points of comfort, style, and versatility in casual footwear, appealing to the urban lifestyle of the 18-40 demographic. The high search volume (109,728) indicates strong interest, while the CPC of $0.47 suggests a cost-effective investment compared to similar keywords. The difficulty score of 48.7 indicates moderate competition, allowing for potential visibility. To optimize, consider incorporating lifestyle imagery and testimonials in the ad to enhance engagement and relevance, leveraging the keyword's strengths to improve brand perception in the lifestyle category."
+        },
+        {
+          "keyword": "how to choose the right sneaker size",
+          "metrics": {
+            "search_volume": 2880,
+            "cpc": 0.6255000000000001,
+            "keyword_difficulty": 61.0,
+            "competition_percentage": 0.3745,
+            "efficiency_index": 0.22023770125958375,
+            "confidence_score": 0.5
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike womens sneaker",
+              "volume": 3600
+            },
+            {
+              "keyword": "nike shoe size",
+              "volume": 4400
+            }
+          ],
+          "explanation": "The keyword \"how to choose the right sneaker size\" aligns with the ad's intent and audience by addressing common pain points related to comfort and fit, appealing to the 18-40 age range interested in fashion and lifestyle. The estimated search volume of 2880 suggests a solid interest level, while the CPC of $0.63 indicates a moderate cost for clicks, reflecting competition in the casual footwear market. The keyword difficulty of 61.0 suggests a competitive landscape, yet a competition score of 0.37 indicates room for effective targeting. To optimize, consider incorporating this keyword into engaging content that addresses sizing tips, enhancing user experience and brand perception."
+        },
+        {
+          "keyword": "unique sneaker designs",
+          "metrics": {
+            "search_volume": 152400,
+            "cpc": 0.5166666666666667,
+            "keyword_difficulty": 48.666666666666664,
+            "competition_percentage": 0.9866666666666667,
+            "efficiency_index": 0.21890202263599856,
+            "confidence_score": 0.6000000000000001
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike womens sneaker",
+              "volume": 3600
+            },
+            {
+              "keyword": "shop sneaker deals",
+              "volume": 450000
+            },
+            {
+              "keyword": "nike al8 sneaker - women's",
+              "volume": 3600
+            }
+          ],
+          "explanation": "The keyword \"unique sneaker designs\" aligns well with the ad's intent and target audience, appealing to fashion-conscious individuals aged 18-40 interested in lifestyle and urban culture. The high search volume of 152,400 indicates strong interest, while a CPC of $0.52 suggests a reasonable cost for targeting this audience. The keyword difficulty of 48.7 indicates moderate competition, likely influenced by similar keywords like \"shop sneaker deals,\" which has high volume but lower difficulty. To optimize performance, consider incorporating lifestyle imagery and user-generated content to enhance engagement and brand perception."
+        },
+        {
+          "keyword": "versatile shoes for everyday wear",
+          "metrics": {
+            "search_volume": 16640,
+            "cpc": 0.458,
+            "keyword_difficulty": 57.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.19952296166484118,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            },
+            {
+              "keyword": "running shoes for women",
+              "volume": 22200
+            },
+            {
+              "keyword": "basketball shoes for men",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running shoes for men",
+              "volume": 14800
+            },
+            {
+              "keyword": "nike running shoes for women",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"versatile shoes for everyday wear\" aligns with the ad's intent and target audience, appealing to 18-40-year-olds interested in fashion and urban culture. Its search volume of 16,640 suggests a strong interest in casual footwear, while a CPC of $0.46 indicates a reasonable cost for potential conversions. The keyword difficulty of 57.2 and competition of 0.70 suggest moderate competition, making it accessible for Nike to improve brand perception in the lifestyle category. To optimize, Nike should incorporate lifestyle imagery and user-generated content to enhance engagement and relevance, leveraging the keyword's versatility to attract a broader audience."
+        },
+        {
+          "keyword": "best sneakers for active lifestyle",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"best sneakers for active lifestyle\" aligns with the ad's intent and audience by targeting individuals aged 18-40 interested in fashion and urban culture, seeking comfortable and stylish footwear. The search volume of 47,536 indicates strong interest, while the CPC of $0.64 suggests cost-effectiveness compared to similar keywords like \"nike sneakers\" with higher CPCs. The difficulty of 71.2 indicates moderate competition, allowing for potential visibility. To optimize, focus on high-quality visuals and engaging content that highlights comfort and versatility, leveraging the urban setting to resonate with the target audience."
+        },
+        {
+          "keyword": "sneakers that fit diverse body types",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"sneakers that fit diverse body types\" aligns with the ad's intent and audience by addressing comfort and versatility for a broad demographic interested in fashion and urban culture. The search volume of 47,536 indicates strong interest, while the CPC of $0.64 suggests cost-effective advertising compared to similar keywords like \"nike sneakers.\" The keyword difficulty of 71.2 indicates moderate competition, likely due to the rising demand for inclusive sizing. To optimize, consider incorporating user-generated content showcasing diverse body types in the ad visuals, enhancing relatability and engagement."
+        },
+        {
+          "keyword": "how to find stylish sneakers",
+          "metrics": {
+            "search_volume": 42782,
+            "cpc": 0.576,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.19153167929901424,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"how to find stylish sneakers\" aligns with the ad's intent and target audience, as it addresses the pain points of comfort, style, and versatility for fashion-conscious individuals aged 18-40. The estimated search volume of 42,782 suggests a strong interest in stylish footwear, while a CPC of $0.58 indicates a cost-effective opportunity compared to similar keywords. The keyword difficulty of 71.2 reflects moderate competition, suggesting that while it's competitive, there's still room for effective targeting. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance engagement and relevance."
+        },
+        {
+          "keyword": "stylish urban footwear",
+          "metrics": {
+            "search_volume": 100,
+            "cpc": 1.0,
+            "keyword_difficulty": 50.0,
+            "competition_percentage": 0.5,
+            "efficiency_index": 0.1861882146768894,
+            "confidence_score": 0.2
+          },
+          "similar_keywords": [],
+          "explanation": "The keyword \"stylish urban footwear\" aligns perfectly with the ad's intent and target audience, appealing to 18-40-year-olds interested in fashion and urban culture. The estimated search volume of 100 indicates niche interest, while a CPC of $1.00 suggests a cost-effective investment for targeted ads. The keyword difficulty of 50.0/100 and competition of 0.50 imply moderate competition, indicating potential for visibility with strategic bidding. To optimize, consider incorporating related lifestyle terms in ad copy and targeting urban-centric platforms to enhance engagement and brand perception."
+        },
+        {
+          "keyword": "durable casual footwear options",
+          "metrics": {
+            "search_volume": 4320,
+            "cpc": 0.42,
+            "keyword_difficulty": 55.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1511601161007667,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"durable casual footwear options\" aligns well with the ad's intent and target audience, as it addresses their need for comfort, style, and versatility in urban settings. The estimated search volume of 4,320 suggests a solid interest in durable footwear, while the CPC of $0.42 indicates a cost-effective opportunity for engagement. The difficulty score of 55 and competition level of 0.70 reflect a moderately competitive landscape, suggesting that while there is interest, effective targeting can yield results. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance relatability and appeal to the audience's fashion interests."
+        },
+        {
+          "keyword": "affordable trendy sneakers",
+          "metrics": {
+            "search_volume": 59420,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.1383918860898138,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"affordable trendy sneakers\" aligns with the ad's intent and target audience, appealing to 18-40-year-olds interested in fashion and urban culture while addressing pain points like comfort and style. The search volume of 59,420 indicates strong interest, while the CPC of $0.64 suggests cost-effectiveness compared to similar keywords like \"nike sneakers\" with a higher CPC. The keyword difficulty of 71.2 indicates moderate competition, implying potential for visibility. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance relatability and engagement, leveraging the keyword's appeal to affordability and trendiness."
+        },
+        {
+          "keyword": "popular sneakers among urban dwellers",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"popular sneakers among urban dwellers\" aligns with the ad's intent and audience by targeting urban culture enthusiasts aged 18-40, seeking stylish and versatile footwear. The search volume of 47,536 indicates strong interest, while the CPC of $0.64 suggests cost-effectiveness compared to similar keywords like \"sneakers\" and \"nike sneakers.\" The difficulty of 71.2 indicates moderate competition, implying a need for strategic targeting. To optimize, consider incorporating local urban elements in the ad and leveraging social media platforms popular among the target demographic to enhance engagement and brand perception."
+        },
+        {
+          "keyword": "fashionable sneakers for young adults",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"fashionable sneakers for young adults\" aligns perfectly with the ad's intent and audience, targeting 18-40-year-olds interested in fashion and urban culture. The estimated search volume of 47,536 indicates strong interest, while a CPC of $0.64 suggests cost-effectiveness compared to similar keywords like \"nike sneakers.\" The keyword difficulty of 71.2 indicates moderate competition, which is manageable given the high competition score of 0.70. To optimize performance, consider incorporating lifestyle imagery and user-generated content to enhance engagement and brand perception in the lifestyle category."
+        },
+        {
+          "keyword": "trendy sneakers for budget-conscious shoppers",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"trendy sneakers for budget-conscious shoppers\" aligns perfectly with the ad's intent and audience, appealing to the 18-40 age range interested in fashion and urban culture while addressing their pain points of comfort and style. The estimated search volume of 47,536 suggests strong interest, while the CPC of $0.64 indicates a cost-effective opportunity compared to similar keywords. The difficulty score of 71.2 reflects moderate competition, suggesting that while it's competitive, there's still room for effective targeting. To optimize, consider incorporating local urban settings in visuals and emphasizing affordability in messaging to resonate with budget-conscious shoppers."
+        },
+        {
+          "keyword": "best value sneakers for young adults",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1981132679079956,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"best value sneakers for young adults\" aligns with the ad's intent and target audience, as it addresses young adults seeking stylish, comfortable, and versatile footwear. The search volume of 47,536 indicates strong interest, while the CPC of $0.64 suggests cost-effectiveness compared to similar keywords like \"nike sneakers.\" The difficulty score of 71.2 indicates moderate competition, reflecting the presence of established brands, while a competition level of 0.70 suggests room for effective targeting. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance engagement and brand perception."
+        },
+        {
+          "keyword": "sneakers that combine comfort and style",
+          "metrics": {
+            "search_volume": 47536,
+            "cpc": 0.48,
+            "keyword_difficulty": 67.8,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.19708856911281492,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike cortez sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"sneakers that combine comfort and style\" aligns perfectly with the ad's intent and target audience, as it addresses the pain points of comfort and style for urban lifestyle enthusiasts aged 18-40. The estimated search volume of 47,536 suggests strong interest, likely influenced by similar keywords like \"sneakers\" and \"nike sneakers,\" which have high volumes. The CPC of $0.48 indicates a cost-effective opportunity, while the difficulty of 67.8 and competition of 0.70 suggest a moderately competitive landscape, allowing for potential visibility. To optimize, consider incorporating this keyword into engaging content that highlights versatility and lifestyle integration, enhancing brand perception in the casual footwear category."
+        },
+        {
+          "keyword": "how to style casual sneakers",
+          "metrics": {
+            "search_volume": 42782,
+            "cpc": 0.47519999999999996,
+            "keyword_difficulty": 69.6,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.1896666190580504,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"how to style casual sneakers\" aligns perfectly with the ad's intent and target audience, as it addresses the pain points of comfort, style, and versatility in an urban lifestyle context. The high search volume (42,782) indicates significant interest, while the CPC ($0.48) suggests cost-effectiveness compared to similar keywords like \"sneakers\" ($0.72). The keyword difficulty (69.6) reflects moderate competition, indicating a balance between opportunity and challenge. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance engagement and improve brand perception in the lifestyle category."
+        },
+        {
+          "keyword": "nike lifestyle sneakers for 18-40",
+          "metrics": {
+            "search_volume": 57043,
+            "cpc": 0.6399999999999999,
+            "keyword_difficulty": 71.2,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.18858603154435924,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            },
+            {
+              "keyword": "nike running sneakers",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"nike lifestyle sneakers for 18-40\" aligns perfectly with the ad's intent and target audience, as it directly addresses the interests of young adults seeking stylish, comfortable, and versatile footwear. The estimated search volume of 57,043 indicates significant interest, while the CPC of $0.64 suggests a cost-effective opportunity compared to similar keywords like \"nike sneakers\" with a higher CPC of $0.87. The keyword difficulty of 71.2 indicates moderate competition, allowing for potential visibility despite the 0.77 competition score. To optimize, consider incorporating long-tail variations and targeting specific urban lifestyle themes to enhance relevance and engagement."
+        },
+        {
+          "keyword": "best casual shoes for city life",
+          "metrics": {
+            "search_volume": 21960,
+            "cpc": 0.37,
+            "keyword_difficulty": 65.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.15057004928806134,
+            "confidence_score": 0.5
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike shoes for men",
+              "volume": 49500
+            }
+          ],
+          "explanation": "The keyword \"best casual shoes for city life\" aligns well with the ad's intent and target audience, as it appeals to urban dwellers aged 18-40 interested in fashion and lifestyle. The high search volume (21,960) indicates strong interest, while the CPC ($0.37) suggests cost-effectiveness compared to similar keywords. The keyword difficulty (65) and competition (0.70) reflect a moderately competitive landscape, indicating potential for visibility. To optimize, consider incorporating location-specific terms or lifestyle elements in the ad copy to enhance relevance and engagement, leveraging the urban setting visual cues."
+        },
+        {
+          "keyword": "where to buy stylish casual shoes",
+          "metrics": {
+            "search_volume": 3888,
+            "cpc": 0.378,
+            "keyword_difficulty": 55.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.14916910449069,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"where to buy stylish casual shoes\" aligns with the ad's intent and audience by addressing the target demographic's desire for fashionable, versatile footwear in an urban lifestyle context. The estimated search volume of 3,888 suggests a strong interest, while the CPC of $0.38 indicates a cost-effective opportunity compared to similar keywords like \"nike casual shoes,\" which has a higher CPC of $0.42. The keyword difficulty of 55 and competition of 0.70 imply moderate competition, suggesting potential for visibility. To optimize, consider incorporating location-based targeting and lifestyle imagery in the ad to enhance relevance and engagement."
+        },
+        {
+          "keyword": "what are the best casual shoes",
+          "metrics": {
+            "search_volume": 3888,
+            "cpc": 0.378,
+            "keyword_difficulty": 55.0,
+            "competition_percentage": 0.7,
+            "efficiency_index": 0.14916910449069,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"what are the best casual shoes\" aligns with the ad's intent and audience, as it targets individuals aged 18-40 interested in fashion and lifestyle, seeking comfortable and stylish footwear. The search volume of 3,888 indicates a strong interest, while the CPC of $0.38 suggests cost-effective advertising compared to similar keywords like \"nike casual shoes,\" which has a higher CPC of $0.42. The keyword difficulty of 55 and competition of 0.70 indicate moderate challenges, suggesting a balanced opportunity for visibility. To optimize, consider incorporating lifestyle imagery and user-generated content to enhance engagement and brand perception."
+        },
+        {
+          "keyword": "why choose nike casual footwear",
+          "metrics": {
+            "search_volume": 4665,
+            "cpc": 0.378,
+            "keyword_difficulty": 55.0,
+            "competition_percentage": 0.77,
+            "efficiency_index": 0.13731466812705365,
+            "confidence_score": 0.4
+          },
+          "similar_keywords": [
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            }
+          ],
+          "explanation": "The keyword \"why choose nike casual footwear\" aligns with the ad's intent and audience by addressing the pain points of comfort, style, and versatility, appealing to the 18-40 age range interested in urban lifestyle. The estimated search volume of 4,665 suggests a solid interest, while the CPC of $0.38 indicates a cost-effective opportunity compared to similar keywords like \"nike casual shoes,\" which has a higher CPC of $0.42. The difficulty score of 55 and high competition (0.77) imply a competitive landscape, suggesting the need for strong ad copy and visuals to stand out. To optimize, consider incorporating user testimonials or lifestyle imagery to enhance engagement."
+        },
+        {
+          "keyword": "casual sneakers",
+          "metrics": {
+            "search_volume": 59420,
+            "cpc": 0.5279999999999999,
+            "keyword_difficulty": 69.6,
+            "competition_percentage": 1.0,
+            "efficiency_index": 0.1359195969331873,
+            "confidence_score": 0.8
+          },
+          "similar_keywords": [
+            {
+              "keyword": "sneakers",
+              "volume": 201000
+            },
+            {
+              "keyword": "nike casual shoes",
+              "volume": 5400
+            },
+            {
+              "keyword": "nike sneakers",
+              "volume": 60500
+            },
+            {
+              "keyword": "jordan sneakers",
+              "volume": 18100
+            },
+            {
+              "keyword": "nike sneakers women",
+              "volume": 12100
+            }
+          ],
+          "explanation": "The keyword \"casual sneakers\" aligns perfectly with the ad's intent and target audience, appealing to 18-40-year-olds interested in fashion and urban culture. Its high search volume (59,420) indicates strong interest, while a moderate CPC of $0.53 suggests cost-effectiveness compared to similar keywords. The difficulty score of 69.6 indicates competition but is manageable, allowing for potential visibility. To optimize, consider incorporating lifestyle imagery and user-generated content in the ad to enhance engagement and brand perception. Additionally, targeting long-tail variations like \"stylish casual sneakers\" could improve performance by capturing more specific search intents."
+        }
+      ]
+    }
+  ],
+  "metrics_explanation": {
+    "search_volume": "Monthly search volume for the keyword",
+    "cpc": "Average cost per click in USD",
+    "keyword_difficulty": "SEO difficulty score (0-100)",
+    "competition_percentage": "Percentage of competing ads (0-100)",
+    "efficiency_index": "Composite score of volume vs. difficulty (higher is better)",
+    "confidence_score": "Confidence in the metric estimates (0-1)"
+  }
+}
