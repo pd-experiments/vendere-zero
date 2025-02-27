@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -29,15 +29,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-} from "@/components/ui/form";
-import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,9 +39,58 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
+  ExternalLink,
 } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card as InnerCard,
+  CardContent as InnerCardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
-// Define the research item type
+// Define proper types for the research item data
+type TargetAudience = {
+  name: string;
+  pain_points: string[];
+  preferences: string[];
+  characteristics: string[];
+};
+
+type KeyFeature = {
+  name: string;
+  importance_score: number;
+  mentioned_benefits: string[];
+};
+
+type Keyword = {
+  keyword: string;
+  intent_reflected: string;
+  likelihood_score: number;
+};
+
+type OriginalHeadline = {
+  headline_text: string;
+  headline_type: string;
+  visual_context: string;
+};
+
+type NewHeadline = {
+  improved: string;
+  original: string;
+  improvements: string[];
+  expected_impact: string[];
+  target_audience: string[];
+  pain_point_addressed: string[];
+};
+
+// Update the ResearchItem type with proper typing
 type ResearchItem = {
   id: string;
   title: string;
@@ -68,6 +108,34 @@ type ResearchItem = {
     competition_percentage: number;
     efficiency_index: number;
   }>;
+  // Updated RPC fields based on sample data
+  mr_id?: string;
+  mr_user_id?: string;
+  mr_image_url?: string;
+  mr_created_at?: string;
+  mr_intent_summary?: string;
+  mr_target_audience?: TargetAudience[];
+  mr_pain_points?: string[];
+  mr_buying_stage?: string;
+  mr_key_features?: KeyFeature[];
+  mr_competitive_advantages?: string[];
+  mr_perplexity_insights?: string;
+  mr_citations?: string[];
+  mr_keywords?: Keyword[];
+  mr_original_headlines?: OriginalHeadline[];
+  mr_new_headlines?: NewHeadline[];
+  li_id?: string;
+  li_type?: string;
+  li_name?: string;
+  li_description?: string;
+  li_user_id?: string;
+  li_created_at?: string;
+  li_item_id?: string;
+  li_features?: string[];
+  li_sentiment_tones?: string[];
+  li_avg_sentiment_confidence?: number | string;
+  li_preview_url?: string;
+  isLoadingVariants?: boolean;
 };
 
 // Form schema for batch generation
@@ -86,15 +154,282 @@ const batchGenerationSchema = z.object({
   campaign_objective: z.string().optional(),
 });
 
+// AdImage component for handling image loading and fallbacks
+const AdImage = ({
+  src,
+  className = "",
+  size = 100,
+  alt = "Ad image",
+}: {
+  src?: string;
+  className?: string;
+  size?: number;
+  alt?: string;
+}) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [wasBlocked, setWasBlocked] = useState(false);
+  const [usedProxy, setUsedProxy] = useState(false);
+
+  // Check if a URL is likely to be blocked by ad blockers
+  const isLikelyToBeBlocked = (url: string): boolean => {
+    return (
+      url.includes("googlesyndication") ||
+      url.includes("googleads") ||
+      url.includes("doubleclick") ||
+      url.includes("ad.") ||
+      url.includes(".ad") ||
+      url.includes("ads.") ||
+      url.includes(".ads")
+    );
+  };
+
+  // Process image URL - use proxy for potentially blocked URLs
+  const getImageUrl = (originalUrl?: string): string | undefined => {
+    if (!originalUrl) return undefined;
+
+    // If it's a data URL, return as is
+    if (originalUrl.startsWith("data:")) return originalUrl;
+
+    // If URL is likely to be blocked, use our proxy
+    if (isLikelyToBeBlocked(originalUrl)) {
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(
+        originalUrl
+      )}`;
+      console.log(`Using proxy for blocked URL: ${proxyUrl}`);
+      setUsedProxy(true);
+      return proxyUrl;
+    }
+
+    // Otherwise return the original URL
+    return originalUrl;
+  };
+
+  // Computed image URL with proxy if needed
+  const imageUrl = useMemo(() => getImageUrl(src), [src]);
+
+  // Reset error state if src changes
+  useEffect(() => {
+    setHasError(false);
+    setIsLoading(true);
+    setWasBlocked(false);
+    setUsedProxy(false);
+
+    // Log the image URL we're trying to load for debugging
+    if (src) {
+      console.log(`Original image URL: ${src}`);
+      if (isLikelyToBeBlocked(src)) {
+        console.warn(
+          "Image URL may be blocked by ad blockers - using proxy:",
+          src
+        );
+      }
+    } else {
+      console.warn("No image source provided");
+    }
+  }, [src]);
+
+  // Function to detect errors
+  const handleImageError = () => {
+    console.error(`Failed to load image: ${imageUrl}`);
+
+    // If we tried with the proxy and still failed
+    if (usedProxy) {
+      console.error("Even proxy couldn't load the image");
+    }
+
+    setHasError(true);
+    setIsLoading(false);
+
+    // If the URL seems like it would be blocked, mark it
+    if (src && isLikelyToBeBlocked(src)) {
+      setWasBlocked(true);
+    }
+  };
+
+  // If no source or error, show fallback
+  if (!imageUrl || hasError) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-1 rounded ${className}`}
+        style={{ width: size, height: size }}
+      >
+        {wasBlocked ? (
+          <div className="flex flex-col items-center">
+            <span>Ad Preview</span>
+            <span className="text-[9px] mt-1">(Blocked by browser)</span>
+          </div>
+        ) : (
+          <span>{hasError ? "Failed to load" : "No image"}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative border rounded-md overflow-hidden"
+      style={{ width: size, height: size }}
+    >
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+          <span className="animate-pulse">Loading...</span>
+        </div>
+      )}
+      <Image
+        src={imageUrl}
+        alt={alt}
+        fill
+        className="object-cover"
+        onError={handleImageError}
+        onLoadingComplete={() => {
+          console.log(`Successfully loaded image: ${imageUrl}`);
+          setIsLoading(false);
+        }}
+        unoptimized // Try this if images are still failing
+      />
+    </div>
+  );
+};
+
+// Progress bar for importance scores with label
+const ImportanceScore = ({
+  score,
+  label,
+}: {
+  score: number;
+  label: string;
+}) => {
+  // Calculate color based on score
+  const getColor = (score: number) => {
+    if (score >= 0.8) return "bg-green-500 dark:bg-green-600";
+    if (score >= 0.6) return "bg-yellow-500 dark:bg-yellow-600";
+    return "bg-orange-500 dark:bg-orange-600";
+  };
+
+  return (
+    <div className="mb-2">
+      <div className="flex justify-between mb-1">
+        <span className="text-sm font-medium">{label}</span>
+        <span className="text-sm font-medium">
+          {(score * 10).toFixed(1)}/10
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+        <div
+          className={`h-2 rounded-full ${getColor(score)}`}
+          style={{ width: `${score * 100}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
+// Target audience card component
+const TargetAudienceCard = ({ audience }: { audience: TargetAudience }) => {
+  return (
+    <div className="rounded-lg bg-background border p-4 mb-3">
+      <h4 className="font-semibold text-base mb-2">{audience.name}</h4>
+
+      {audience.characteristics && audience.characteristics.length > 0 && (
+        <div className="mb-3">
+          <h5 className="text-sm font-medium text-muted-foreground mb-1">
+            Characteristics
+          </h5>
+          <div className="flex flex-wrap gap-1">
+            {audience.characteristics.map((char: string, i: number) => (
+              <Badge key={i} variant="outline" className="bg-background/50">
+                {char}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {audience.preferences && audience.preferences.length > 0 && (
+        <div className="mb-3">
+          <h5 className="text-sm font-medium text-muted-foreground mb-1">
+            Preferences
+          </h5>
+          <div className="flex flex-wrap gap-1">
+            {audience.preferences.map((pref: string, i: number) => (
+              <Badge
+                key={i}
+                variant="default"
+                className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
+              >
+                {pref}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {audience.pain_points && audience.pain_points.length > 0 && (
+        <div>
+          <h5 className="text-sm font-medium text-muted-foreground mb-1">
+            Pain Points
+          </h5>
+          <div className="flex flex-wrap gap-1">
+            {audience.pain_points.map((pain: string, i: number) => (
+              <Badge
+                key={i}
+                variant="destructive"
+                className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20"
+              >
+                {pain}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Feature Card Component
+const FeatureCard = ({ feature }: { feature: KeyFeature }) => {
+  return (
+    <div className="rounded-lg bg-background border p-4 mb-3">
+      <h4 className="font-semibold text-base mb-2">{feature.name}</h4>
+
+      <ImportanceScore score={feature.importance_score} label="Importance" />
+
+      {feature.mentioned_benefits && feature.mentioned_benefits.length > 0 && (
+        <div className="mt-3">
+          <h5 className="text-sm font-medium text-muted-foreground mb-1">
+            Benefits
+          </h5>
+          <ul className="list-disc pl-5 text-sm space-y-1">
+            {feature.mentioned_benefits.map((benefit: string, i: number) => (
+              <li key={i}>{benefit}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Fix linter error for avg_sentiment_confidence by ensuring it's treated as a number
+const formatSentimentConfidence = (value: number | string): string => {
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  return `${(numValue * 100).toFixed(1)}%`;
+};
+
 export default function KeywordsList() {
   const router = useRouter();
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<ResearchItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedItemDetails, setSelectedItemDetails] =
+    useState<ResearchItem | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("items");
 
   // Initialize form
   const form = useForm<z.infer<typeof batchGenerationSchema>>({
@@ -123,39 +458,115 @@ export default function KeywordsList() {
       setFilteredItems(
         researchItems.filter(
           (item) =>
-            item.title?.toLowerCase().includes(query) ||
-            item.keyword?.toLowerCase().includes(query) ||
-            item.description?.toLowerCase().includes(query)
+            item.li_name?.toLowerCase().includes(query) ||
+            item.li_description?.toLowerCase().includes(query) ||
+            item.mr_intent_summary?.toLowerCase().includes(query)
         )
       );
     }
   }, [searchQuery, researchItems]);
 
-  // Fetch research items from API
-  const fetchResearchItems = async () => {
+  // Fetch research items from API with timeout and retry logic
+  const fetchResearchItems = async (retryCount = 0) => {
     setIsLoading(true);
+    setLoadError(null);
+
+    // Create an abort controller to handle timeouts
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // Increase to 15 seconds
+
     try {
-      const response = await fetch("/api/keywords/research-items");
+      const response = await fetch("/api/keywords/research-items", {
+        signal: controller.signal,
+        // Add cache: 'no-store' to prevent caching issues
+        cache: "no-store",
+        // Add additional headers to prevent caching
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      });
+
+      // Clear the timeout since the request completed
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        throw new Error(
+          `Server returned ${response.status}: ${response.statusText}`
+        );
       }
+
       const data = await response.json();
-      // Initialize the expanded property for each item
-      const itemsWithExpanded = data.map((item: ResearchItem) => ({
-        ...item,
-        expanded: false,
-        variants: item.variants || [],
-      }));
+
+      // Check if response contains an error object
+      if (data && typeof data === "object" && "error" in data) {
+        console.error("API returned an error:", data);
+        throw new Error(data.message || data.error || "API returned an error");
+      }
+
+      // If we get an empty array but not explicitly intended, treat as an error
+      if (Array.isArray(data) && data.length === 0) {
+        console.log("Received empty data array from API");
+      }
+
+      // Process the data without modifying the URLs - our AdImage component will handle proxying
+      const itemsWithExpanded = (data || []).map((item: ResearchItem) => {
+        // Log original URLs for debugging
+        if (item.mr_image_url) {
+          console.log(`Original mr_image_url: ${item.mr_image_url}`);
+        }
+        if (item.li_preview_url) {
+          console.log(`Original li_preview_url: ${item.li_preview_url}`);
+        }
+
+        return {
+          ...item,
+          expanded: false,
+          variants: item.variants || [],
+          variant_count:
+            typeof item.variant_count === "number" ? item.variant_count : 0,
+        };
+      });
+
       setResearchItems(itemsWithExpanded);
       setFilteredItems(itemsWithExpanded);
-    } catch (error) {
+      setLoadError(null);
+
+      // Show success toast for manual refresh (not on initial load)
+      if (retryCount > 0 || !document.hidden) {
+        toast.success(
+          `Successfully loaded ${itemsWithExpanded.length} research items`
+        );
+      }
+    } catch (error: unknown) {
       console.error("Error fetching research items:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not fetch research items"
-      );
+
+      // Handle timeout specifically
+      if (error instanceof Error && error.name === "AbortError") {
+        setLoadError("Request timed out. The server took too long to respond.");
+        toast.error("Request timed out. The server took too long to respond.");
+      } else {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Could not fetch research items";
+        setLoadError(errorMessage);
+        toast.error(errorMessage);
+      }
+
+      // Retry logic (max 2 retries)
+      if (retryCount < 2) {
+        console.log(`Retrying request (${retryCount + 1}/2)...`);
+        setTimeout(() => fetchResearchItems(retryCount + 1), 2000);
+        return;
+      }
+
+      // If all retries failed, set empty data
+      setResearchItems([]);
+      setFilteredItems([]);
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
@@ -185,34 +596,108 @@ export default function KeywordsList() {
     item.expanded = !item.expanded;
 
     // If expanding and no variants loaded yet, fetch them
-    if (item.expanded && item.keyword && item.variants.length === 0) {
+    if (item.expanded && item.variants.length === 0) {
+      // Set a loading state for this specific item
+      item.isLoadingVariants = true;
+      setFilteredItems([...newItems]);
+
       try {
-        const response = await fetch(
-          `/api/keywords/variants/${encodeURIComponent(item.keyword)}`
-        );
+        // Create an abort controller for timeout handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        // Use the ID directly as we've updated the API to handle IDs
+        const itemId = encodeURIComponent(item.id);
+        console.log(`Fetching variants for item ID: ${itemId}`);
+
+        const response = await fetch(`/api/keywords/variants/${itemId}`, {
+          signal: controller.signal,
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
+
+        // Clear timeout
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message ||
+              errorData.error ||
+              `Error: ${response.status} ${response.statusText}`
+          );
         }
 
         const variants = await response.json();
+
+        // Check if the response is valid
+        if (!Array.isArray(variants)) {
+          throw new Error("Invalid response format for variants");
+        }
+
+        console.log(
+          `Received ${variants.length} variants for item ID: ${itemId}`
+        );
+
         item.variants = variants;
+        item.variant_count = variants.length;
+
+        // Update the corresponding research item's variant count as well
+        const researchItemIndex = researchItems.findIndex(
+          (ri) => ri.id === item.id
+        );
+        if (researchItemIndex >= 0) {
+          const updatedResearchItems = [...researchItems];
+          updatedResearchItems[researchItemIndex].variant_count =
+            variants.length;
+          setResearchItems(updatedResearchItems);
+        }
       } catch (error) {
-        console.error(`Error fetching variants for ${item.keyword}:`, error);
-        toast.error(`Could not load variants for ${item.keyword}`);
+        console.error(
+          `Error fetching variants for ${item.li_name || item.id}:`,
+          error
+        );
+
+        // Handle specific error cases for better user feedback
+        if (error instanceof Error) {
+          if (error.name === "AbortError") {
+            toast.error(
+              `Request timeout: Could not load variants for ${
+                item.li_name || "this item"
+              } within the time limit.`
+            );
+          } else {
+            toast.error(
+              `Could not load variants for ${item.li_name || "this item"}: ${
+                error.message
+              }`
+            );
+          }
+        } else {
+          toast.error(
+            `Could not load variants for ${item.li_name || "this item"}`
+          );
+        }
+
         item.variants = [];
+      } finally {
+        // Clear loading state
+        item.isLoadingVariants = false;
+        setFilteredItems([...newItems]);
       }
     }
 
     setFilteredItems(newItems);
   };
 
-  // View keyword variants
-  const viewKeywordVariants = (keyword: string) => {
-    if (keyword) {
-      router.push(`/keywords/variants/${encodeURIComponent(keyword)}`);
-    } else {
-      toast.error("No keyword associated with this item");
-    }
+  // Function to handle item selection for detailed view
+  const viewItemDetails = (item: ResearchItem) => {
+    setSelectedItemDetails(item);
+    setActiveTab("details");
+    setShowBatchDialog(true);
   };
 
   // Handle batch generation
@@ -224,13 +709,13 @@ export default function KeywordsList() {
       return;
     }
 
-    // Get the selected items that have keywords
-    const selectedWithKeywords = filteredItems
-      .filter((item) => selectedItems.includes(item.id) && item.keyword)
-      .map((item) => item.keyword as string);
+    // Get the selected items for batch generation
+    const selectedItemsData = filteredItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
 
-    if (selectedWithKeywords.length === 0) {
-      toast.error("None of the selected items have associated keywords");
+    if (selectedItemsData.length === 0) {
+      toast.error("No valid items selected for batch generation");
       return;
     }
 
@@ -253,7 +738,7 @@ export default function KeywordsList() {
         },
         body: JSON.stringify({
           ad_features: adFeatures,
-          keywords: selectedWithKeywords,
+          item_ids: selectedItemsData.map((item) => item.id),
         }),
       });
 
@@ -270,6 +755,8 @@ export default function KeywordsList() {
       // Refresh the research items
       fetchResearchItems();
       setShowBatchDialog(false);
+      setSelectedItemDetails(null);
+      setActiveTab("items");
     } catch (error) {
       console.error("Error generating variants:", error);
       toast.error(
@@ -299,7 +786,7 @@ export default function KeywordsList() {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-8">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">
@@ -331,6 +818,16 @@ export default function KeywordsList() {
                 <Plus className="mr-2 h-4 w-4" /> New Variant
               </Button>
               <Button
+                variant="outline"
+                onClick={() => fetchResearchItems()}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                {isLoading ? "Refreshing..." : "Refresh"}
+              </Button>
+              <Button
                 variant="default"
                 onClick={() => setShowBatchDialog(true)}
                 disabled={selectedItems.length === 0}
@@ -354,7 +851,7 @@ export default function KeywordsList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[40px]">
+                    <TableHead className="w-[40px] px-4">
                       <Checkbox
                         checked={
                           selectedItems.length === filteredItems.length &&
@@ -364,19 +861,40 @@ export default function KeywordsList() {
                         disabled={filteredItems.length === 0}
                       />
                     </TableHead>
-                    <TableHead className="w-[30px]"></TableHead>
-                    <TableHead>Title / Keyword</TableHead>
-                    <TableHead>Intent Summary</TableHead>
-                    <TableHead className="text-right">Variants</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[30px] px-2"></TableHead>
+                    <TableHead className="px-4">Image Preview</TableHead>
+                    <TableHead className="px-4">Intent Summary</TableHead>
+                    <TableHead className="px-4">Description</TableHead>
+                    <TableHead className="text-right px-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center h-24">
-                        <div className="flex justify-center items-center">
-                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                        <div className="flex flex-col justify-center items-center gap-2">
+                          <div className="h-8 w-8 animate-spin rounded-full border-primary border-t-transparent"></div>
+                          <p className="text-muted-foreground">
+                            Loading image data...
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : loadError ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center h-24">
+                        <div className="flex flex-col justify-center items-center gap-3">
+                          <p className="text-destructive font-medium">
+                            Error loading data
+                          </p>
+                          <p className="text-muted-foreground">{loadError}</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchResearchItems()}
+                          >
+                            Try Again
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -393,7 +911,7 @@ export default function KeywordsList() {
                           <TableRow
                             className={item.expanded ? "border-b-0" : ""}
                           >
-                            <TableCell>
+                            <TableCell className="px-4">
                               <Checkbox
                                 checked={selectedItems.includes(item.id)}
                                 onCheckedChange={() =>
@@ -401,8 +919,8 @@ export default function KeywordsList() {
                                 }
                               />
                             </TableCell>
-                            <TableCell>
-                              {item.keyword && item.variant_count > 0 ? (
+                            <TableCell className="px-2">
+                              {item.variant_count > 0 ? (
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -419,41 +937,54 @@ export default function KeywordsList() {
                                 <span className="h-6 w-6"></span>
                               )}
                             </TableCell>
-                            <TableCell className="font-medium">
-                              <div>{item.title}</div>
-                              {item.keyword && (
-                                <div className="text-sm text-muted-foreground">
-                                  Keyword: {item.keyword}
-                                </div>
-                              )}
+                            <TableCell className="px-4 py-3">
+                              <AdImage
+                                src={item.mr_image_url || item.li_preview_url}
+                                size={80}
+                                alt={`Ad preview for ${
+                                  item.li_name || "unnamed item"
+                                }`}
+                              />
                             </TableCell>
-                            <TableCell>
-                              <div className="max-w-md truncate">
-                                {item.intent_summary ||
-                                  item.description ||
-                                  "No summary available"}
+                            <TableCell className="px-4">
+                              <div className="max-w-md line-clamp-1">
+                                <HoverCard>
+                                  <HoverCardTrigger asChild>
+                                    <span className="cursor-help">
+                                      {item.mr_intent_summary ||
+                                        item.intent_summary ||
+                                        "No summary available"}
+                                    </span>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent className="w-80 p-4">
+                                    <p className="text-sm">
+                                      {item.mr_intent_summary ||
+                                        item.intent_summary ||
+                                        "No summary available"}
+                                    </p>
+                                  </HoverCardContent>
+                                </HoverCard>
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">
-                              {item.variant_count || 0}
+                            <TableCell className="px-4">
+                              <div className="max-w-md line-clamp-1">
+                                {item.li_description || "No description"}
+                              </div>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right px-4">
                               <div className="flex justify-end space-x-2">
-                                {item.keyword && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      viewKeywordVariants(item.keyword!)
-                                    }
-                                  >
-                                    <FileText className="h-4 w-4" />
-                                  </Button>
-                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => viewItemDetails(item)}
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
                           {item.expanded &&
+                            !item.isLoadingVariants &&
                             item.variants &&
                             item.variants.length > 0 && (
                               <TableRow
@@ -463,7 +994,7 @@ export default function KeywordsList() {
                                 <TableCell colSpan={6} className="p-0">
                                   <div className="p-4">
                                     <h4 className="text-sm font-medium mb-2">
-                                      Variants for {item.keyword}
+                                      Variants for {item.li_name || "Item"}
                                     </h4>
                                     <div className="rounded-md border overflow-hidden">
                                       <Table>
@@ -525,7 +1056,23 @@ export default function KeywordsList() {
                                 </TableCell>
                               </TableRow>
                             )}
+                          {item.expanded && item.isLoadingVariants && (
+                            <TableRow
+                              key={`${item.id}-loading`}
+                              className="bg-muted/50"
+                            >
+                              <TableCell colSpan={6} className="py-8">
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Loading variants...
+                                  </p>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
                           {item.expanded &&
+                            !item.isLoadingVariants &&
                             (!item.variants || item.variants.length === 0) && (
                               <TableRow
                                 key={`${item.id}-expanded-empty`}
@@ -551,124 +1098,73 @@ export default function KeywordsList() {
       </div>
 
       {/* Batch Generation Dialog */}
-      <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+      <Dialog
+        open={showBatchDialog}
+        onOpenChange={(open) => {
+          setShowBatchDialog(open);
+          if (!open) {
+            setSelectedItemDetails(null);
+            setActiveTab("items");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Batch Generate Variants</DialogTitle>
             <DialogDescription>
-              Generate variants for {selectedItems.length} selected items
+              {selectedItems.length} item(s) selected for batch generation
             </DialogDescription>
           </DialogHeader>
 
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onBatchGenerate)}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="visual_cues"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Visual Cues</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter visual cues, comma separated"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Describe visual elements (e.g., &quot;running shoes,
-                      sports attire&quot;)
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="items">Selected Items</TabsTrigger>
+              <TabsTrigger value="details" disabled={!selectedItemDetails}>
+                Item Details
+              </TabsTrigger>
+            </TabsList>
 
-              <FormField
-                control={form.control}
-                name="pain_points"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pain Points</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter pain points, comma separated"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      List pain points (e.g., &quot;foot pain, poor
-                      performance&quot;)
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="visitor_intent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Visitor Intent</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter visitor intent" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="target_audience"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target Audience</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter target audience as JSON (e.g., {"age": "18-35"})'
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="product_category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Product Category</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter product category (optional)"
-                          {...field}
+            <TabsContent value="items" className="mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[450px] overflow-y-auto p-2">
+                {filteredItems
+                  .filter((item) => selectedItems.includes(item.id))
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      className="border rounded-md p-3 flex flex-col space-y-2 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex justify-center mb-2">
+                        <AdImage
+                          src={item.mr_image_url || item.li_preview_url}
+                          size={60}
+                          alt={`Ad preview for ${
+                            item.li_name || "unnamed item"
+                          }`}
                         />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="campaign_objective"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Campaign Objective</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter campaign objective (optional)"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                      </div>
+                      <h4 className="font-medium text-sm truncate">
+                        {item.li_name ||
+                          item.mr_intent_summary?.substring(0, 30) ||
+                          `Item ${item.id.substring(0, 8)}`}
+                      </h4>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {item.mr_intent_summary ||
+                          item.intent_summary ||
+                          "No summary"}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-auto"
+                        onClick={() => viewItemDetails(item)}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  ))}
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="mt-6">
                 <Button
                   type="button"
                   variant="outline"
@@ -676,7 +1172,10 @@ export default function KeywordsList() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isGenerating}>
+                <Button
+                  onClick={() => form.handleSubmit(onBatchGenerate)()}
+                  disabled={isGenerating}
+                >
                   {isGenerating ? (
                     <>
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
@@ -687,8 +1186,445 @@ export default function KeywordsList() {
                   )}
                 </Button>
               </DialogFooter>
-            </form>
-          </Form>
+            </TabsContent>
+
+            <TabsContent value="details" className="mt-4">
+              {selectedItemDetails && (
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">
+                      Details for {selectedItemDetails.li_name || "Item"}
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setActiveTab("items")}
+                    >
+                      Back to Items
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    {/* Image Preview Card */}
+                    <InnerCard>
+                      <InnerCardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row gap-6 items-start">
+                          <div className="flex-shrink-0">
+                            <h4 className="font-medium mb-3">Ad Preview</h4>
+                            <AdImage
+                              src={
+                                selectedItemDetails.mr_image_url ||
+                                selectedItemDetails.li_preview_url
+                              }
+                              size={200}
+                              alt={`Ad preview for ${
+                                selectedItemDetails.li_name || "unnamed item"
+                              }`}
+                            />
+                          </div>
+                          <div className="flex-grow">
+                            <h4 className="font-medium mb-3">Intent Summary</h4>
+                            <div className="bg-muted/50 p-4 rounded-md">
+                              <p className="text-sm">
+                                {selectedItemDetails.mr_intent_summary ||
+                                  selectedItemDetails.intent_summary ||
+                                  "No intent summary available"}
+                              </p>
+                            </div>
+
+                            {selectedItemDetails.mr_buying_stage && (
+                              <div className="mt-4">
+                                <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                                  Buying Stage
+                                </h5>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-base px-3 py-1"
+                                >
+                                  {selectedItemDetails.mr_buying_stage}
+                                </Badge>
+                              </div>
+                            )}
+
+                            {selectedItemDetails.li_description && (
+                              <div className="mt-4">
+                                <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                                  Description
+                                </h5>
+                                <div className="bg-muted/30 p-3 rounded-md">
+                                  <p className="text-sm">
+                                    {selectedItemDetails.li_description}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </InnerCardContent>
+                    </InnerCard>
+
+                    {/* Target Audience */}
+                    {selectedItemDetails.mr_target_audience &&
+                      selectedItemDetails.mr_target_audience.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">
+                              Target Audience
+                            </h4>
+                            <div className="space-y-3">
+                              {selectedItemDetails.mr_target_audience.map(
+                                (audience, index) => (
+                                  <TargetAudienceCard
+                                    key={`audience-${index}`}
+                                    audience={audience}
+                                  />
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Pain Points */}
+                    {selectedItemDetails.mr_pain_points &&
+                      selectedItemDetails.mr_pain_points.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">Pain Points</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedItemDetails.mr_pain_points.map(
+                                (pain, index) => (
+                                  <Badge
+                                    key={`pain-${index}`}
+                                    variant="destructive"
+                                    className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20 px-3 py-1.5 text-sm"
+                                  >
+                                    {pain}
+                                  </Badge>
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Key Features */}
+                    {selectedItemDetails.mr_key_features &&
+                      selectedItemDetails.mr_key_features.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">Key Features</h4>
+                            <div className="space-y-3">
+                              {selectedItemDetails.mr_key_features.map(
+                                (feature, index) => (
+                                  <FeatureCard
+                                    key={`feature-${index}`}
+                                    feature={feature}
+                                  />
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Competitive Advantages */}
+                    {selectedItemDetails.mr_competitive_advantages &&
+                      selectedItemDetails.mr_competitive_advantages.length >
+                        0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">
+                              Competitive Advantages
+                            </h4>
+                            <div className="space-y-2">
+                              {selectedItemDetails.mr_competitive_advantages.map(
+                                (adv, index) => (
+                                  <div
+                                    key={`adv-${index}`}
+                                    className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-900"
+                                  >
+                                    <p className="text-sm text-green-800 dark:text-green-300">
+                                      {adv}
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Keywords */}
+                    {selectedItemDetails.mr_keywords &&
+                      selectedItemDetails.mr_keywords.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">Keywords</h4>
+
+                            <div className="space-y-4">
+                              {(() => {
+                                // Group keywords by intent
+                                const keywordsByIntent: Record<
+                                  string,
+                                  Keyword[]
+                                > = {};
+                                selectedItemDetails.mr_keywords.forEach(
+                                  (kw) => {
+                                    if (
+                                      !keywordsByIntent[kw.intent_reflected]
+                                    ) {
+                                      keywordsByIntent[kw.intent_reflected] =
+                                        [];
+                                    }
+                                    keywordsByIntent[kw.intent_reflected].push(
+                                      kw
+                                    );
+                                  }
+                                );
+
+                                return Object.entries(keywordsByIntent).map(
+                                  ([intent, keywords]) => (
+                                    <div key={intent} className="mb-4">
+                                      <h5 className="text-sm font-medium text-primary mb-2 capitalize">
+                                        {intent}
+                                      </h5>
+                                      <div className="flex flex-wrap gap-2">
+                                        {keywords.map((kw, idx) => {
+                                          // Calculate color based on likelihood score
+                                          const getColor = (score: number) => {
+                                            if (score >= 0.8)
+                                              return "border-green-500 text-green-700 dark:text-green-400 dark:border-green-700";
+                                            if (score >= 0.7)
+                                              return "border-yellow-500 text-yellow-700 dark:text-yellow-400 dark:border-yellow-700";
+                                            return "border-orange-500 text-orange-700 dark:text-orange-400 dark:border-orange-700";
+                                          };
+
+                                          return (
+                                            <div
+                                              key={idx}
+                                              className={`text-xs border rounded-full px-3 py-1 ${getColor(
+                                                kw.likelihood_score
+                                              )} bg-background`}
+                                            >
+                                              <div className="flex items-center gap-2">
+                                                <span>{kw.keyword}</span>
+                                                <span className="font-semibold">
+                                                  {(
+                                                    kw.likelihood_score * 100
+                                                  ).toFixed(0)}
+                                                  %
+                                                </span>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )
+                                );
+                              })()}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Perplexity Insights */}
+                    {selectedItemDetails.mr_perplexity_insights && (
+                      <InnerCard>
+                        <InnerCardContent className="p-4">
+                          <h4 className="font-medium mb-4">
+                            Perplexity Insights
+                          </h4>
+                          <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-md dark:prose-invert">
+                            <ReactMarkdown>
+                              {selectedItemDetails.mr_perplexity_insights}
+                            </ReactMarkdown>
+                          </div>
+                        </InnerCardContent>
+                      </InnerCard>
+                    )}
+
+                    {/* Headline Improvements */}
+                    {selectedItemDetails.mr_new_headlines &&
+                      selectedItemDetails.mr_new_headlines.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">
+                              Headline Improvements
+                            </h4>
+
+                            <div className="space-y-4">
+                              {selectedItemDetails.mr_new_headlines.map(
+                                (headline, index) => (
+                                  <div
+                                    key={index}
+                                    className="rounded-lg border p-4 mb-3 bg-background"
+                                  >
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div className="p-3 bg-muted/50 rounded-md">
+                                        <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                                          Original
+                                        </h5>
+                                        <p className="text-base font-medium">
+                                          {headline.original}
+                                        </p>
+                                      </div>
+
+                                      <div className="p-3 bg-primary/5 rounded-md border-l-4 border-primary">
+                                        <h5 className="text-sm font-medium text-primary mb-1">
+                                          Improved
+                                        </h5>
+                                        <p className="text-base font-medium">
+                                          {headline.improved}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {headline.improvements &&
+                                      headline.improvements.length > 0 && (
+                                        <div className="mt-3">
+                                          <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                                            Improvements
+                                          </h5>
+                                          <ul className="list-disc pl-5 text-sm space-y-1">
+                                            {headline.improvements.map(
+                                              (improvement, i) => (
+                                                <li key={i}>{improvement}</li>
+                                              )
+                                            )}
+                                          </ul>
+                                        </div>
+                                      )}
+
+                                    {headline.expected_impact &&
+                                      headline.expected_impact.length > 0 && (
+                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-900">
+                                          <h5 className="text-sm font-medium text-green-800 dark:text-green-400 mb-1">
+                                            Expected Impact
+                                          </h5>
+                                          <p className="text-sm text-green-700 dark:text-green-300">
+                                            {headline.expected_impact[0]}
+                                          </p>
+                                        </div>
+                                      )}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Citations */}
+                    {selectedItemDetails.mr_citations &&
+                      selectedItemDetails.mr_citations.length > 0 && (
+                        <InnerCard>
+                          <InnerCardContent className="p-4">
+                            <h4 className="font-medium mb-4">Citations</h4>
+                            <div className="space-y-2">
+                              {selectedItemDetails.mr_citations.map(
+                                (citation, index) => (
+                                  <div
+                                    key={`citation-${index}`}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                                    <a
+                                      href={citation}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-blue-500 hover:underline truncate"
+                                    >
+                                      {citation}
+                                    </a>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </InnerCardContent>
+                        </InnerCard>
+                      )}
+
+                    {/* Library Item Data */}
+                    <InnerCard>
+                      <InnerCardContent className="p-4">
+                        <h4 className="font-medium mb-4">Library Item Data</h4>
+                        <div className="space-y-4">
+                          {/* Features */}
+                          {selectedItemDetails.li_features &&
+                            selectedItemDetails.li_features.length > 0 && (
+                              <div>
+                                <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                                  Features
+                                </h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {selectedItemDetails.li_features.map(
+                                    (feature, index) => (
+                                      <Badge
+                                        key={`feature-${index}`}
+                                        variant="outline"
+                                      >
+                                        {feature}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                          {/* Sentiment Tones */}
+                          {selectedItemDetails.li_sentiment_tones &&
+                            selectedItemDetails.li_sentiment_tones.length >
+                              0 && (
+                              <div>
+                                <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                                  Sentiment Tones
+                                </h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {selectedItemDetails.li_sentiment_tones.map(
+                                    (tone, index) => (
+                                      <Badge
+                                        key={`tone-${index}`}
+                                        variant="secondary"
+                                      >
+                                        {tone}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                          <div>
+                            <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                              Avg Sentiment Confidence
+                            </h5>
+                            <p>
+                              {selectedItemDetails.li_avg_sentiment_confidence
+                                ? formatSentimentConfidence(
+                                    selectedItemDetails.li_avg_sentiment_confidence
+                                  )
+                                : "None"}
+                            </p>
+                          </div>
+                        </div>
+                      </InnerCardContent>
+                    </InnerCard>
+                  </div>
+
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveTab("items")}
+                    >
+                      Back to Items
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
