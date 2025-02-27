@@ -6,13 +6,15 @@ import {
   Command,
   Ratio,
   GalleryVerticalEnd,
-  BookIcon,
   GlobeIcon,
+  LibraryBigIcon,
+  BarChart3Icon,
   // SquareTerminal,
   // AudioLines,
 } from "lucide-react"
+import { LayoutGroup } from "framer-motion"
 
-import { NavMain } from "@/components/nav-main"
+import { NavMain, type NavItem } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -25,11 +27,13 @@ import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/lib/auth-context"
 import _ from "lodash"
 import { Instrument_Serif } from 'next/font/google';
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from "react"
 
 const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
 
-const data = {
+// Memoize the data for better performance
+const getNavData = () => ({
   teams: [
     {
       name: "Acme Inc",
@@ -51,12 +55,17 @@ const data = {
     {
       title: "Market",
       url: "/market",
-      icon: GlobeIcon
+      icon: BarChart3Icon
     },
     {
       title: "Library",
       url: "/library",
-      icon: BookIcon
+      icon: LibraryBigIcon
+    },
+    {
+      title: "Knowledge",
+      url: "/query",
+      icon: GlobeIcon
     },
     // {
     //   title: "Simulations",
@@ -85,18 +94,32 @@ const data = {
     //   ],
     // },
   ],
-}
+});
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
   const pathname = usePathname()
+  const router = useRouter()
+  const data = React.useMemo(() => getNavData(), [])
 
-  console.log('Current pathname:', pathname)
-  const items = data.navMain.map(item => ({
-    ...item,
-    isActive: pathname === item.url
-  }))
-  console.log('Nav items with active state:', items)
+  // Prefetch the library page to improve navigation performance
+  useEffect(() => {
+    // Prefetch the library page when the sidebar mounts
+    router.prefetch('/library')
+  }, [router])
+
+  // Remove console.log statements for better performance
+  const items = React.useMemo(() => {
+    return data.navMain.map(item => ({
+      ...item,
+      isActive: pathname === item.url
+    })) as NavItem[]
+  }, [data.navMain, pathname])
+
+  // Optimization: capture click events and use router.push for navigation
+  const handleNavItemClick = React.useCallback((url: string) => {
+    router.push(url)
+  }, [router])
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -112,11 +135,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Separator className="mt-2 opacity-50" />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={items} />
+        <LayoutGroup>
+          <NavMain items={items} onItemClick={handleNavItemClick} />
+        </LayoutGroup>
       </SidebarContent>
       <SidebarFooter>
         <div className="mt-auto px-3 py-1 group-data-[state=collapsed]:hidden">
-          <div className="inline-flex items-center gap-1.5 rounded-sm border border-border/30 bg-muted/20 px-1.5 py-0.5 text-[10px] text-muted-foreground/70">
+          <div className="inline-flex items-center gap-1.5 rounded-none border border-border/30 bg-muted/20 px-1.5 py-0.5 text-[10px] text-muted-foreground/70">
             <Command className="h-2.5 w-2.5" />
             <span className="font-medium">E to Collapse</span>
           </div>

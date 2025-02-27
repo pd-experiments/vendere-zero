@@ -27,7 +27,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      router.refresh()
+
+      // Only refresh if we're not on a 404 page
+      // This prevents refresh loops on 404 pages
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname ?? ""
+        if (!/404/.test(path)) {
+          router.refresh()
+        }
+      }
     })
 
     return () => subscription.unsubscribe()

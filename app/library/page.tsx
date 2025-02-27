@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense, lazy } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Video, MoreHorizontal, Trash2, Image as ImageIcon } from "lucide-react";
+import { Video, MoreHorizontal, Trash2, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -15,6 +14,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+// Dynamically import the DataTable component
+const DataTable = lazy(() => import("@/components/ui/data-table").then(mod => ({ default: mod.DataTable })));
 
 type LibraryItem = {
     id: string;
@@ -46,8 +48,6 @@ type UploadingFile = {
     abortController?: AbortController;
 };
 
-
-
 type PaginatedResponse = {
     items: LibraryItem[];
     total: number;
@@ -56,8 +56,32 @@ type PaginatedResponse = {
     totalPages: number;
 };
 
+// Loading component to show while the data is being fetched
+const LibraryLoading = () => (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-lg">Loading library...</span>
+        </div>
+    </div>
+);
+
+// Placeholder component for initial render
+const LibraryPlaceholder = () => (
+    <div className="min-h-screen bg-background">
+        <div className="px-4 mx-auto">
+            <div className="border-0 bg-card">
+                <div className="flex items-center justify-center h-[70vh]">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 export default function Library() {
     const router = useRouter();
+    const [isClientReady, setIsClientReady] = useState(false);
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [confidenceRange, setConfidenceRange] = useState<[number, number]>([0, 100]);
     const [selectedTones, setSelectedTones] = useState<string[]>([]);
@@ -69,6 +93,11 @@ export default function Library() {
     const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set([1]));
     const [cachedRecords, setCachedRecords] = useState<Record<number, LibraryItem[]>>({});
     const [selectedType, setSelectedType] = useState<string[]>([]);
+
+    // Set client-side rendering flag after component mounts
+    useEffect(() => {
+        setIsClientReady(true);
+    }, []);
 
     useEffect(() => {
         const fetchLibraryData = async (pageToLoad: number) => {
@@ -518,92 +547,99 @@ export default function Library() {
         }
     };
 
+    // If not client-ready, show a lightweight placeholder
+    if (!isClientReady) {
+        return <LibraryPlaceholder />;
+    }
+
     return (
         <div className="min-h-screen bg-background">
             <div className="px-4 mx-auto">
                 <div className="border-0 bg-card">
-                    <DataTable
-                        columns={columns}
-                        data={records}
-                        isLoading={isLoading}
-                        searchPlaceholder="Find content in your library..."
-                        loadedPages={loadedPages}
-                        onLoadPage={handleLoadPage}
-                        serverSidePagination={{
-                            page,
-                            pageSize,
-                            total,
-                            onPageChange: (newPage) => {
-                                setPage(newPage);
-                                if (cachedRecords[newPage]) {
-                                    setRecords(cachedRecords[newPage]);
+                    <Suspense fallback={<LibraryLoading />}>
+                        <DataTable
+                            columns={columns}
+                            data={records}
+                            isLoading={isLoading}
+                            searchPlaceholder="Find content in your library..."
+                            loadedPages={loadedPages}
+                            onLoadPage={handleLoadPage}
+                            serverSidePagination={{
+                                page,
+                                pageSize,
+                                total,
+                                onPageChange: (newPage) => {
+                                    setPage(newPage);
+                                    if (cachedRecords[newPage]) {
+                                        setRecords(cachedRecords[newPage]);
+                                    }
+                                },
+                                onPageSizeChange: setPageSize
+                            }}
+                            onRowClick={(record) => {
+                                if (record.type === 'video') {
+                                    router.push(`/library/video/${record.id}`);
+                                } else {
+                                    router.push(`/library/${record.id}?image_url=${encodeURIComponent(record.image_url || '')}`);
                                 }
-                            },
-                            onPageSizeChange: setPageSize
-                        }}
-                        onRowClick={(record) => {
-                            if (record.type === 'video') {
-                                router.push(`/library/video/${record.id}`);
-                            } else {
-                                router.push(`/library/${record.id}?image_url=${encodeURIComponent(record.image_url || '')}`);
-                            }
-                        }}
-                        filters={[
-                            {
-                                id: "type",
-                                label: "Type",
-                                type: "multiselect",
-                                options: ["video", "image"],
-                                value: selectedType,
-                                filterFn: (row, id, value) => {
-                                    if (!value || (Array.isArray(value) && value.length === 0)) return true;
-                                    const type = row.getValue<string>(id);
-                                    return value.includes(type);
+                            }}
+                            filters={[
+                                {
+                                    id: "type",
+                                    label: "Type",
+                                    type: "multiselect",
+                                    options: ["video", "image"],
+                                    value: selectedType,
+                                    filterFn: (row, id, value) => {
+                                        if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                        const type = row.getValue<string>(id);
+                                        return value.includes(type);
+                                    },
+                                    onValueChange: (value) => setSelectedType(value as string[]),
                                 },
-                                onValueChange: (value) => setSelectedType(value as string[]),
-                            },
-                            {
-                                id: "sentiment_confidence",
-                                label: "Confidence Range",
-                                type: "range",
-                                value: confidenceRange,
-                                filterFn: (row, id, value) => {
-                                    if (!value) return true;
-                                    const [min, max] = value as [number, number];
-                                    const confidence = row.getValue<number>(id);
-                                    return confidence >= min / 100 && confidence <= max / 100;
+                                {
+                                    id: "sentiment_confidence",
+                                    label: "Confidence Range",
+                                    type: "range",
+                                    value: confidenceRange,
+                                    filterFn: (row, id, value) => {
+                                        if (!value) return true;
+                                        const [min, max] = value as [number, number];
+                                        const confidence = row.getValue<number>(id);
+                                        return confidence >= min / 100 && confidence <= max / 100;
+                                    },
+                                    onValueChange: (value) => setConfidenceRange(value as [number, number]),
                                 },
-                                onValueChange: (value) => setConfidenceRange(value as [number, number]),
-                            },
-                            {
-                                id: "sentiment_tone",
-                                label: "Tones",
-                                type: "multiselect",
-                                options: allTones,
-                                value: selectedTones,
-                                filterFn: (row, id, value) => {
-                                    if (!value || (Array.isArray(value) && value.length === 0)) return true;
-                                    const tones = row.getValue<string[]>(id);
-                                    return tones.some(tone => value.includes(tone.toLowerCase()));
+                                {
+                                    id: "sentiment_tone",
+                                    label: "Tones",
+                                    type: "multiselect",
+                                    options: allTones,
+                                    value: selectedTones,
+                                    filterFn: (row, id, value) => {
+                                        if (!value || (Array.isArray(value) && value.length === 0)) return true;
+                                        const tones = row.getValue<string[]>(id);
+                                        return tones.some(tone => value.includes(tone.toLowerCase()));
+                                    },
+                                    onValueChange: (value) => setSelectedTones(value as string[]),
                                 },
-                                onValueChange: (value) => setSelectedTones(value as string[]),
-                            },
-                        ]}
-                        globalFilter={{
-                            placeholder: "Search your creative library...",
-                            searchFn: (row, id, value) => {
-                                const searchValue = (value as string).toLowerCase();
-                                const name = String(row.getValue("name") || "").toLowerCase();
-                                const description = String(row.getValue("image_description") || "").toLowerCase();
-                                return name.includes(searchValue) || description.includes(searchValue);
-                            },
-                        }}
-                        uploadButton={{
-                            onFileUpload: handleFileUpload,
-                            onCancelUpload: handleCancelUpload,
-                            uploadingFiles
-                        }}
-                    />
+                            ]}
+                            globalFilter={{
+                                placeholder: "Search your creative library...",
+                                searchFn: (row, id, value) => {
+                                    const searchValue = (value as string).toLowerCase();
+                                    const name = String(row.getValue("name") || "").toLowerCase();
+                                    const description = String(row.getValue("image_description") || "").toLowerCase();
+                                    return name.includes(searchValue) || description.includes(searchValue);
+                                },
+                            }}
+                            uploadButton={{
+                                onFileUpload: handleFileUpload,
+                                onCancelUpload: handleCancelUpload,
+                                uploadingFiles
+                            }}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </div>

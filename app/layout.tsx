@@ -47,7 +47,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="dark">
-      <body className={`${GeistSans.className} dark:bg-background dark:text-white`}>
+      <body className={`font-sans antialiased dark:bg-background dark:text-white`}>
         <Providers>
           <AuthProvider>
             <SidebarProvider defaultOpen={sidebarState}>
@@ -57,7 +57,7 @@ export default async function RootLayout({
                   <div className="h-16 shrink-0">
                     <Header />
                   </div>
-                  <main className="flex-1 overflow-auto w-[100%]">
+                  <main className="flex-1 overflow-auto w-[100%] font-sans antialiased">
                     {children}
                   </main>
                 </div>

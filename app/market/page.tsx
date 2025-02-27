@@ -5,7 +5,7 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Globe, MaximizeIcon, TrendingUp, Users } from "lucide-react";
+import { BarChart3, Globe, MaximizeIcon, Medal, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -327,7 +327,7 @@ export default function Market() {
                             {/* Active tab indicator - animated background */}
                             {activeTab && (
                                 <motion.div
-                                    className="absolute bg-muted/50 border-[0.5px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] rounded-sm"
+                                    className="absolute bg-muted/50 border-[0.5px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] rounded-none"
                                     layoutId="tab-background"
                                     initial={false}
                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -428,7 +428,7 @@ export default function Market() {
                                     }
                                 }}
                             >
-                                <Globe className="h-4 w-4" />
+                                <Medal className="h-4 w-4" />
                                 <motion.span
                                     initial={{ opacity: 0.8 }}
                                     animate={{ opacity: activeTab === "competition" ? 1 : 0.8 }}
@@ -952,7 +952,7 @@ export default function Market() {
                                         <TabsList className="w-full justify-start h-auto gap-4 bg-transparent p-0 border-0">
                                             <TabsTrigger
                                                 value="advantages"
-                                                className="data-[state=active]:bg-muted/50 data-[state=active]:text-foreground rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-2 border-0"
+                                                className="rounded-none data-[state=active]:bg-muted/50 data-[state=active]:text-foreground px-3 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-2 border-0"
                                             >
                                                 Competitive Advantages
                                                 <div className="ml-1 bg-primary/10 text-primary text-xs font-medium rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
@@ -967,7 +967,7 @@ export default function Market() {
                                             </TabsTrigger> */}
                                             <TabsTrigger
                                                 value="analysis"
-                                                className="data-[state=active]:bg-muted/50 data-[state=active]:text-foreground rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-2 border-0"
+                                                className="rounded-none data-[state=active]:bg-muted/50 data-[state=active]:text-foreground px-3 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-2 border-0"
                                             >
                                                 Core Features
                                                 <div className="ml-1 bg-primary/10 text-primary text-xs font-medium rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">

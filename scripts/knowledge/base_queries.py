@@ -1,5 +1,5 @@
 from llama_index.core.storage import StorageContext
-from llama_index.core import VectorStoreIndex, Document
+from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.vector_stores.supabase import SupabaseVectorStore
 from supabase.client import Client, create_client, ClientOptions
 from fastapi import FastAPI
@@ -7,23 +7,22 @@ from pydantic import BaseModel, Field
 import json
 import os
 import asyncio
-from typing import List, Dict
+from typing import List, Dict, Any
 from contextlib import asynccontextmanager
-
-# from llama_index.llms.groq import Groq
+import requests
+from llama_index.core.llms import (
+    CustomLLM,
+    CompletionResponse,
+    CompletionResponseGen,
+    LLMMetadata,
+)
+from llama_index.core.llms.callbacks import llm_completion_callback
 from pathlib import Path
 from dotenv import load_dotenv
 from llama_index.core import PromptTemplate
-
-# from llama_index.core.query_engine import CitationQueryEngine
-# from llama_index.core.agent import ReActAgent
-# from llama_index.core.tools import QueryEngineTool
-# from llama_index.core.response.schema import Response
-from llama_index.program.openai import OpenAIPydanticProgram
-import sys
-
-sys.path.append(str(Path(__file__).parents[2]))
 from company_context import COMPANY_CONTEXT
+from llama_index.program.openai import OpenAIPydanticProgram
+from llama_index.llms.openai import OpenAI
 
 
 @asynccontextmanager
@@ -103,6 +102,82 @@ class StructuredReport(BaseModel):
     )
 
 
+class PerplexityLLM(CustomLLM):
+    context_window: int = 4096
+    num_output: int = 1024
+    model: str = "sonar-pro"
+    temperature: float = 0.1
+    api_key: str = None
+    api_url: str = "https://api.perplexity.ai/chat/completions"
+    last_citations: List[str] = []
+
+    def __init__(
+        self, model: str = "sonar-pro", temperature: float = 0.1, api_key: str = None
+    ):
+        super().__init__()
+        self.model = model
+        self.temperature = temperature
+        self.api_key = api_key or os.getenv("PERPLEXITY_API_KEY")
+        self.last_citations = []  # Reset citations on init
+        if not self.api_key:
+            raise ValueError("Perplexity API key not found")
+
+    @property
+    def metadata(self) -> LLMMetadata:
+        """Get LLM metadata."""
+        return LLMMetadata(
+            context_window=self.context_window,
+            num_output=self.num_output,
+            model_name=self.model,
+        )
+
+    @llm_completion_callback()
+    def complete(self, prompt: str, **kwargs: Any) -> CompletionResponse:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a specialized AI assistant focused on providing comprehensive analysis of marketing and competitive data.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": self.temperature,
+        }
+
+        try:
+            response = requests.post(self.api_url, json=payload, headers=headers)
+            response.raise_for_status()
+            response_json = response.json()
+
+            # Extract and store citations if available
+            self.last_citations = response_json.get("citations", [])
+
+            return CompletionResponse(
+                text=response_json["choices"][0]["message"]["content"]
+            )
+        except Exception as e:
+            self.last_citations = []  # Reset citations on error
+            raise Exception(f"Error calling Perplexity API: {str(e)}")
+
+    @llm_completion_callback()
+    def stream_complete(self, prompt: str, **kwargs: Any) -> CompletionResponseGen:
+        response_text = self.complete(prompt, **kwargs).text
+        response = ""
+        # Simulate streaming by yielding one character at a time
+        for char in response_text:
+            response += char
+            yield CompletionResponse(text=response, delta=char)
+
+    def get_last_citations(self) -> List[str]:
+        """Return citations from the last API call"""
+        return self.last_citations
+
+
 class KnowledgeBase:
     def __init__(self):
         # Initialize connections using environment variables
@@ -115,97 +190,8 @@ class KnowledgeBase:
             ),
         )
 
-        # Initialize the index
+        # Initialize the index and query engines
         self._initialize_index()
-
-        # Create company-specific prompt template with safe gets
-        company_name = COMPANY_CONTEXT.get("name", "Company")
-        company_context = f"""You are an AI assistant for {company_name}, 
-        focusing on our company's specific context and strategic priorities.
-        
-        Key Company Context:
-        - Industry: {COMPANY_CONTEXT.get("industry", "Not specified")}
-        - Core Products: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("primary_products", ["Not specified"]))}
-        - Key Markets: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("key_markets", ["Not specified"]))}
-        - Target Segments: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("target_segments", ["Not specified"]))}
-        
-        Strategic Focus Areas:
-        {self._format_strategic_priorities()}
-        
-        Market Position:
-        - Competitive Advantages: {", ".join(COMPANY_CONTEXT.get("market_position", {}).get("competitive_advantages", ["Not specified"]))}
-        - Key Competitors: {self._format_competitors()}
-        - Current Market Trends: {", ".join(COMPANY_CONTEXT.get("market_position", {}).get("market_trends", {}).get("consumer_preferences", ["Not specified"]))}
-        
-        Current Challenges:
-        {self._format_challenges()}
-        """
-
-        # Update research query engine with company context
-        self.research_query_engine = self.index.as_query_engine(
-            similarity_top_k=50,
-            response_mode="refine",
-            text_qa_template=PromptTemplate(
-                f"""{company_context}
-                
-                You are a specialized AI assistant focused on generating detailed, comprehensive analysis.
-                Your responses should be thorough and well-supported by the database information,
-                while considering {company_name}'s specific context and strategic priorities.
-                
-                Context information is below:
-                ---------------------
-                {{context_str}}
-                ---------------------
-
-                Using this context and {company_name}'s company perspective, provide a detailed analysis addressing: {{query_str}}
-                
-                Requirements:
-                - Generate at least 4-5 detailed paragraphs
-                - Support each point with specific examples from the data
-                - Include relevant statistics and trends
-                - Cite specific sources when possible
-                - Analyze patterns and relationships in the data
-                - Consider implications for our strategic priorities
-                - Align insights with our market position
-                
-                If certain information isn't available in the context, acknowledge that limitation but explore related available data."""
-            ),
-            temperature=0.1,
-        )
-
-        # Update structured program with company context
-        self.structured_program = OpenAIPydanticProgram.from_defaults(
-            output_cls=StructuredReport,
-            prompt_template_str=f"""{company_context}
-            
-            Analyze the provided data and generate a structured report from {company_name}'s perspective.
-            Focus on detailed analysis with comprehensive evidence and patterns.
-            
-            Available Data Types:
-            - Market research with intent summaries and target audiences
-            - Competitor citations with features and pricing
-            - Ad analysis with visual descriptions
-            
-            Query: {{query}}
-            Retrieved Context: {{context}}
-            
-            Return a structured report with these exact components:
-            1. query: The original query text
-            2. areas: A list of 3-4 research areas relevant to our priorities, each containing:
-               - title: Clear section title aligned with our context
-               - format_guide: Detailed format/structure (4-5 paragraphs per section)
-               - query_prompt: Detailed prompt for company-specific analysis
-               - supporting_data: List of relevant data points
-            3. executive_summary: A thorough summary for leadership (2-3 paragraphs)
-            
-            Ensure each area:
-            - Aligns with our strategic priorities
-            - Considers our competitive positioning
-            - Addresses our current challenges
-            - Provides actionable insights
-            - Maintains our market perspective""",
-            verbose=True,
-        )
 
     def _fetch_all_data(self, supabase: Client) -> List[Document]:
         """Fetch all relevant data from Supabase and convert to Documents"""
@@ -267,7 +253,7 @@ class KnowledgeBase:
         return documents
 
     def _initialize_index(self):
-        """Initialize the vector store and index"""
+        """Initialize the vector store and index, LLMs, and query engines"""
         documents = self._fetch_all_data(self.supabase)
         vector_store = SupabaseVectorStore(
             postgres_connection_string=os.getenv("DB_CONNECTION"),
@@ -297,7 +283,7 @@ class KnowledgeBase:
             f"""{company_context}
             
             You are a specialized AI assistant focused on providing comprehensive analysis of marketing and competitive data.
-            Your responses should be thorough and well-supported by the database information about ads, market research, and competitor citations.
+            Your responses should be thorough, detailed, and well-supported by the database information about ads, market research, and competitor citations.
             
             Context information is below:
             ---------------------
@@ -307,26 +293,116 @@ class KnowledgeBase:
             Using this context and {company_name}'s perspective, provide a detailed analysis addressing: {{query_str}}
             
             Requirements:
-            - Generate at least 2-3 detailed paragraphs
-            - Support each point with specific examples from the data
-            - Include relevant statistics and trends when available
-            - Cite specific sources and evidence
-            - Consider implications for our strategic priorities
-            - Align insights with our market position
+            - Generate at least 4-5 detailed paragraphs with clear section headings
+            - Support each point with multiple specific examples from the data
+            - Include relevant statistics, trends, and quantitative data when available
+            - Cite specific sources and evidence for each major claim
+            - Analyze patterns and relationships between different data points
+            - Consider implications for our strategic priorities and market position
+            - Provide actionable insights and recommendations
+            - Include a brief summary of key findings at the end
+            - Highlight any gaps in the data or areas needing further research
+            - Draw connections between different types of data (ads, market research, citations)
             
-            If certain information isn't available in the context, acknowledge that limitation but explore related available data."""
+            Response Structure:
+            1. Start with a brief overview of your findings
+            2. Break down the analysis into clear sections with headings
+            3. Support each section with specific evidence and examples
+            4. End with key takeaways and recommendations
+            
+            If certain information isn't available in the context, acknowledge that limitation but explore related available data and suggest what additional data would be valuable."""
         )
 
         self.index = VectorStoreIndex.from_documents(
             documents, storage_context=storage_context
         )
 
-        self.query_engine = self.index.as_query_engine(
+        # Initialize both LLMs
+        self.perplexity_llm = PerplexityLLM(model="sonar-pro", temperature=0.1)
+        openai_llm = OpenAI(model="gpt-4", temperature=0.1)
+
+        # First set up OpenAI for structured program
+        Settings.llm = openai_llm
+        Settings.context_window = 8000
+        Settings.num_output = 4000
+
+        # Create structured program with OpenAI explicitly
+        structured_prompt = f"""{company_context}
+            
+            Analyze the provided data and generate a structured report from {company_name}'s perspective.
+            Focus on detailed analysis with comprehensive evidence and patterns.
+            
+            Available Data Types:
+            - Market research with intent summaries and target audiences
+            - Competitor citations with features and pricing
+            - Ad analysis with visual descriptions
+            
+            Query: {{query}}
+            Retrieved Context: {{context}}
+            
+            Return a structured report with these exact components:
+            1. query: The original query text
+            2. areas: A list of 3-4 research areas relevant to our priorities, each containing:
+               - title: Clear section title aligned with our context
+               - format_guide: Detailed format/structure (4-5 paragraphs per section)
+               - query_prompt: Detailed prompt for company-specific analysis
+               - supporting_data: List of relevant data points
+            3. executive_summary: A thorough summary for leadership (2-3 paragraphs)
+            
+            Ensure each area:
+            - Aligns with our strategic priorities
+            - Considers our competitive positioning
+            - Addresses our current challenges
+            - Provides actionable insights
+            - Maintains our market perspective"""
+
+        self.structured_program = OpenAIPydanticProgram.from_defaults(
+            output_cls=StructuredReport,
+            llm=openai_llm,
+            prompt_template_str=structured_prompt,
+            verbose=True,
+        )
+
+        # Set up research query engine with OpenAI
+        self.research_query_engine = self.index.as_query_engine(
             similarity_top_k=50,
             response_mode="refine",
             text_qa_template=qa_template,
-            temperature=0.1,
+            llm=openai_llm,  # Explicitly pass OpenAI LLM
         )
+
+        # Now switch to Perplexity for regular queries
+        Settings.llm = self.perplexity_llm
+
+        # Initialize regular query engine with Perplexity
+        self.query_engine = self.index.as_query_engine(
+            similarity_top_k=550,
+            response_mode="tree_summarize",
+            text_qa_template=qa_template,
+            llm=self.perplexity_llm,  # Explicitly pass Perplexity LLM
+        )
+
+        # Create extended context for other methods
+        self.company_context = f"""You are an AI assistant for {company_name}, 
+        focusing on our company's specific context and strategic priorities.
+        
+        Key Company Context:
+        - Industry: {COMPANY_CONTEXT.get("industry", "Not specified")}
+        - Core Products: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("primary_products", ["Not specified"]))}
+        - Key Markets: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("key_markets", ["Not specified"]))}
+        - Target Segments: {", ".join(COMPANY_CONTEXT.get("core_business", {}).get("target_segments", ["Not specified"]))}
+        
+        Strategic Focus Areas:
+        {self._format_strategic_priorities()}
+        
+        Market Position:
+        - Competitive Advantages: {", ".join(COMPANY_CONTEXT.get("market_position", {}).get("competitive_advantages", ["Not specified"]))}
+        - Key Competitors: {self._format_competitors()}
+        - Current Market Trends: {", ".join(COMPANY_CONTEXT.get("market_position", {}).get("market_trends", {}).get("consumer_preferences", ["Not specified"]))}
+        
+        Current Challenges:
+        {self._format_challenges()}
+        """
 
     async def generate_section(self, area: ResearchArea) -> ReportSection:
         """Generate a single section of the report with retries and error handling"""
@@ -464,7 +540,14 @@ class KnowledgeBase:
                 }
                 sources.append(source)
 
-            return {"response": str(response), "sources": sources}
+            # Get citations from the Perplexity LLM if available
+            citations = self.perplexity_llm.get_last_citations()
+
+            return {
+                "response": str(response),
+                "sources": sources,
+                "citations": citations,
+            }
         else:
             # Generate structured report
             report = await self.generate_report(query)
@@ -546,7 +629,6 @@ class KnowledgeBase:
 # Create a global instance of KnowledgeBase
 # kb = None
 
-
 # @app.post("/query")
 # async def query_endpoint(request: QueryRequest):
 #     """Enhanced endpoint that supports both simple queries and detailed reports"""
@@ -559,7 +641,6 @@ class KnowledgeBase:
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-
 # @app.get("/health")
 # async def health_check():
 #     """
@@ -567,11 +648,9 @@ class KnowledgeBase:
 #     """
 #     return {"status": "healthy"}
 
-
 # def main():
 #     """Run the FastAPI server"""
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
-
 
 # if __name__ == "__main__":
 #     main()

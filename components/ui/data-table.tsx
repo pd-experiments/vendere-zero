@@ -209,14 +209,14 @@ export function DataTable<TData, TValue>({
                 placeholder={searchPlaceholder}
                 value={globalFilterValue}
                 onChange={(event) => setGlobalFilterValue(event.target.value)}
-                className="pl-8 h-8"
+                className="pl-8 h-8 rounded-none"
               />
             </div>
           )}
           {filters.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
+                <Button variant="outline" size="sm" className="rounded-none h-8">
                   <SlidersHorizontal className="mr-2 h-4 w-4" />
                   Filters
                   {activeFiltersCount > 0 && (
@@ -400,7 +400,7 @@ export function DataTable<TData, TValue>({
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="h-8 flex items-center gap-2" variant="secondary">
+                  <Button className="rounded-none h-8 flex items-center gap-2" variant="secondary">
                     <FaGoogleDrive className="h-4 w-4" />
                     <FaMeta className="h-4 w-4" />
                     Connect
@@ -442,11 +442,11 @@ export function DataTable<TData, TValue>({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-8">
+              <Button variant="outline" className="rounded-none h-8">
                 Columns <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[150px]">
+            <DropdownMenuContent align="end" className="w-[150px] rounded-none">
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -459,7 +459,7 @@ export function DataTable<TData, TValue>({
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className="capitalize"
+                      className="capitalize rounded-none"
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
