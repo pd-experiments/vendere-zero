@@ -7,9 +7,16 @@ from pydantic import BaseModel, Field
 import json
 import os
 import asyncio
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple, cast, Set
 from contextlib import asynccontextmanager
 import requests
+import time
+from functools import lru_cache
+from collections import Counter, defaultdict
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+import numpy as np
 from llama_index.core.llms import (
     CustomLLM,
     CompletionResponse,
@@ -47,6 +54,24 @@ class QueryRequest(BaseModel):
     query: str
     deep_research: bool = False
     detail_level: int = Field(default=50, ge=0, le=100)
+
+
+class SuggestedTask(BaseModel):
+    """A suggested task for the user to complete based on their query"""
+
+    task_type: str = Field(
+        description="Type of task: 'variant_generation' or 'suggested_query'"
+    )
+    title: str = Field(description="Short descriptive title of the task")
+    description: str = Field(
+        description="Detailed description of what this task would accomplish"
+    )
+    input_data: Dict[str, Any] = Field(
+        description="Input data for the task in the format required by the relevant API"
+    )
+    relevance_score: float = Field(
+        description="How relevant this task is to the query (0-1)"
+    )
 
 
 class ReportSection(BaseModel):
@@ -193,12 +218,355 @@ class KnowledgeBase:
             ),
         )
 
+        print("Initializing Knowledge Base with chunk-based retrieval...")
+        start_time = time.time()
+
+        # Initialize document cache
+        self.document_cache = {}
+        self.query_cache = {}
+        self.cache_expiry = 3600  # Cache expiry in seconds (1 hour)
+
+        # Topic chunk storage
+        self.topic_chunks = {}
+        self.keyword_index = {}
+        self.doc_to_topic_map = {}
+        self.topic_metadata = {}
+
         # Initialize the index and query engines
         self._initialize_index()
+
+        # Pre-compute type filters
+        self.type_filters = self._build_type_filters()
+
+        # Preprocess documents into topical chunks for faster retrieval
+        try:
+            self._preprocess_documents_into_chunks()
+            print(
+                f"Knowledge base initialization completed in {time.time() - start_time:.2f} seconds"
+            )
+        except ImportError:
+            print(
+                "Warning: scikit-learn not installed. Falling back to standard retrieval."
+            )
+            print(
+                "To use optimized chunk-based retrieval, install scikit-learn: pip install scikit-learn"
+            )
+        except Exception as e:
+            print(
+                f"Error during preprocessing: {str(e)}. Fallback to standard retrieval will be used."
+            )
+            # Initialize empty chunks to avoid errors
+            self._initialize_empty_chunks()
+
+    def _extract_keywords(self, text):
+        """Extract important keywords from text using simple frequency analysis"""
+        if not isinstance(text, str):
+            # Handle non-string input
+            return []
+
+        # Convert to lowercase and split into words
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", text.lower())
+
+        # Remove common stop words
+        stop_words = {
+            "and",
+            "the",
+            "is",
+            "in",
+            "it",
+            "to",
+            "of",
+            "for",
+            "with",
+            "on",
+            "that",
+            "this",
+            "are",
+            "as",
+            "be",
+            "by",
+            "from",
+            "has",
+            "have",
+            "not",
+            "was",
+            "were",
+            "will",
+            "an",
+            "a",
+        }
+        filtered_words = [word for word in words if word not in stop_words]
+
+        # Count occurrences
+        word_counts = Counter(filtered_words)
+
+        # Return top keywords (adjust number as needed)
+        return [word for word, count in word_counts.most_common(20)]
+
+    def _extract_keywords_from_query(self, query):
+        """Extract keywords from a query"""
+        # Simple approach - extract all significant words
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", query.lower())
+        stop_words = {
+            "and",
+            "the",
+            "is",
+            "in",
+            "it",
+            "to",
+            "of",
+            "for",
+            "with",
+            "on",
+            "that",
+            "this",
+        }
+        return [word for word in words if word not in stop_words]
+
+    def _cluster_documents_by_topic(self, documents=None, num_topics=15):
+        """Group documents into topics using K-means clustering on TF-IDF features"""
+        if documents is None:
+            documents = list(self.document_cache.values())
+
+        # Check if we have enough documents
+        if len(documents) < num_topics:
+            num_topics = max(1, len(documents) // 2)
+            print(
+                f"Reducing number of topics to {num_topics} due to small document count"
+            )
+
+        if len(documents) == 0:
+            print("No documents available for clustering")
+            return {}
+
+        print(f"Clustering {len(documents)} documents into topics...")
+        start_time = time.time()
+
+        # Extract document texts
+        doc_texts = []
+        doc_ids = []
+
+        for doc_id, doc in self.document_cache.items():
+            text = doc.get("text", "")
+            if text and len(text.strip()) > 0:
+                doc_texts.append(text)
+                doc_ids.append(doc_id)
+
+        if len(doc_texts) == 0:
+            print("No valid document texts found for clustering")
+            return {}
+
+        # Create TF-IDF vectors
+        try:
+            vectorizer = TfidfVectorizer(
+                max_features=1000, stop_words="english", ngram_range=(1, 2)
+            )
+            tfidf_matrix = vectorizer.fit_transform(doc_texts)
+
+            # Apply K-means clustering
+            kmeans = KMeans(n_clusters=num_topics, random_state=42)
+            clusters = kmeans.fit_predict(tfidf_matrix)
+
+            # Group documents by cluster
+            topic_docs = defaultdict(list)
+            for i, cluster_id in enumerate(clusters):
+                # Use the document object
+                doc_id = doc_ids[i]
+                topic_docs[f"topic_{cluster_id}"].append(doc_id)
+                # Map document ID to its topic
+                self.doc_to_topic_map[doc_id] = f"topic_{cluster_id}"
+
+            # Extract topic keywords
+            feature_names = vectorizer.get_feature_names_out()
+            for topic_id, doc_ids in topic_docs.items():
+                # Get the centroid of this cluster
+                centroid = kmeans.cluster_centers_[int(topic_id.split("_")[1])]
+                # Get the top words for this topic
+                top_keyword_indices = centroid.argsort()[-10:][::-1]
+                top_keywords = [feature_names[i] for i in top_keyword_indices]
+
+                # Store topic metadata
+                self.topic_metadata[topic_id] = {
+                    "keywords": top_keywords,
+                    "size": len(doc_ids),
+                    "docs": doc_ids,
+                }
+
+            print(
+                f"Document clustering completed in {time.time() - start_time:.2f} seconds"
+            )
+            return topic_docs
+
+        except Exception as e:
+            print(f"Error during document clustering: {str(e)}")
+            # Fallback: just create a single topic with all documents
+            topic_docs = {"topic_0": doc_ids}
+            self.topic_metadata["topic_0"] = {
+                "keywords": ["general", "all", "documents"],
+                "size": len(doc_ids),
+                "docs": doc_ids,
+            }
+
+            # Map all documents to this topic
+            for doc_id in doc_ids:
+                self.doc_to_topic_map[doc_id] = "topic_0"
+
+            return topic_docs
+
+    def _format_topic_chunk(self, doc_ids, max_docs=10):
+        """Format a set of documents into a coherent chunk with metadata"""
+        # Limit number of documents to avoid context overflow
+        if len(doc_ids) > max_docs:
+            # Sort by some relevance metric and take top N
+            # For simplicity, we'll just take the first N
+            doc_ids = doc_ids[:max_docs]
+
+        # Combine documents with headers
+        chunk_parts = []
+        for i, doc_id in enumerate(doc_ids):
+            doc_info = self.document_cache.get(doc_id, {})
+            doc_text = doc_info.get("text", "")
+            doc_type = doc_info.get("type", "unknown")
+
+            header = f"--- Document {i + 1} (Type: {doc_type}) ---"
+            chunk_parts.append(f"{header}\n{doc_text}")
+
+        return "\n\n".join(chunk_parts)
+
+    def _preprocess_documents_into_chunks(self):
+        """Organize documents into topic-based chunks for faster retrieval"""
+        print("Preprocessing documents into topical chunks...")
+        start_time = time.time()
+
+        # Cluster documents by topic
+        topic_docs = self._cluster_documents_by_topic()
+
+        # Create content chunks for each topic
+        for topic_id, doc_ids in topic_docs.items():
+            chunk_text = self._format_topic_chunk(doc_ids)
+
+            # Get keywords for this topic
+            keywords = self.topic_metadata[topic_id]["keywords"]
+
+            # Store the chunk
+            self.topic_chunks[topic_id] = {
+                "text": chunk_text,
+                "document_ids": doc_ids,
+                "keywords": keywords,
+            }
+
+            # Update keyword index for fast lookup
+            for keyword in keywords:
+                if keyword not in self.keyword_index:
+                    self.keyword_index[keyword] = []
+                self.keyword_index[keyword].append(topic_id)
+
+        print(
+            f"Created {len(self.topic_chunks)} topic chunks with {len(self.keyword_index)} indexed keywords"
+        )
+        print(f"Preprocessing completed in {time.time() - start_time:.2f} seconds")
+
+    def _retrieve_relevant_chunks(self, query, max_chunks=3):
+        """Retrieve the most relevant topic chunks for a query without vector search"""
+        start_time = time.time()
+
+        # Extract keywords from query
+        query_keywords = self._extract_keywords_from_query(query)
+
+        # Find matching topics based on keyword overlap
+        topics_scores = defaultdict(int)
+
+        # Score each topic based on keyword matches
+        for keyword in query_keywords:
+            for topic_id in self.keyword_index.get(keyword, []):
+                topics_scores[topic_id] += 1
+
+        # If no matches through keywords, use a simple fallback
+        if not topics_scores:
+            print("No keyword matches found, using fallback retrieval")
+            # Return a few diverse topics as fallback
+            fallback_chunks = []
+            fallback_sources = []
+
+            # Get a few random topics
+            for topic_id in list(self.topic_chunks.keys())[:max_chunks]:
+                fallback_chunks.append(self.topic_chunks[topic_id]["text"])
+
+                # Add sources from these chunks
+                doc_ids = self.topic_chunks[topic_id]["document_ids"][:5]
+                for doc_id in doc_ids:
+                    doc_info = self.document_cache.get(doc_id, {})
+                    if doc_info:
+                        fallback_sources.append(
+                            {
+                                "text": doc_info.get("text", ""),
+                                "score": 0.5,  # Default score for fallback
+                                "extra_info": {
+                                    "type": doc_info.get("type", "unknown"),
+                                    "id": doc_id,
+                                    "url": doc_info.get("metadata", {}).get("url", ""),
+                                    "image_url": doc_info.get("metadata", {}).get(
+                                        "image_url", ""
+                                    ),
+                                },
+                            }
+                        )
+
+            return fallback_chunks, fallback_sources
+
+        # Get top scoring topics
+        top_topics = sorted(
+            topics_scores.keys(), key=lambda t: topics_scores[t], reverse=True
+        )[:max_chunks]
+
+        # Get the chunks for these topics
+        chunks = [self.topic_chunks[topic_id]["text"] for topic_id in top_topics]
+
+        # Get the document metadata for these chunks
+        doc_ids = []
+        for topic_id in top_topics:
+            doc_ids.extend(self.topic_chunks[topic_id]["document_ids"])
+
+        # Prepare source information
+        sources = []
+        for doc_id in doc_ids[:20]:  # Limit to 20 sources
+            doc_info = self.document_cache.get(doc_id, {})
+            if doc_info:
+                sources.append(
+                    {
+                        "text": doc_info.get("text", ""),
+                        "score": topics_scores.get(
+                            self.doc_to_topic_map.get(doc_id, ""), 0.5
+                        ),
+                        "extra_info": {
+                            "type": doc_info.get("type", "unknown"),
+                            "id": doc_id,
+                            "url": doc_info.get("metadata", {}).get("url", ""),
+                            "image_url": doc_info.get("metadata", {}).get(
+                                "image_url", ""
+                            ),
+                        },
+                    }
+                )
+
+        print(f"Chunk retrieval completed in {time.time() - start_time:.2f} seconds")
+        return chunks, sources
+
+    def _build_type_filters(self) -> Dict[str, List[str]]:
+        """Build document type filters for faster filtering during retrieval"""
+        # Scan all documents for their IDs by type
+        type_filters = {"ad": [], "market_research": [], "citation": []}
+        for doc_id, doc_info in self.document_cache.items():
+            doc_type = doc_info.get("type")
+            if doc_type in type_filters:
+                type_filters[doc_type].append(doc_id)
+        return type_filters
 
     def _fetch_all_data(self, supabase: Client) -> List[Document]:
         """Fetch all relevant data from Supabase and convert to Documents"""
         documents = []
+        start_time = time.time()
+        print("Fetching data from Supabase...")
 
         # Fetch ad library data
         ad_data = supabase.table("ad_structured_output").select("*").execute().data
@@ -208,6 +576,13 @@ class KnowledgeBase:
                 extra_info={"type": "ad", "id": ad["id"], "url": ad["image_url"]},
             )
             documents.append(doc)
+            # Cache document by ID for faster retrieval
+            self.document_cache[ad["id"]] = {
+                "document": doc,
+                "type": "ad",
+                "text": doc.text,
+                "metadata": {"url": ad["image_url"]},
+            }
 
         # Fetch market research data
         research_data = supabase.table("market_research_v2").select("*").execute().data
@@ -229,6 +604,13 @@ class KnowledgeBase:
                 },
             )
             documents.append(doc)
+            # Cache document
+            self.document_cache[research["id"]] = {
+                "document": doc,
+                "type": "market_research",
+                "text": doc.text,
+                "metadata": {"image_url": research["image_url"]},
+            }
 
         # Fetch citation research
         citation_data = supabase.table("citation_research").select("*").execute().data
@@ -252,7 +634,20 @@ class KnowledgeBase:
                 },
             )
             documents.append(doc)
+            # Cache document
+            self.document_cache[citation["id"]] = {
+                "document": doc,
+                "type": "citation",
+                "text": doc.text,
+                "metadata": {
+                    "image_url": citation["image_url"],
+                    "url": citation["site_url"],
+                },
+            }
 
+        print(
+            f"Data fetching completed in {time.time() - start_time:.2f} seconds. Total documents: {len(documents)}"
+        )
         return documents
 
     def _initialize_index(self):
@@ -438,22 +833,25 @@ class KnowledgeBase:
             except Exception:
                 if attempt == max_retries - 1:  # Last attempt
                     # If all retries failed, generate a simplified but valid response
-                    basic_response = self.query_engine.query(
-                        f"""Provide a basic but valid analysis of {area.title}.
+                    basic_response = self._fast_query_engine(
+                        query=f"""Provide a basic but valid analysis of {area.title}.
                         Focus on the most important facts and evidence available.
-                        Must include at least 2-3 paragraphs with specific data points."""
+                        Must include at least 2-3 paragraphs with specific data points.""",
+                        detail_level=50,
                     )
 
                     return ReportSection(
                         title=area.title,
-                        content=str(basic_response),
+                        content=str(basic_response["response"]),
                         sources=[
                             {
-                                "type": node.node.extra_info.get("type", "unknown"),
-                                "content": node.node.text,
-                                "relevance_score": float(node.score),
+                                "type": source["extra_info"].get("type", "unknown"),
+                                "content": source["text"],
+                                "url": source["extra_info"].get("url", ""),
+                                "image_url": source["extra_info"].get("image_url", ""),
+                                "relevance_score": float(source["score"]),
                             }
-                            for node in basic_response.source_nodes
+                            for source in basic_response["sources"][:10]
                         ],
                     )
                 else:
@@ -498,78 +896,308 @@ class KnowledgeBase:
             title=query, sections=valid_sections, summary=plan.executive_summary
         )
 
+    @lru_cache(maxsize=100)
+    def _get_cached_query_result(self, query_key: str) -> Optional[Dict[str, Any]]:
+        """Get cached query result if it exists and is not expired"""
+        if query_key in self.query_cache:
+            result, timestamp = self.query_cache[query_key]
+            if time.time() - timestamp < self.cache_expiry:
+                return result
+            else:
+                # Remove expired cache entry
+                del self.query_cache[query_key]
+        return None
+
+    def _fast_retrieval(
+        self, query: str, top_k: int = 20, types: Optional[List[str]] = None
+    ) -> List[Dict[str, Any]]:
+        """Optimized retrieval function that uses pre-filters and direct vector operations"""
+        start_time = time.time()
+
+        # First try from cache
+        cache_key = f"{query}_{top_k}_{types}"
+        cached_result = self._get_cached_query_result(cache_key)
+        if cached_result:
+            print(f"Cache hit for query: {query[:30]}...")
+            return cached_result
+
+        # Get raw retriever for faster direct operations
+        retriever = self.index.as_retriever(similarity_top_k=top_k)
+
+        # Apply type filtering during retrieval if specified
+        if types:
+            # Use type filters to get document IDs of specified types
+            filtered_ids = []
+            for doc_type in types:
+                filtered_ids.extend(self.type_filters.get(doc_type, []))
+
+            # If we have type filters, apply them in the retrieval
+            if filtered_ids:
+                # This assumes the retriever supports filtering, may need adjustment
+                nodes = retriever.retrieve(query, filter_ids=filtered_ids)
+            else:
+                nodes = retriever.retrieve(query)
+        else:
+            nodes = retriever.retrieve(query)
+
+        # Sort by relevance and limit to top_k
+        nodes = sorted(nodes, key=lambda x: x.score, reverse=True)[:top_k]
+
+        # Convert to lightweight format
+        results = []
+        for node in nodes:
+            results.append(
+                {
+                    "text": node.node.text,
+                    "score": float(node.score),
+                    "extra_info": node.node.extra_info,
+                }
+            )
+
+        # Cache result
+        self.query_cache[cache_key] = (results, time.time())
+
+        print(
+            f"Fast retrieval completed in {time.time() - start_time:.2f} seconds. Retrieved {len(results)} documents."
+        )
+        return results
+
+    def _fast_query_engine(self, query: str, detail_level: int = 50) -> Dict[str, Any]:
+        """A faster query engine that uses pre-processed chunks with vector search fallback"""
+        start_time = time.time()
+        retrieval_method = "chunk"  # Default to chunk-based retrieval
+
+        # Step 1: Retrieve relevant chunks using keyword-based lookup
+        max_chunks = 1  # Start with 1 chunk for lower detail levels
+        if detail_level > 60:
+            max_chunks = 2  # Use 2 chunks for medium detail
+        if detail_level > 80:
+            max_chunks = 3  # Use 3 chunks for high detail
+
+        # Choose LLM model based on detail level
+        if detail_level < 50:
+            self.perplexity_llm.model = "sonar"
+        else:
+            self.perplexity_llm.model = "sonar-pro"
+
+        # Get template based on detail level
+        if detail_level < 50:
+            template = self.qa_templates["compact"]
+        elif detail_level < 85:
+            template = self.qa_templates["standard"]
+        else:
+            template = self.qa_templates["comprehensive"]
+
+        # Try using chunk-based retrieval first
+        try:
+            if len(self.topic_chunks) > 0:
+                print("Retrieving relevant ad campaigns and market research...")
+                chunks, sources = self._retrieve_relevant_chunks(
+                    query, max_chunks=max_chunks
+                )
+
+                # Check if we got meaningful results
+                if not chunks or chunks[0].startswith(
+                    "No preprocessed chunks available"
+                ):
+                    raise ValueError("No relevant ad campaigns found in database")
+            else:
+                raise ValueError("Ad campaign database not initialized")
+        except Exception as e:
+            # Fall back to vector search if chunk retrieval fails
+            print(
+                f"Chunk retrieval failed: {str(e)}. Falling back to comprehensive search."
+            )
+            top_k = int(min(20 + (detail_level / 200) * 80, 100))  # Use fewer documents
+            print("Searching through complete ad and market research database...")
+            sources = self._fast_retrieval(query, top_k)
+
+            # Format sources as context
+            chunks = [
+                "\n\n".join(
+                    [
+                        f"Campaign/Research Entry {i + 1} (Relevance: {source['score']:.2f}):\n{source['text']}"
+                        for i, source in enumerate(sources[:top_k])
+                    ]
+                )
+            ]
+            retrieval_method = "vector"
+
+        retrieval_time = time.time() - start_time
+        print(
+            f"Retrieved {len(sources)} relevant campaigns/research entries in {retrieval_time:.2f} seconds using {retrieval_method} search"
+        )
+        llm_start = time.time()
+
+        # Step 2: Format context for the LLM
+        context_text = "\n\n".join(chunks)
+
+        # Summarize context if it's too large
+        if len(context_text.split()) > 2000 and detail_level < 70:
+            # Truncate context for lower detail levels
+            context_text = "\n\n".join(chunks[:1])
+            print(
+                f"Focusing on most relevant {len(context_text.split())} words of campaign data"
+            )
+
+        # Step 3: Generate response using the template and chunks
+        print("Analyzing campaign data and generating insights...")
+        prompt = template.format(query_str=query, context_str=context_text)
+
+        # Get response from LLM
+        response = self.perplexity_llm.complete(prompt)
+
+        llm_time = time.time() - llm_start
+        print(f"Analysis completed in {llm_time:.2f} seconds")
+
+        return {
+            "response": response.text,
+            "sources": sources,
+            "citations": self.perplexity_llm.get_last_citations(),
+            "timing": {
+                "retrieval_time": retrieval_time,
+                "llm_time": llm_time,
+                "total_time": time.time() - start_time,
+                "method": retrieval_method,
+            },
+        }
+
+    def _generate_suggested_tasks(
+        self, query: str, response_text: str, sources: List[Dict]
+    ) -> List[SuggestedTask]:
+        """Generate suggested tasks based on the query and response using LLM"""
+        try:
+            # Extract keywords to provide context for the LLM
+            keywords = self._extract_keywords_from_query(query)
+
+            # Prepare context from sources (limited to avoid token overflow)
+            source_context = []
+            for i, source in enumerate(sources[:5]):  # Limit to first 5 sources
+                source_type = source.get("extra_info", {}).get("type", "unknown")
+                source_context.append(
+                    f"Source {i + 1} ({source_type}): {source.get('text', '')[:200]}..."
+                )
+
+            source_context_str = "\n".join(source_context)
+
+            # Construct the prompt to generate task suggestions
+            suggested_tasks_prompt = f"""Based on the following user query, response, and source data, generate 3-5 suggested follow-up tasks.
+
+USER QUERY: "{query}"
+
+RESPONSE SUMMARY: {response_text[:500]}...
+
+SOURCES:
+{source_context_str}
+
+EXTRACTED KEYWORDS: {", ".join(keywords)}
+
+Please generate two types of tasks:
+1. "variant_generation" tasks - For creating ad variants based on the query context
+2. "suggested_query" tasks - For follow-up research queries to explore related topics
+
+Each task must strictly follow this JSON format:
+{{
+  "task_type": "variant_generation" or "suggested_query",
+  "title": "Brief descriptive title",
+  "description": "Detailed description of what this task would accomplish",
+  "input_data": {{
+    // For variant_generation tasks:
+    "keywords": [
+      {{ "term": "keyword1", "volume": 1000, "intent": "informational", "difficulty": 0.5 }},
+      // more keywords...
+    ],
+    "elements": [
+      {{ "type": "headline", "location": "top", "code": "<h1>{{{{text}}}}</h1>", "text": "Compelling headline text" }},
+      {{ "type": "body", "location": "middle", "code": "<p>{{{{text}}}}</p>", "text": "Informative body text" }},
+      {{ "type": "cta", "location": "bottom", "code": "<button>{{{{text}}}}</button>", "text": "Action-oriented CTA" }}
+    ],
+    "target_markets": ["Market1", "Market2", "Market3"]
+    
+    // For suggested_query tasks:
+    "query": "Follow-up query text",
+    "deep_research": true/false,
+    "detail_level": number between 50-85
+  }},
+  "relevance_score": number between 0.0-1.0
+}}
+
+Return a valid JSON array containing these tasks. Do not include any explanations or text outside the JSON array.
+"""
+
+            # Use the LLM to generate suggestions - choose an appropriate LLM model
+            # For complex structured output, OpenAI might be more reliable than Perplexity
+            if hasattr(self, "llm") and self.llm:
+                llm_for_tasks = self.llm  # Use existing OpenAI LLM if available
+            else:
+                # Create a new OpenAI instance with appropriate settings for structured output
+                llm_for_tasks = OpenAI(model="gpt-4o-mini", temperature=0.2)
+
+            # Get the LLM response
+            response = llm_for_tasks.complete(suggested_tasks_prompt)
+            response_text = response.text
+
+            # Extract the JSON array from the response
+            # Find anything that looks like a JSON array
+            json_match = re.search(r"\[\s*\{.*\}\s*\]", response_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+            else:
+                # Fallback: assume the entire response is JSON
+                json_str = response_text
+
+            # Parse the JSON into Python objects
+            try:
+                task_dicts = json.loads(json_str)
+
+                # Convert dictionaries to SuggestedTask objects
+                suggested_tasks = []
+                for task_dict in task_dicts:
+                    # Validate the task has all required fields
+                    required_fields = [
+                        "task_type",
+                        "title",
+                        "description",
+                        "input_data",
+                        "relevance_score",
+                    ]
+                    if all(field in task_dict for field in required_fields):
+                        suggested_tasks.append(SuggestedTask(**task_dict))
+
+                return suggested_tasks
+            except json.JSONDecodeError:
+                print(f"Error parsing LLM response as JSON: {response_text[:100]}...")
+                # Fall back to empty list if JSON parsing fails
+                return []
+        except Exception as e:
+            print(f"Error generating suggested tasks: {str(e)}")
+            return []
+
     async def query(
         self, query: str, deep_research: bool = False, detail_level: int = 50
     ) -> dict:
         """Enhanced query method that supports both simple queries and structured reports"""
         if not deep_research:
-            # Scale similarity_top_k based on detail level
-            similarity_top_k = min(50 + (detail_level / 250) * 950, 800)
+            # Use the optimized fast query engine instead of the standard query engine
+            print(f"Processing query with detail level {detail_level}: {query}")
+            result = self._fast_query_engine(query, detail_level)
 
-            # Scale context and output limits based on detail level
-            # Map detail_level to context window (2048-8192 tokens)
-            context_window = int(2048 + (detail_level / 100) * 6144)
-            # Map detail_level to output tokens (256-4096 tokens)
-            num_output = int(256 + (detail_level / 315) * 3840)
-
-            # Select appropriate template and response mode based on detail level
-            if detail_level < 35:
-                template = self.qa_templates["compact"]
-                response_mode = "simple_summarize"
-                self.perplexity_llm.model = "sonar"
-            elif detail_level < 50:
-                template = self.qa_templates["compact"]
-                response_mode = "tree_summarize"
-                self.perplexity_llm.model = "sonar"
-            elif detail_level < 65:
-                template = self.qa_templates["standard"]
-                response_mode = "tree_summarize"
-                self.perplexity_llm.model = "sonar"
-            elif detail_level < 85:
-                template = self.qa_templates["comprehensive"]
-                response_mode = "compact"
-                self.perplexity_llm.model = "sonar-pro"
-            else:
-                template = self.qa_templates["comprehensive"]
-                response_mode = "refine"
-                self.perplexity_llm.model = "sonar-pro"
-
-            # Update LLM settings
-            self.perplexity_llm.context_window = context_window
-            self.perplexity_llm.num_output = num_output
-
-            # Create query engine with detail-specific settings
-            detail_query_engine = self.index.as_query_engine(
-                similarity_top_k=similarity_top_k,
-                response_mode=response_mode,
-                text_qa_template=template,
-                llm=self.perplexity_llm,
+            # Generate suggested tasks based on the query and response
+            suggested_tasks = self._generate_suggested_tasks(
+                query=query, response_text=result["response"], sources=result["sources"]
             )
 
-            response = detail_query_engine.query(query)
-
-            sources = []
-            for source_node in response.source_nodes:
-                source = {
-                    "text": source_node.node.text,
-                    "score": float(source_node.score),
-                    "extra_info": source_node.node.extra_info,
-                }
-                sources.append(source)
-
-            citations = self.perplexity_llm.get_last_citations()
-
             return {
-                "response": str(response),
-                "sources": sources,
-                "citations": citations,
+                "response": result["response"],
+                "sources": result["sources"],
+                "citations": result["citations"],
+                "suggested_tasks": [task.dict() for task in suggested_tasks],
                 "metadata": {
                     "detail_level": detail_level,
-                    "similarity_top_k": similarity_top_k,
-                    "response_mode": response_mode,
+                    "retrieval_time": result["timing"]["retrieval_time"],
+                    "llm_time": result["timing"]["llm_time"],
+                    "total_time": result["timing"]["total_time"],
                     "llm_model": self.perplexity_llm.model,
-                    "context_window": context_window,
-                    "num_output": num_output,
                 },
             }
         else:
@@ -648,6 +1276,35 @@ class KnowledgeBase:
             )
         except Exception:
             return "No challenge information available"
+
+    def _initialize_empty_chunks(self):
+        """Initialize empty topic chunks as fallback if preprocessing fails"""
+        print("Initializing empty topic chunks as fallback")
+
+        # Create a single fallback topic
+        self.topic_chunks = {
+            "fallback": {
+                "text": "No preprocessed chunks available. Using fallback retrieval.",
+                "document_ids": list(self.document_cache.keys())[
+                    :50
+                ],  # Limit to 50 docs
+                "keywords": ["fallback"],
+            }
+        }
+
+        # Add to keyword index
+        self.keyword_index = {"fallback": ["fallback"]}
+
+        # Map all documents to fallback topic
+        for doc_id in self.document_cache.keys():
+            self.doc_to_topic_map[doc_id] = "fallback"
+
+        # Add metadata
+        self.topic_metadata["fallback"] = {
+            "keywords": ["fallback"],
+            "size": len(self.document_cache),
+            "docs": list(self.document_cache.keys())[:50],
+        }
 
 
 # Create a global instance of KnowledgeBase

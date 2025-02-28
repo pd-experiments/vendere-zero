@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { ExternalLink, FileText, Image as ImageIcon, Globe, Calendar, Tag, Clock, Info, ArrowRight, Link as LinkIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { supabase } from '@/lib/supabase';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
 
 export interface Source {
     id: string;
@@ -61,6 +63,7 @@ export function MessageSources({ sources, citations = [] }: MessageSourcesProps)
     const [isVisible, setIsVisible] = useState(true);
     const [sourceRecords, setSourceRecords] = useState<Record<string, SourceRecord>>({});
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'citations' | 'sources'>('citations');
     const totalItems = sources.length + citations.length;
 
     useEffect(() => {
@@ -144,42 +147,122 @@ export function MessageSources({ sources, citations = [] }: MessageSourcesProps)
     return (
         <div className="mb-2">
             <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-white/70">{totalItems} sources</span>
-                </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs rounded-none text-white/50 hover:text-white/80"
-                    onClick={() => setIsVisible(!isVisible)}
-                >
-                    {isVisible ? 'Hide sources' : 'Show sources'}
-                </Button>
+                <Tabs defaultValue="citations" className="w-full" onValueChange={(value) => setActiveTab(value as 'citations' | 'sources')}>
+                    <div className="flex items-center justify-between">
+                        <TabsList className="h-auto bg-transparent p-0 gap-4 relative">
+                            {/* Active tab indicator - animated background */}
+                            {activeTab && (
+                                <motion.div
+                                    className="absolute bg-muted/50 border-[0.5px] shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] rounded-none"
+                                    layoutId="tab-background"
+                                    initial={false}
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    style={{
+                                        width: "var(--tab-width)",
+                                        height: "var(--tab-height)",
+                                        left: "var(--tab-left)",
+                                        top: "var(--tab-top)",
+                                    }}
+                                />
+                            )}
+
+                            <TabsTrigger
+                                value="citations"
+                                className="relative rounded-sm px-3 py-1.5 text-xs font-medium flex items-center gap-2 z-10 data-[state=active]:bg-transparent"
+                                ref={(el) => {
+                                    if (el && activeTab === "citations") {
+                                        const rect = el.getBoundingClientRect();
+                                        document.documentElement.style.setProperty('--tab-width', `${rect.width}px`);
+                                        document.documentElement.style.setProperty('--tab-height', `${rect.height}px`);
+                                        document.documentElement.style.setProperty('--tab-left', `${el.offsetLeft}px`);
+                                        document.documentElement.style.setProperty('--tab-top', `${el.offsetTop}px`);
+                                    }
+                                }}
+                            >
+                                <motion.span
+                                    initial={{ opacity: 0.8 }}
+                                    animate={{ opacity: activeTab === "citations" ? 1 : 0.8 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    Citations ({citations.length})
+                                </motion.span>
+                            </TabsTrigger>
+
+                            <TabsTrigger
+                                value="sources"
+                                className="relative rounded-sm px-3 py-1.5 text-xs font-medium flex items-center gap-2 z-10 data-[state=active]:bg-transparent"
+                                ref={(el) => {
+                                    if (el && activeTab === "sources") {
+                                        const rect = el.getBoundingClientRect();
+                                        document.documentElement.style.setProperty('--tab-width', `${rect.width}px`);
+                                        document.documentElement.style.setProperty('--tab-height', `${rect.height}px`);
+                                        document.documentElement.style.setProperty('--tab-left', `${el.offsetLeft}px`);
+                                        document.documentElement.style.setProperty('--tab-top', `${el.offsetTop}px`);
+                                    }
+                                }}
+                            >
+                                <motion.span
+                                    initial={{ opacity: 0.8 }}
+                                    animate={{ opacity: activeTab === "sources" ? 1 : 0.8 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    From Your Library ({sources.length})
+                                </motion.span>
+                            </TabsTrigger>
+                        </TabsList>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs rounded-none text-white/50 hover:text-white/80"
+                            onClick={() => setIsVisible(!isVisible)}
+                        >
+                            {isVisible ? 'Hide' : 'Show'}
+                        </Button>
+                    </div>
+
+                    {isVisible && (
+                        <div className="mt-3">
+                            <TabsContent value="citations">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex overflow-x-auto gap-2 pb-2 no-scrollbar snap-x"
+                                >
+                                    {citations.map((citation, index) => (
+                                        <CitationCard
+                                            key={`citation-${index}`}
+                                            citation={citation}
+                                            index={index + 1}
+                                        />
+                                    ))}
+                                </motion.div>
+                            </TabsContent>
+
+                            <TabsContent value="sources">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex overflow-x-auto gap-2 pb-2 no-scrollbar snap-x"
+                                >
+                                    {sources.map((source) => (
+                                        <SourceCard
+                                            key={`source-${source.id}`}
+                                            source={source}
+                                            record={sourceRecords[source.extra_info.id]}
+                                            isLoading={isLoading}
+                                        />
+                                    ))}
+                                </motion.div>
+                            </TabsContent>
+                        </div>
+                    )}
+                </Tabs>
             </div>
-
-            {isVisible && (
-                <div className="flex overflow-x-auto gap-2 pb-2 no-scrollbar snap-x">
-                    {/* Render normal sources */}
-                    {sources.map((source, index) => (
-                        <SourceCard
-                            key={`source-${source.id}`}
-                            source={source}
-                            record={sourceRecords[source.extra_info.id]}
-                            isLoading={isLoading}
-                            index={index + 1}
-                        />
-                    ))}
-
-                    {/* Render citation links */}
-                    {citations.map((citation, index) => (
-                        <CitationCard
-                            key={`citation-${index}`}
-                            citation={citation}
-                            index={sources.length + index + 1}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
@@ -198,7 +281,7 @@ function CitationCard({ citation, index }: { citation: string; index: number }) 
         <div className="flex flex-col rounded-none bg-background/30 hover:bg-background/50 transition-colors border border-border/30 min-w-[200px] w-[200px] overflow-hidden flex-shrink-0 snap-start">
             {/* Header with index number, favicon and domain */}
             <div className="flex items-center p-1 border-b border-border/20">
-                <div className="flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-background/50 text-xs text-white/80">
+                <div className="flex items-center justify-center min-w-5 h-5 mr-2 rounded-sm bg-[#B1E116]/10 text-xs text-white/80">
                     {index}
                 </div>
 
@@ -238,7 +321,7 @@ function CitationCard({ citation, index }: { citation: string; index: number }) 
                             href={citation}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:text-white/80 transition-colors"
+                            className="hover:text-white/80 line-clamp-1 transition-colors"
                         >
                             {citation.length > 40 ? citation.substring(0, 37) + '...' : citation}
                         </Link>
@@ -249,11 +332,10 @@ function CitationCard({ citation, index }: { citation: string; index: number }) 
     );
 }
 
-function SourceCard({ source, record, isLoading, index }: {
+function SourceCard({ source, record, isLoading }: {
     source: Source;
     record?: SourceRecord;
     isLoading: boolean;
-    index: number;
 }) {
     const { type, id, url, image_url: sourceImageUrl, name, domain } = source.extra_info;
 
@@ -291,12 +373,8 @@ function SourceCard({ source, record, isLoading, index }: {
 
     return (
         <div className="flex flex-col rounded-none bg-background/30 hover:bg-background/50 transition-colors border border-border/30 min-w-[200px] w-[200px] overflow-hidden flex-shrink-0 snap-start">
-            {/* Header with index number, icon and title */}
+            {/* Header without index number */}
             <div className="flex items-center p-1 border-b border-border/20">
-                <div className="flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-background/50 text-xs text-white/80">
-                    {index}
-                </div>
-
                 <div className="relative h-6 w-6 rounded-sm overflow-hidden mr-3 flex-shrink-0 bg-background/50 flex items-center justify-center">
                     {imageUrl ? (
                         <Image
