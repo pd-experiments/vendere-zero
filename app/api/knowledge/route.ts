@@ -17,53 +17,24 @@ export async function POST(req: NextRequest) {
       throw new Error('Missing required parameter: query');
     }
 
-    // // Simple response without streaming
-    // const response = {
-    //   id: Date.now().toString(),
-    //   role: 'assistant',
-    //   content: "Here is a detailed analysis based on the available data...",
-    //   createdAt: new Date(),
-    //   sources: [
-    //     {
-    //       id: "source-1",
-    //       text: "This is a sample source from market research data showing consumer preferences.",
-    //       score: 0.92,
-    //       extra_info: {
-    //         type: "market_research",
-    //         id: "mr-123",
-    //         image_url: "https://via.placeholder.com/150"
-    //       }
-    //     },
-    //     {
-    //       id: "source-2",
-    //       text: "This is a sample source from ad data showing campaign performance.",
-    //       score: 0.85,
-    //       extra_info: {
-    //         type: "ad",
-    //         id: "ad-456",
-    //         image_url: "https://via.placeholder.com/150"
-    //       }
-    //     },
-    //     {
-    //       id: "source-3",
-    //       text: "This is a sample source from citation data showing competitor analysis.",
-    //       score: 0.78,
-    //       extra_info: {
-    //         type: "citation",
-    //         id: "cit-789",
-    //         url: "https://example.com",
-    //         image_url: "https://via.placeholder.com/150"
-    //       }
-    //     }
-    //   ]
-    // };
+    // Ensure detail level is a number between 0-100, defaulting to 50 if not provided
+    const detailLevel = typeof body.detailLevel === 'number' 
+      ? Math.max(0, Math.min(100, body.detailLevel)) 
+      : 50;
+    
+    // Add detailLevel to the request body
+    const requestBody = {
+      ...body,
+      detailLevel,
+      deep_research: body.deepResearch || false,
+    };
     
     const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/knowledge/query', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();

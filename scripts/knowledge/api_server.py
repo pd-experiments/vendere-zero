@@ -63,7 +63,11 @@ async def query_endpoint(request: QueryRequest):
     if not kb:
         raise HTTPException(status_code=500, detail="Knowledge base not initialized")
     try:
-        response = await kb.query(request.query, request.deep_research)
+        response = await kb.query(
+            query=request.query,
+            deep_research=request.deep_research,
+            detail_level=request.detail_level,
+        )
         return response
     except Exception as e:
         logger.error(f"Error in query endpoint: {str(e)}")

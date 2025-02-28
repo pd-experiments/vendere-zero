@@ -6,14 +6,21 @@ import { Attachment, Message, CreateMessage, ChatRequestOptions } from 'ai';
 import { Messages } from '@/components/messages';
 import { Source } from '@/components/message-sources';
 
+// Extend ChatRequestOptions to include detailLevel
+interface CustomChatRequestOptions extends ChatRequestOptions {
+    detailLevel?: number;
+}
+
 export default function QueryPage() {
     const [messages, setMessages] = useState<Array<Message>>([]);
     const [input, setInput] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
+    const [detailLevel, setDetailLevel] = useState(50);
+    const [deepResearch, setDeepResearch] = useState(false);
 
-    const handleSubmit = async (event?: { preventDefault?: () => void }) => {
+    const handleSubmit = async (event?: { preventDefault?: () => void }, options?: CustomChatRequestOptions) => {
         event?.preventDefault?.();
 
         if (!input.trim()) {
@@ -43,6 +50,8 @@ export default function QueryPage() {
                 body: JSON.stringify({
                     query: input,
                     messages: messages,
+                    detailLevel: options?.detailLevel !== undefined ? options.detailLevel : detailLevel,
+                    deepResearch: deepResearch,
                 }),
             });
 
@@ -81,13 +90,13 @@ export default function QueryPage() {
         }
     };
 
-    const reload = async (chatRequestOptions?: ChatRequestOptions) => {
+    const reload = async (chatRequestOptions?: CustomChatRequestOptions) => {
         return null;
     };
 
     const append = async (
         message: Message | CreateMessage,
-        chatRequestOptions?: ChatRequestOptions
+        chatRequestOptions?: CustomChatRequestOptions
     ) => {
         try {
             // Add user message to the chat
@@ -111,6 +120,8 @@ export default function QueryPage() {
                 body: JSON.stringify({
                     query: message.content,
                     messages: messages,
+                    detailLevel: chatRequestOptions?.detailLevel !== undefined ? chatRequestOptions.detailLevel : detailLevel,
+                    deepResearch: deepResearch,
                 }),
             });
 
@@ -177,6 +188,10 @@ export default function QueryPage() {
                         append={append}
                         handleSubmit={handleSubmit}
                         className="w-full"
+                        detailLevel={detailLevel}
+                        setDetailLevel={setDetailLevel}
+                        deepResearch={deepResearch}
+                        setDeepResearch={setDeepResearch}
                     />
                 </div>
             </div>

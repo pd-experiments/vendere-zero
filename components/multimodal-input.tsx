@@ -27,9 +27,14 @@ import { PaperclipIcon, StopIcon } from '@/components/icons';
 import { PreviewAttachment } from '@/components/preview-attachment';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
 import { SuggestedActions } from '@/components/suggested-actions';
 import equal from 'fast-deep-equal';
 import { FaGlobeAmericas } from 'react-icons/fa';
+
+interface CustomChatRequestOptions extends ChatRequestOptions {
+  detailLevel?: number;
+}
 
 function PureMultimodalInput({
   input,
@@ -43,6 +48,10 @@ function PureMultimodalInput({
   append,
   handleSubmit,
   className,
+  detailLevel = 50,
+  setDetailLevel,
+  deepResearch,
+  setDeepResearch,
 }: {
   input: string;
   setInput: (value: string) => void;
@@ -54,15 +63,19 @@ function PureMultimodalInput({
   setMessages: Dispatch<SetStateAction<Array<Message>>>;
   append: (
     message: Message | CreateMessage,
-    chatRequestOptions?: ChatRequestOptions,
+    chatRequestOptions?: CustomChatRequestOptions,
   ) => Promise<string | null | undefined>;
   handleSubmit: (
     event?: {
       preventDefault?: () => void;
     },
-    chatRequestOptions?: ChatRequestOptions,
+    chatRequestOptions?: CustomChatRequestOptions,
   ) => void;
   className?: string;
+  detailLevel?: number;
+  setDetailLevel?: Dispatch<SetStateAction<number>>;
+  deepResearch?: boolean;
+  setDeepResearch?: Dispatch<SetStateAction<boolean>>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -121,6 +134,7 @@ function PureMultimodalInput({
 
     handleSubmit(undefined, {
       experimental_attachments: attachments,
+      detailLevel,
     });
 
     setAttachments([]);
@@ -136,6 +150,7 @@ function PureMultimodalInput({
     setAttachments,
     setLocalStorageInput,
     width,
+    detailLevel,
   ]);
 
   const uploadFile = async (file: File) => {
@@ -259,7 +274,27 @@ function PureMultimodalInput({
 
           <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
             <AttachmentsButton fileInputRef={fileInputRef} isLoading={isLoading} />
-            <DeepResearchButton isLoading={isLoading} input={input} />
+            {deepResearch !== undefined && setDeepResearch !== undefined && (
+              <DeepResearchButton isLoading={isLoading} input={input} deepResearch={deepResearch} setDeepResearch={setDeepResearch} />
+            )}
+
+            {setDetailLevel && (
+              <div className="flex items-center ml-2 border-l pl-2 dark:border-zinc-700">
+                <span className="text-xs mr-2 text-muted-foreground whitespace-nowrap">Detail Level:</span>
+                <div className="w-24">
+                  <Slider
+                    disabled={isLoading}
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[detailLevel]}
+                    onValueChange={(value) => setDetailLevel(value[0])}
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-xs ml-1 text-muted-foreground">{detailLevel}%</span>
+              </div>
+            )}
           </div>
 
           <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
@@ -284,7 +319,9 @@ export const MultimodalInput = memo(
   (prevProps, nextProps) => {
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
+    if (prevProps.detailLevel !== nextProps.detailLevel) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.deepResearch !== nextProps.deepResearch) return false;
 
     return true;
   },
@@ -317,9 +354,13 @@ const AttachmentsButton = memo(PureAttachmentsButton);
 function PureDeepResearchButton({
   isLoading,
   input,
+  deepResearch,
+  setDeepResearch,
 }: {
   isLoading: boolean;
   input: string;
+  deepResearch: boolean;
+  setDeepResearch: Dispatch<SetStateAction<boolean>>;
 }) {
   const handleDeepResearch = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -327,16 +368,24 @@ function PureDeepResearchButton({
       toast.error('Please enter a query for deep research');
       return;
     }
-    toast.success('Starting deep research...');
-    // TODO: Implement deep research mode switching here
+    const newValue = !deepResearch;
+    console.log('Toggling deepResearch from', deepResearch, 'to', newValue);
+    toast.success(newValue ? 'Deep research enabled' : 'Deep research disabled');
+    setDeepResearch(newValue);
   };
+
+  useEffect(() => {
+    if (input.trim().length === 0) {
+      setDeepResearch(false);
+    }
+  }, [input, setDeepResearch]);
 
   return (
     <Button
-      className="rounded-none border-[1px] py-1 px-2 h-fit font-light dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200"
+      className={`rounded-none border-[1px] py-1 px-2 h-fit font-light ${deepResearch ? 'text-blue-200 dark:border-zinc-600 dark:bg-zinc-600 hover:dark:bg-zinc-700 hover:bg-zinc-400' : 'dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200'}`}
       onClick={handleDeepResearch}
       disabled={isLoading}
-      variant="ghost"
+      variant={deepResearch ? "secondary" : "ghost"}
       title="Deep Research"
     >
       <FaGlobeAmericas size={14} /> Deep Research
@@ -347,6 +396,7 @@ function PureDeepResearchButton({
 const DeepResearchButton = memo(PureDeepResearchButton, (prevProps, nextProps) => {
   if (prevProps.isLoading !== nextProps.isLoading) return false;
   if (prevProps.input !== nextProps.input) return false;
+  if (prevProps.deepResearch !== nextProps.deepResearch) return false;
   return true;
 });
 
@@ -384,7 +434,7 @@ function PureSendButton({
 }) {
   return (
     <Button
-      className="rounded-none px-2 py-1 h-fit border text-white font-light bg-black/30 dark:border-zinc-600"
+      className="rounded-none px-2 py-1 h-fit border text-white font-light bg-black/30 dark:border-zinc-600 dark:hover:bg-zinc-800"
       onClick={(event) => {
         event.preventDefault();
         submitForm();

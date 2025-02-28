@@ -23,6 +23,7 @@ from llama_index.core import PromptTemplate
 from company_context import COMPANY_CONTEXT
 from llama_index.program.openai import OpenAIPydanticProgram
 from llama_index.llms.openai import OpenAI
+from qa_templates import create_qa_templates
 
 
 @asynccontextmanager
@@ -45,6 +46,7 @@ load_dotenv(env_path)
 class QueryRequest(BaseModel):
     query: str
     deep_research: bool = False
+    detail_level: int = Field(default=50, ge=0, le=100)
 
 
 class ReportSection(BaseModel):
@@ -146,6 +148,7 @@ class PerplexityLLM(CustomLLM):
                 },
                 {"role": "user", "content": prompt},
             ],
+            "max_tokens": self.num_output,
             "temperature": self.temperature,
         }
 
@@ -279,39 +282,8 @@ class KnowledgeBase:
         - Key Competitors: {self._format_competitors()}
         - Current Market Trends: {", ".join(COMPANY_CONTEXT.get("market_position", {}).get("market_trends", {}).get("consumer_preferences", ["Not specified"]))}"""
 
-        qa_template = PromptTemplate(
-            f"""{company_context}
-            
-            You are a specialized AI assistant focused on providing comprehensive analysis of marketing and competitive data.
-            Your responses should be thorough, detailed, and well-supported by the database information about ads, market research, and competitor citations.
-            
-            Context information is below:
-            ---------------------
-            {{context_str}}
-            ---------------------
-
-            Using this context and {company_name}'s perspective, provide a detailed analysis addressing: {{query_str}}
-            
-            Requirements:
-            - Generate at least 4-5 detailed paragraphs with clear section headings
-            - Support each point with multiple specific examples from the data
-            - Include relevant statistics, trends, and quantitative data when available
-            - Cite specific sources and evidence for each major claim
-            - Analyze patterns and relationships between different data points
-            - Consider implications for our strategic priorities and market position
-            - Provide actionable insights and recommendations
-            - Include a brief summary of key findings at the end
-            - Highlight any gaps in the data or areas needing further research
-            - Draw connections between different types of data (ads, market research, citations)
-            
-            Response Structure:
-            1. Start with a brief overview of your findings
-            2. Break down the analysis into clear sections with headings
-            3. Support each section with specific evidence and examples
-            4. End with key takeaways and recommendations
-            
-            If certain information isn't available in the context, acknowledge that limitation but explore related available data and suggest what additional data would be valuable."""
-        )
+        # Initialize QA templates for different detail levels
+        self.qa_templates = create_qa_templates(company_context, company_name)
 
         self.index = VectorStoreIndex.from_documents(
             documents, storage_context=storage_context
@@ -319,7 +291,7 @@ class KnowledgeBase:
 
         # Initialize both LLMs
         self.perplexity_llm = PerplexityLLM(model="sonar-pro", temperature=0.1)
-        openai_llm = OpenAI(model="gpt-4", temperature=0.1)
+        openai_llm = OpenAI(model="gpt-4o-mini", temperature=0.1)
 
         # First set up OpenAI for structured program
         Settings.llm = openai_llm
@@ -367,20 +339,20 @@ class KnowledgeBase:
         self.research_query_engine = self.index.as_query_engine(
             similarity_top_k=50,
             response_mode="refine",
-            text_qa_template=qa_template,
+            text_qa_template=self.qa_templates["standard"],
             llm=openai_llm,  # Explicitly pass OpenAI LLM
         )
 
         # Now switch to Perplexity for regular queries
         Settings.llm = self.perplexity_llm
 
-        # Initialize regular query engine with Perplexity
-        self.query_engine = self.index.as_query_engine(
-            similarity_top_k=550,
-            response_mode="tree_summarize",
-            text_qa_template=qa_template,
-            llm=self.perplexity_llm,  # Explicitly pass Perplexity LLM
-        )
+        # # Initialize regular query engine with Perplexity
+        # self.query_engine = self.index.as_query_engine(
+        #     similarity_top_k=120,
+        #     response_mode="compact",
+        #     text_qa_template=self.qa_templates["compact"],
+        #     llm=self.perplexity_llm,  # Explicitly pass Perplexity LLM
+        # )
 
         # Create extended context for other methods
         self.company_context = f"""You are an AI assistant for {company_name}, 
@@ -526,11 +498,55 @@ class KnowledgeBase:
             title=query, sections=valid_sections, summary=plan.executive_summary
         )
 
-    async def query(self, query: str, deep_research: bool = False) -> dict:
+    async def query(
+        self, query: str, deep_research: bool = False, detail_level: int = 50
+    ) -> dict:
         """Enhanced query method that supports both simple queries and structured reports"""
         if not deep_research:
-            # Use existing simple query logic
-            response = self.query_engine.query(query)
+            # Scale similarity_top_k based on detail level
+            similarity_top_k = min(50 + (detail_level / 250) * 950, 800)
+
+            # Scale context and output limits based on detail level
+            # Map detail_level to context window (2048-8192 tokens)
+            context_window = int(2048 + (detail_level / 100) * 6144)
+            # Map detail_level to output tokens (256-4096 tokens)
+            num_output = int(256 + (detail_level / 315) * 3840)
+
+            # Select appropriate template and response mode based on detail level
+            if detail_level < 35:
+                template = self.qa_templates["compact"]
+                response_mode = "simple_summarize"
+                self.perplexity_llm.model = "sonar"
+            elif detail_level < 50:
+                template = self.qa_templates["compact"]
+                response_mode = "tree_summarize"
+                self.perplexity_llm.model = "sonar"
+            elif detail_level < 65:
+                template = self.qa_templates["standard"]
+                response_mode = "tree_summarize"
+                self.perplexity_llm.model = "sonar"
+            elif detail_level < 85:
+                template = self.qa_templates["comprehensive"]
+                response_mode = "compact"
+                self.perplexity_llm.model = "sonar-pro"
+            else:
+                template = self.qa_templates["comprehensive"]
+                response_mode = "refine"
+                self.perplexity_llm.model = "sonar-pro"
+
+            # Update LLM settings
+            self.perplexity_llm.context_window = context_window
+            self.perplexity_llm.num_output = num_output
+
+            # Create query engine with detail-specific settings
+            detail_query_engine = self.index.as_query_engine(
+                similarity_top_k=similarity_top_k,
+                response_mode=response_mode,
+                text_qa_template=template,
+                llm=self.perplexity_llm,
+            )
+
+            response = detail_query_engine.query(query)
 
             sources = []
             for source_node in response.source_nodes:
@@ -541,16 +557,23 @@ class KnowledgeBase:
                 }
                 sources.append(source)
 
-            # Get citations from the Perplexity LLM if available
             citations = self.perplexity_llm.get_last_citations()
 
             return {
                 "response": str(response),
                 "sources": sources,
                 "citations": citations,
+                "metadata": {
+                    "detail_level": detail_level,
+                    "similarity_top_k": similarity_top_k,
+                    "response_mode": response_mode,
+                    "llm_model": self.perplexity_llm.model,
+                    "context_window": context_window,
+                    "num_output": num_output,
+                },
             }
         else:
-            # Generate structured report
+            # Deep research mode remains unchanged
             report = await self.generate_report(query)
             return {
                 "report": {
