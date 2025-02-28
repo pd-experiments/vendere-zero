@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
                 // Prepare the ad features data
                 const adFeatures = {
                     visual_cues: Array.isArray(item.mr_keywords)
-                        ? item.mr_keywords.slice(0, 5).map((k) =>
+                        ? item.mr_keywords.slice(0, 5).map((k: any) =>
                             typeof k === "string" ? k : String(k)
                         )
                         : ["product"],
@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
                         body: JSON.stringify({
                             ad_features: adFeatures,
                             user_id: user.id,
+                            // Pass the image URL directly instead of in an array of objects
                             image_url: imageUrl,
                         }),
                     },

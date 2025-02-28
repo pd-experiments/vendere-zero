@@ -145,18 +145,18 @@ async function processBatchGenerationTask(
         );
 
         // Extract keywords from items
-        const keywords = selectedItems.map((item: {
-            keyword?: string;
-            li_name?: string;
-            mr_intent_summary?: string;
-        }) =>
-            item.keyword || item.li_name ||
-            item.mr_intent_summary?.substring(0, 30)
-        ).filter(Boolean);
+        // const keywords = selectedItems.map((item: {
+        //     keyword?: string;
+        //     li_name?: string;
+        //     mr_intent_summary?: string;
+        // }) =>
+        //     item.keyword || item.li_name ||
+        //     item.mr_intent_summary?.substring(0, 30)
+        // ).filter(Boolean);
 
-        if (keywords.length === 0) {
-            throw new Error("No valid keywords found in selected items");
-        }
+        // if (keywords.length === 0) {
+        //     throw new Error("No valid keywords found in selected items");
+        // }
 
         // Extract image URLs for each item to associate variants with correct items
         const itemImageUrls = selectedItems.map((item: {
@@ -195,11 +195,13 @@ async function processBatchGenerationTask(
                 campaign_objective: adFeatures.campaign_objective ||
                     "Awareness",
                 // Don't use adFeatures.image_url as it's not reliable for batch processing
-                // Instead, we'll send the itemImageUrls array to associate variants with items
             },
-            keywords,
+            keywords: ["The primary intent of visitors"], // Default keyword for testing
             user_id: userId,
-            item_image_urls: itemImageUrls, // Add this to the payload
+            // Pass the image URL directly instead of the array
+            image_url: itemImageUrls.length > 0
+                ? itemImageUrls[0].image_url
+                : undefined,
         };
 
         // Update progress

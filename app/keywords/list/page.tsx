@@ -753,93 +753,87 @@ export default function KeywordsList() {
     setActivePollTaskIds((prev) => prev.filter((id) => id !== taskId));
   };
 
+  // Helper function to update loading states for items
+  const setItemLoadingState = (
+    itemId: string,
+    stateKey: "isLoadingVariants" | "isGeneratingVariants",
+    value: boolean
+  ) => {
+    setResearchItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            [stateKey]: value,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
   // Generate variants for an item
   const generateVariants = async (item: ResearchItem) => {
+    setItemLoadingState(item.id, "isGeneratingVariants", true);
+
     try {
-      // Set the loading state
-      const updatedItems = [...researchItems];
-      const itemIndex = updatedItems.findIndex((i) => i.id === item.id);
-
-      if (itemIndex < 0) {
-        toast.error("Could not find the selected item");
-        return;
-      }
-
-      // Mark this item as generating variants
-      updatedItems[itemIndex] = {
-        ...updatedItems[itemIndex],
-        isGeneratingVariants: true,
-      };
-      setResearchItems(updatedItems);
-
-      // Get the best available image URL for this item
-      // This is critical as variants will be matched back to items via this URL
-      const imageUrl =
-        item.mr_image_url ||
-        item.image_url ||
-        item.li_preview_url ||
-        "placeholder-image-url.jpg";
-
-      // Prepare the ad features data
+      // Prepare ad features for the API call
       const adFeatures = {
-        visual_cues: item.keywords?.slice(0, 5) || ["product"],
-        pain_points: ["problem", "challenge", "need"],
-        visitor_intent: "learn",
-        product_category: item.title?.split(" ")[0] || "general",
+        visual_cues: ["product", "service", "solution"],
+        pain_points: ["time", "cost", "quality"],
+        visitor_intent: "find solution",
+        target_audience: { name: "General audience" },
+        product_category: "general",
         campaign_objective: "awareness",
-        // Ensure the image URL is set so variants can be linked back to this item
-        image_url: imageUrl,
       };
+
+      // Get the image URL from mr_image_url or li_preview_url
+      const imageUrl = item.mr_image_url || item.li_preview_url;
 
       console.log(
-        `Generating variants for ${item.title} (${item.id}) with image URL: ${imageUrl}`
+        `Generating variants for item ${item.id} with image: ${imageUrl}`
       );
 
-      // Call the API to generate variants
-      const response = await fetch(`/api/keywords/generate-variants-for-item`, {
+      // Make the API call to generate variants
+      const response = await fetch("/api/keywords/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          item_id: item.id,
           ad_features: adFeatures,
+          keyword: item.keyword,
+          item_id: item.id,
+          // Pass the image URL directly
+          image_url: imageUrl,
         }),
       });
 
-      // Handle API errors
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || `Failed with status ${response.status}`
-        );
+        throw new Error(`Error: ${response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log("Variant generation result:", result);
+      const variants = await response.json();
+      console.log(`Generated ${variants.length} variants for ${item.id}`);
 
-      toast.success(
-        `Generated ${result.variant_count} keyword variants for "${item.title}"`
+      // Update the local state with the new variants
+      setResearchItems((prevItems) =>
+        prevItems.map((prevItem) => {
+          if (prevItem.id === item.id) {
+            return {
+              ...prevItem,
+              variants: variants,
+              variant_count: variants.length,
+            };
+          }
+          return prevItem;
+        })
       );
 
-      // Refresh the list of items to get updated variant counts
-      await fetchResearchItems();
-
-      // After refreshing, expand the row to show the newly generated variants
-      const newItems = [...researchItems];
-      const newIndex = newItems.findIndex((i) => i.id === item.id);
-
-      if (newIndex >= 0) {
-        // Clear the generating state
-        newItems[newIndex] = {
-          ...newItems[newIndex],
-          isGeneratingVariants: false,
-        };
-        setResearchItems(newItems);
-
-        // Expand the row to show variants
-        toggleRowExpansion(newIndex);
-      }
+      // Show success notification
+      toast.success(
+        `Generated ${variants.length} keyword variants for ${item.id}`
+      );
     } catch (error) {
       console.error("Error generating variants:", error);
       toast.error(
@@ -847,18 +841,8 @@ export default function KeywordsList() {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
-
-      // Clear the generating state on error
-      const updatedItems = [...researchItems];
-      const itemIndex = updatedItems.findIndex((i) => i.id === item.id);
-
-      if (itemIndex >= 0) {
-        updatedItems[itemIndex] = {
-          ...updatedItems[itemIndex],
-          isGeneratingVariants: false,
-        };
-        setResearchItems(updatedItems);
-      }
+    } finally {
+      setItemLoadingState(item.id, "isGeneratingVariants", false);
     }
   };
 

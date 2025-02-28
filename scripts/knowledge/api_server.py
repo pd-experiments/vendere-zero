@@ -147,7 +147,7 @@ async def generate_keyword_variants_endpoint(
             logger.info(f"Received request with user_id: {user_id}")
 
         logger.info(
-            f"Received keyword variant generation request for {ad_features.product_category}"
+            f"Received keyword variant generation request for {ad_features.product_category} with image URL: {ad_features.image_url}"
         )
 
         # Add timeout to ensure faster response
@@ -165,6 +165,9 @@ async def generate_keyword_variants_endpoint(
 
             # Filter to only include generated keywords and limit to 12
             generated_variants = [kw for kw in variants if kw.source == "generated"]
+            logger.info(
+                f"Generated {len(generated_variants)} variants for {set([kw.image_url for kw in generated_variants])}"
+            )
 
             # Ensure we return exactly 12 variants (or all if less than 12)
             final_variants = generated_variants[: min(12, len(generated_variants))]
