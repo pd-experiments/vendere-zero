@@ -802,7 +802,9 @@ class MarketResearchAnalyzer:
             top_brands = (
                 [brand for brand in key_competitors if brand in unique_brands]
                 + list(unique_brands - set(key_competitors))
-            )[:10]  # Limit to 10 brands total
+            )[
+                :10
+            ]  # Limit to 10 brands total
 
             # Simplified competitor data collection with company context awareness
             competitor_data: Dict[str, CompetitorData] = {}
@@ -1008,9 +1010,11 @@ class MarketResearchAnalyzer:
             # Convert sets to sorted lists and ensure we have data
             market_data = {
                 "segments": sorted(list(market_data["segments"]))[:3],
-                "price_ranges": sorted(list(market_data["price_ranges"]))[:3]
-                if market_data["price_ranges"]
-                else ["$0-$100"],
+                "price_ranges": (
+                    sorted(list(market_data["price_ranges"]))[:3]
+                    if market_data["price_ranges"]
+                    else ["$0-$100"]
+                ),
                 "trends": sorted(list(market_data["trends"]))[:3],
             }
 

@@ -122,27 +122,39 @@ export async function GET() {
             } as TransformedItem;
         });
 
-        // For each item, get the count of keyword variants
-        for (const item of transformedData) {
-            if (item.keyword) {
-                // Get count of variants for this keyword
-                const { count, error: countError } = await supabase
-                    .from("keyword_variants")
-                    .select("*", { count: "exact", head: false })
-                    .eq("keyword", item.keyword);
+        // OPTIMIZATION: Instead of querying variants for each keyword individually,
+        // fetch all variants for this user in a single query and do the counting in memory
+        console.log("Fetching all keyword variants in a single query");
+        const { data: allVariants, error: variantsError } = await supabase
+            .from("keyword_variants")
+            .select("keyword")
+            .eq("user_id", user.id);
 
-                if (countError) {
-                    console.error(
-                        `Error counting variants for ${item.keyword}:`,
-                        countError,
-                    );
-                    item.variant_count = 0;
-                } else {
-                    item.variant_count = count || 0;
+        if (variantsError) {
+            console.error("Error fetching variants:", variantsError);
+            // Continue with zero counts rather than failing completely
+        } else if (allVariants && allVariants.length > 0) {
+            console.log(
+                `Retrieved ${allVariants.length} keyword variants for matching`,
+            );
+
+            // Count variants by keyword in memory
+            const variantCountsByKeyword: Record<string, number> = {};
+
+            allVariants.forEach((variant) => {
+                if (variant.keyword) {
+                    variantCountsByKeyword[variant.keyword] =
+                        (variantCountsByKeyword[variant.keyword] || 0) + 1;
                 }
-            } else {
-                item.variant_count = 0;
-            }
+            });
+
+            // Update counts in transformed items
+            transformedData.forEach((item: TransformedItem) => {
+                if (item.keyword && variantCountsByKeyword[item.keyword]) {
+                    item.variant_count = variantCountsByKeyword[item.keyword];
+                }
+                // If no matching variants found, variant_count remains 0
+            });
         }
 
         return NextResponse.json(transformedData);

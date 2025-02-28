@@ -3,222 +3,178 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 // Define types for the RPC response
-type RPCItem = {
-    mr_id?: string;
-    mr_user_id?: string;
+interface RPCItem {
+    mr_id: string;
+    mr_user_id: string;
     mr_image_url?: string;
     mr_created_at?: string;
     mr_intent_summary?: string;
-    mr_target_audience?: Record<string, unknown>;
-    mr_pain_points?: Record<string, unknown>;
-    mr_buying_stage?: string;
-    mr_key_features?: Record<string, unknown>;
-    mr_competitive_advantages?: Record<string, unknown>;
-    mr_perplexity_insights?: string;
-    mr_citations?: string[];
-    mr_keywords?: Array<string | Record<string, unknown>>;
-    mr_original_headlines?: Array<Record<string, unknown>>;
-    mr_new_headlines?: Array<Record<string, unknown>>;
+    mr_keywords?: (string | Record<string, unknown>)[];
     li_id?: string;
-    li_type?: string;
     li_name?: string;
     li_description?: string;
+    li_preview_url?: string;
     li_user_id?: string;
     li_created_at?: string;
-    li_item_id?: string;
-    li_features?: string[];
-    li_sentiment_tones?: string[];
-    li_avg_sentiment_confidence?: number;
-    li_preview_url?: string;
-    [key: string]: unknown; // Allow for any additional properties
-};
+    // Note: The RPC doesn't return image_url directly, it returns mr_image_url and li_preview_url
+}
 
-// Define the transformed item type
-type TransformedItem = {
+// Define type for transformed items
+interface TransformedItem {
     id: string;
     title: string;
-    keyword: string | null;
     description: string;
-    intent_summary: string;
-    created_at: string | undefined;
-    mr_id?: string;
-    li_id?: string;
-    image_url?: string;
-    preview_url?: string;
+    keywords: string[];
+    image_url: string | null;
+    mr_image_url: string | null; // Added to maintain both fields
+    li_preview_url: string | null; // Added to maintain both fields
+    source: string;
+    created_at: string;
+    intent_summary: string | null;
+    user_id: string;
     variant_count: number;
-};
-
-// Split an array into chunks of specified size
-function chunkArray<T>(array: T[], chunkSize: number): T[][] {
-    const result = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-        result.push(array.slice(i, i + chunkSize));
-    }
-    return result;
 }
 
 export async function GET() {
-    const cookieStore = cookies();
-
-    // Create a Supabase client with service role key for higher privileges
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
+    try {
+        console.log("Fetching research items...");
+        const cookieStore = cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
                 },
             },
-        },
-    );
+        );
 
-    try {
-        // Get the current user
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
+        // Get all research items using the RPC function
+        const { data: researchItems, error: rpcError } = await supabase.rpc(
+            "join_market_research_and_library_items",
+        );
 
-        if (!user) {
+        if (rpcError) {
+            console.error("Error fetching research items:", rpcError);
             return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
-
-        console.log("Fetching research items for user:", user.id);
-
-        // Call the RPC function to join market research and library items
-        const { data, error } = await supabase
-            .rpc("join_market_research_and_library_items");
-
-        if (error) {
-            console.error("Error fetching research items:", error);
-            return NextResponse.json(
-                { error: "Failed to fetch research items" },
+                { error: "Error fetching research items", details: rpcError },
                 { status: 500 },
             );
         }
 
-        // Transform the data to match the expected structure in the React component
-        const transformedData = data.map((item: RPCItem) => {
-            // Extract keywords from mr_keywords if available
-            let keyword = null;
-            if (item.mr_keywords && item.mr_keywords.length > 0) {
-                // Assuming the first keyword is the main one
-                const firstKeyword = item.mr_keywords[0];
-                if (
-                    typeof firstKeyword === "object" &&
-                    "keyword" in firstKeyword && firstKeyword.keyword
-                ) {
-                    keyword = String(firstKeyword.keyword);
-                } else if (typeof firstKeyword === "string") {
-                    keyword = firstKeyword;
-                }
-            }
+        console.log(`Retrieved ${researchItems.length} research items`);
 
-            return {
-                id: item.mr_id || item.li_id || "",
-                title: item.li_name || "Untitled",
-                keyword: keyword,
-                description: item.li_description || "",
-                intent_summary: item.mr_intent_summary || "",
-                created_at: item.mr_created_at || item.li_created_at,
-                // Include all original fields to preserve data
-                ...item,
-                variant_count: 0, // Will be updated in the next step
-            } as TransformedItem;
-        });
+        // Transform the data
+        const transformedItems: TransformedItem[] = researchItems.map(
+            (item: RPCItem) => {
+                // Use the best available title
+                const title = item.li_name || "Untitled";
 
-        // Get list of all keywords that need counts
-        const keywords = transformedData
-            .filter((item: TransformedItem) => item.keyword)
-            .map((item: TransformedItem) => item.keyword as string);
+                // Use the best available description
+                const description = item.li_description || "";
 
-        // Only fetch variant counts if we have keywords
-        if (keywords.length > 0) {
-            console.log(
-                `Fetching variant counts for ${keywords.length} keywords`,
-            );
+                // Extract keywords from mr_keywords JSONB array if available
+                const keywords = Array.isArray(item.mr_keywords)
+                    ? item.mr_keywords.map((k) =>
+                        typeof k === "string" ? k : String(k)
+                    )
+                    : [];
 
-            // Create a map to store keyword counts
-            const countMap = new Map<string, number>();
+                // Store both image URLs for maximum compatibility
+                const mr_image_url = item.mr_image_url || null;
+                const li_preview_url = item.li_preview_url || null;
 
-            // Split keywords into smaller batches (50 per batch)
-            const BATCH_SIZE = 50;
-            const keywordBatches = chunkArray(keywords, BATCH_SIZE);
+                // Primary image URL for matching with variants
+                // NOTE: This should match what's used in the variant endpoint
+                const image_url = mr_image_url || li_preview_url || null;
 
-            // Process each batch
-            let totalVariantsFetched = 0;
+                // Use the best available source
+                const source = "Research Item";
 
-            for (let i = 0; i < keywordBatches.length; i++) {
-                const batch = keywordBatches[i];
-                try {
-                    console.log(
-                        `Fetching batch ${
-                            i + 1
-                        }/${keywordBatches.length} with ${batch.length} keywords`,
-                    );
+                // Use the best available creation date
+                const created_at = item.mr_created_at || item.li_created_at ||
+                    new Date().toISOString();
 
-                    // Get counts for current batch of keywords
-                    const { data: variantCounts, error: countsError } =
-                        await supabase
-                            .from("keyword_variants")
-                            .select("keyword, id")
-                            .in("keyword", batch);
+                // Use the best available intent summary
+                const intent_summary = item.mr_intent_summary || null;
 
-                    if (countsError) {
-                        console.error(
-                            `Error fetching variant counts for batch ${i + 1}:`,
-                            countsError,
-                        );
-                        continue; // Skip this batch but continue with others
-                    }
+                return {
+                    id: item.mr_id, // Use market research ID as the primary ID
+                    title,
+                    description,
+                    keywords,
+                    image_url,
+                    mr_image_url, // Keep both original fields
+                    li_preview_url, // Keep both original fields
+                    source,
+                    created_at,
+                    intent_summary,
+                    user_id: item.mr_user_id || item.li_user_id,
+                    // Initialize variant_count to 0, will be updated later
+                    variant_count: 0,
+                };
+            },
+        );
 
-                    // Count occurrences of each keyword in this batch
-                    variantCounts?.forEach((variant) => {
-                        const key = variant.keyword;
-                        countMap.set(key, (countMap.get(key) || 0) + 1);
-                        totalVariantsFetched++;
-                    });
+        // Get user ID for fetching variants
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
 
-                    console.log(
-                        `Successfully processed batch ${i + 1} with ${
-                            variantCounts?.length || 0
-                        } variants`,
-                    );
-                } catch (batchError) {
-                    console.error(
-                        `Error processing batch ${i + 1}:`,
-                        batchError,
-                    );
-                    // Continue with next batch even if one fails
-                }
-            }
-
-            // Update the variant counts in transformedData
-            transformedData.forEach((item: TransformedItem) => {
-                if (item.keyword) {
-                    item.variant_count = countMap.get(item.keyword) || 0;
-                }
-            });
-
-            console.log(
-                `Updated variant counts for all items. Found ${totalVariantsFetched} total variants.`,
+        if (userError || !user) {
+            console.error("Error getting user:", userError);
+            return NextResponse.json(
+                { error: "Error getting user", details: userError },
+                { status: 401 },
             );
         }
 
-        return NextResponse.json(transformedData);
+        // OPTIMIZATION: Instead of querying variants for each image URL individually,
+        // fetch all variants for this user in a single query
+        const { data: allVariants, error: variantError } = await supabase
+            .from("keyword_variants")
+            .select("variant_id, image_url")
+            .eq("user_id", user.id);
+
+        if (variantError) {
+            console.error("Error fetching variants:", variantError);
+            // Continue with zero counts rather than failing completely
+        } else if (allVariants && allVariants.length > 0) {
+            console.log(
+                `Retrieved ${allVariants.length} variants for matching`,
+            );
+
+            // Count variants by image_url in memory
+            const variantCountsByImageUrl: Record<string, number> = {};
+
+            allVariants.forEach((variant) => {
+                if (variant.image_url) {
+                    variantCountsByImageUrl[variant.image_url] =
+                        (variantCountsByImageUrl[variant.image_url] || 0) + 1;
+                }
+            });
+
+            // Update counts in transformed items
+            transformedItems.forEach((item) => {
+                if (item.image_url && variantCountsByImageUrl[item.image_url]) {
+                    item.variant_count =
+                        variantCountsByImageUrl[item.image_url];
+                }
+            });
+        }
+
+        console.log("Returning research items with variant counts");
+        return NextResponse.json(transformedItems);
     } catch (error) {
-        console.error("Error in research items API:", error);
+        console.error("Unexpected error in GET route:", error);
+        const errorMessage = error instanceof Error
+            ? error.message
+            : "Unknown error";
         return NextResponse.json(
-            {
-                error: "Internal Server Error",
-                message: error instanceof Error
-                    ? error.message
-                    : "Unknown error",
-                details: error instanceof Error ? error.stack : undefined,
-            },
+            { error: "Unexpected error", details: errorMessage },
             { status: 500 },
         );
     }
