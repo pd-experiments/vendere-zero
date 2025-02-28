@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       content: data.response,
       sources: data.sources,
       citations: data.citations || [], // Include citations from Perplexity
+      suggestedTasks: data.suggested_tasks || [], // Include suggested tasks from the API
       createdAt: new Date()
     };
 

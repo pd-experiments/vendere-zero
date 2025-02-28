@@ -29,6 +29,13 @@ declare module 'ai' {
   interface Message {
     sources?: Source[];
     citations?: string[];
+    suggestedTasks?: Array<{
+      task_type: string;
+      title: string;
+      description: string;
+      input_data: any;
+      relevance_score: number;
+    }>;
   }
 }
 

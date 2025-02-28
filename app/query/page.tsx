@@ -71,7 +71,8 @@ export default function QueryPage() {
                 content: data.content,
                 createdAt: new Date(data.createdAt) || new Date(),
                 sources: data.sources as Source[],
-                citations: data.citations || []
+                citations: data.citations || [],
+                suggestedTasks: data.suggestedTasks || []
             };
 
             setMessages(prev => [...prev, assistantMessage]);
@@ -138,7 +139,8 @@ export default function QueryPage() {
                 content: data.content,
                 createdAt: new Date(data.createdAt) || new Date(),
                 sources: data.sources as Source[],
-                citations: data.citations || []
+                citations: data.citations || [],
+                suggestedTasks: data.suggestedTasks || []
             };
 
             setMessages(prev => [...prev, assistantMessage]);
