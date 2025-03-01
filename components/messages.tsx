@@ -28,90 +28,99 @@ interface MessagesProps {
 function SuggestedTasks({ tasks }: { tasks: Message['suggestedTasks'] }) {
   if (!tasks || tasks.length === 0) return null;
 
-  // Get up to 3 tasks to display
   const displayTasks = tasks.slice(0, 3);
 
   const getTaskIcon = (taskType: string) => {
     switch (taskType) {
       case 'variant_generation':
-        return <RectangleHorizontal className="h-4 w-4" />;
+        return <RectangleHorizontal className="h-4 w-4 text-white/50" />;
       case 'suggested_query':
-        return <Globe2Icon className="h-4 w-4" />;
+        return <Globe2Icon className="h-4 w-4 text-white/50" />;
       default:
-        return <Sparkles className="h-4 w-4" />;
+        return <Sparkles className="h-4 w-4 text-white/50" />;
     }
   };
 
   const handleTaskClick = (task: typeof tasks[0]) => {
-    // For now, we'll just log the task and show how it would be executed
     console.log('Task clicked:', task);
 
-    // In a real implementation, this would:
-    // 1. For suggested_query: Submit the query to the knowledge API
-    // 2. For variant_generation: Submit the task to the variant generation API
-
-    // You could use a global state manager or context to access the submit functions
     if (task.task_type === 'suggested_query') {
       alert(`Would execute query: ${task.input_data.query}`);
-      // In production: submitQuery(task.input_data.query, task.input_data.deep_research, task.input_data.detail_level);
     } else if (task.task_type === 'variant_generation') {
       alert(`Would generate variants with ${task.input_data.keywords.length} keywords for ${task.input_data.target_markets.length} markets`);
-      // In production: generateVariants(task.input_data);
     }
   };
 
   return (
     <motion.div
-      className="w-full md:w-[200px] flex flex-col gap-2 bg-background/30 p-2 rounded-none border border-border/30"
+      className="w-full md:w-[220px] flex flex-col gap-3 bg-background/20 backdrop-blur-sm p-2 rounded-lg border border-white/[0.08]"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <div className="text-xs uppercase tracking-wide text-muted-foreground/70 font-medium mb-1 px-1">
+      <div className="text-xs uppercase tracking-wider text-white/40 font-medium px-0.5">
         Suggested Tasks
       </div>
-      <div className="grid grid-cols-1 gap-2">
+      <div className="flex flex-col gap-2">
         {displayTasks.map((task, index) => (
           <motion.div
             key={index}
-            className="p-2 border border-border/20 bg-background/50 rounded-none hover:bg-background/80 transition-colors cursor-pointer group"
+            className="group relative"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            onClick={() => handleTaskClick(task)}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {getTaskIcon(task.task_type)}
-                <span className="text-sm font-medium truncate max-w-[110px] md:max-w-[110px]">{task.title}</span>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRightCircle className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="start" className="max-w-[250px]">
-                  <p className="text-xs">{task.description}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground line-clamp-2">
-              {task.description}
-            </div>
-            <div className="mt-2 flex justify-between items-center">
-              <div className="text-xs text-muted-foreground/70">
-                {task.task_type === 'variant_generation'
-                  ? `${task.input_data.keywords.length} keywords`
-                  : task.task_type === 'suggested_query'
-                    ? (task.input_data.deep_research ? 'Deep research' : 'Quick answer')
-                    : ''}
-              </div>
-              <div className="h-1 w-12 bg-background/50 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500/50"
-                  style={{ width: `${task.relevance_score * 100}%` }}
-                ></div>
+            <div
+              onClick={() => handleTaskClick(task)}
+              className="p-2.5 border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] rounded-md transition-all duration-200 cursor-pointer overflow-hidden"
+            >
+              <div className="flex items-start gap-2.5">
+                <div className="mt-0.5 p-1.5 bg-white/[0.05] rounded-md">
+                  {getTaskIcon(task.task_type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-white/90 truncate">
+                      {task.title}
+                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white/[0.08] hover:text-white/90"
+                        >
+                          <ArrowRightCircle className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="start"
+                        className="max-w-[250px] text-white/70 bg-background/90 backdrop-blur-sm border-white/[0.08]"
+                      >
+                        <p className="text-xs">{task.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <p className="mt-1 text-xs text-white/50 line-clamp-2">
+                    {task.description}
+                  </p>
+                  <div className="mt-2.5 flex items-center justify-between">
+                    <div className="text-[11px] text-white/40">
+                      {task.task_type === 'variant_generation'
+                        ? `${task.input_data.keywords.length} keywords`
+                        : task.task_type === 'suggested_query'
+                          ? (task.input_data.deep_research ? 'Deep research' : 'Quick answer')
+                          : ''}
+                    </div>
+                    <div className="h-1 w-12 bg-white/[0.05] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#B1E116]/30"
+                        style={{ width: `${task.relevance_score * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -184,7 +193,7 @@ function MessageWithImages({ message, isLoading, setMessages, reload, isReadonly
         {/* On tablet+, show all three columns */}
         <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)_200px] items-start">
           {/* Left column - Suggested Tasks - hidden on mobile */}
-          <div className="hidden md:flex justify-end pr-6">
+          <div className="hidden md:flex justify-end pr-3">
             {hasSuggestedTasks && (
               <SuggestedTasks tasks={message.suggestedTasks} />
             )}
@@ -193,7 +202,6 @@ function MessageWithImages({ message, isLoading, setMessages, reload, isReadonly
           {/* Center column - Message Content - Always centered */}
           <div className={cn(
             "mx-auto w-full max-w-[800px]",
-            message.role === 'assistant' ? 'pl-0' : '-ml-8'
           )}>
             <PreviewMessage
               message={message}
