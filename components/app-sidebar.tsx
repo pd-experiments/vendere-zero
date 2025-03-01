@@ -72,20 +72,13 @@ const getNavData = () => ({
     },
     {
       title: "Keywords",
-      url: "#",
+      url: "/keywords/list",
       icon: KeyboardIcon,
-      items: [
-        {
-          title: "Keywords List",
-          url: "/keywords/list",
-          icon: ListIcon,
-        },
-        {
-          title: "New Variant",
-          url: "/keywords",
-          icon: PlusCircleIcon,
-        },
-      ],
+    },
+    {
+      title: "Ad variants",
+      url: "/ad-variants",
+      icon: PlusCircleIcon,
     },
     // {
     //   title: "Simulations",
