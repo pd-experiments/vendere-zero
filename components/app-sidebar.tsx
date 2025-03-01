@@ -87,6 +87,11 @@ const getNavData = () => ({
         },
       ],
     },
+    {
+      title: "Ad variants",
+      url: "/ad-variants",
+      icon: PlusCircleIcon,
+    },
     // {
     //   title: "Simulations",
     //   url: "/simulations",
