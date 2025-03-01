@@ -193,6 +193,66 @@ export type Database = {
         }
         Relationships: []
       }
+      keyword_variants: {
+        Row: {
+          audience_segment: string | null
+          competition_percentage: number
+          confidence_score: number
+          cpc: number
+          created_at: string | null
+          efficiency_index: number
+          explanation: string
+          geo_target: string | null
+          id: string
+          image_url: string | null
+          keyword: string
+          keyword_difficulty: number
+          predicted_performance: number | null
+          search_volume: number
+          source: string
+          user_id: string | null
+          variant_id: string
+        }
+        Insert: {
+          audience_segment?: string | null
+          competition_percentage: number
+          confidence_score: number
+          cpc: number
+          created_at?: string | null
+          efficiency_index: number
+          explanation: string
+          geo_target?: string | null
+          id?: string
+          image_url?: string | null
+          keyword: string
+          keyword_difficulty: number
+          predicted_performance?: number | null
+          search_volume: number
+          source: string
+          user_id?: string | null
+          variant_id: string
+        }
+        Update: {
+          audience_segment?: string | null
+          competition_percentage?: number
+          confidence_score?: number
+          cpc?: number
+          created_at?: string | null
+          efficiency_index?: number
+          explanation?: string
+          geo_target?: string | null
+          id?: string
+          image_url?: string | null
+          keyword?: string
+          keyword_difficulty?: number
+          predicted_performance?: number | null
+          search_volume?: number
+          source?: string
+          user_id?: string | null
+          variant_id?: string
+        }
+        Relationships: []
+      }
       library_items: {
         Row: {
           avg_sentiment_confidence: number | null
@@ -307,6 +367,69 @@ export type Database = {
           id?: string
           insights?: Json | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      semrush_keywords: {
+        Row: {
+          competition: number | null
+          cpc: number | null
+          id: string
+          keyword: string
+          keyword_difficulty: number | null
+          keyword_intents: string[] | null
+          number_of_results: number | null
+          position: number | null
+          position_type: string | null
+          previous_position: number | null
+          search_volume: number | null
+          serp_features: string[] | null
+          timestamp: string | null
+          traffic: number | null
+          traffic_cost: number | null
+          traffic_percentage: number | null
+          trends: number[] | null
+          url: string | null
+        }
+        Insert: {
+          competition?: number | null
+          cpc?: number | null
+          id?: string
+          keyword: string
+          keyword_difficulty?: number | null
+          keyword_intents?: string[] | null
+          number_of_results?: number | null
+          position?: number | null
+          position_type?: string | null
+          previous_position?: number | null
+          search_volume?: number | null
+          serp_features?: string[] | null
+          timestamp?: string | null
+          traffic?: number | null
+          traffic_cost?: number | null
+          traffic_percentage?: number | null
+          trends?: number[] | null
+          url?: string | null
+        }
+        Update: {
+          competition?: number | null
+          cpc?: number | null
+          id?: string
+          keyword?: string
+          keyword_difficulty?: number | null
+          keyword_intents?: string[] | null
+          number_of_results?: number | null
+          position?: number | null
+          position_type?: string | null
+          previous_position?: number | null
+          search_volume?: number | null
+          serp_features?: string[] | null
+          timestamp?: string | null
+          traffic?: number | null
+          traffic_cost?: number | null
+          traffic_percentage?: number | null
+          trends?: number[] | null
+          url?: string | null
         }
         Relationships: []
       }
@@ -464,6 +587,37 @@ export type Database = {
           features: Json
           sentiment_analysis: Json
           created_at: string
+        }[]
+      }
+      join_market_research_and_library_items: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mr_id: string
+          mr_user_id: string
+          mr_image_url: string
+          mr_created_at: string
+          mr_intent_summary: string
+          mr_target_audience: Json
+          mr_pain_points: Json
+          mr_buying_stage: string
+          mr_key_features: Json
+          mr_competitive_advantages: Json
+          mr_perplexity_insights: string
+          mr_citations: string[]
+          mr_keywords: Json[]
+          mr_original_headlines: Json[]
+          mr_new_headlines: Json[]
+          li_id: string
+          li_type: Database["public"]["Enums"]["library_item_type"]
+          li_name: string
+          li_description: string
+          li_user_id: string
+          li_created_at: string
+          li_item_id: string
+          li_features: string[]
+          li_sentiment_tones: string[]
+          li_avg_sentiment_confidence: number
+          li_preview_url: string
         }[]
       }
       match_ad_descriptions:

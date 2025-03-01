@@ -281,7 +281,7 @@ function CitationCard({ citation, index }: { citation: string; index: number }) 
         <div className="flex flex-col rounded-none bg-background/30 hover:bg-background/50 transition-colors border border-border/30 min-w-[200px] w-[200px] overflow-hidden flex-shrink-0 snap-start">
             {/* Header with index number, favicon and domain */}
             <div className="flex items-center p-1 border-b border-border/20">
-                <div className="flex items-center justify-center min-w-5 h-5 mr-2 rounded-sm bg-[#B1E116]/10 text-xs text-white/80">
+                <div className="flex items-center justify-center min-w-5 h-5 mr-2 rounded-sm bg-gray-500/30 text-xs text-white/80">
                     {index}
                 </div>
 

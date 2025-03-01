@@ -38,9 +38,6 @@ import {
   Loader2,
   SwatchBook,
   EllipsisVertical,
-  FolderOpen,
-  FolderClosed,
-  LibraryBig,
 } from "lucide-react";
 import {
   HoverCard,
@@ -246,7 +243,7 @@ const AdImage = ({
   if (!imageUrl || hasError) {
     return (
       <div
-        className={`flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-1 rounded-none ${className}`}
+        className={`flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-1 rounded ${className}`}
         style={{ width: size, height: size }}
       >
         {wasBlocked ? (
@@ -263,7 +260,7 @@ const AdImage = ({
 
   return (
     <div
-      className="relative border rounded-none overflow-hidden"
+      className="relative border rounded-md overflow-hidden"
       style={{ width: size, height: size }}
     >
       {isLoading && (
@@ -333,7 +330,7 @@ const TargetAudienceCard = ({ audience }: { audience: TargetAudience }) => {
           </h5>
           <div className="flex flex-wrap gap-1">
             {audience.characteristics.map((char: string, i: number) => (
-              <Badge key={i} variant="outline" className="bg-primary/10 text-primary rounded-none border-primary/20 text-xs">
+              <Badge key={i} variant="outline" className="bg-background/50">
                 {char}
               </Badge>
             ))}
@@ -1008,7 +1005,7 @@ export default function KeywordsList() {
   };
 
   return (
-    <div className="mx-auto px-8 no-scrollbar">
+    <div className="container mx-auto p-8">
       {!showMainDetails ? (
         <div className="flex flex-col gap-6">
           {/* Task Manager - Show only if there are tasks */}
@@ -1020,63 +1017,57 @@ export default function KeywordsList() {
             />
           )}
 
-          <div className="no-scrollbar">
-            <div className="flex justify-between gap-2 pb-2">
-              <div className="flex flex-row items-center gap-2">
-                <Badge variant="outline" className="bg-[#4EBE96]/20 hover:bg-[#4EBE96]/30 rounded-none gap-2">
-                  Display Advertisements
-                </Badge>
-                <Badge variant="outline" className="rounded-none gap-2 bg-primary/10 text-primary">
-                  Ad2Keyword
-                </Badge>
+          <div>
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold">Research Items List</h2>
+                <p className="text-sm text-muted-foreground">
+                  {researchItems.length} total items with{" "}
+                  {researchItems.reduce(
+                    (sum, item) => sum + (item.variant_count || 0),
+                    0
+                  )}{" "}
+                  keyword variants
+                </p>
               </div>
-              <Badge variant="outline" className="rounded-none gap-2 bg-foreground/10 text-primary">
-                <LibraryBig className="h-3 w-3" />
-                {researchItems.length} total items with{" "}
-                {researchItems.reduce(
-                  (sum, item) => sum + (item.variant_count || 0),
-                  0
-                )}{" "}
-                keyword variants
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/keywords")}
+                  className="rounded-none"
+                >
+                  <SwatchBook className="h-4 w-4" /> New Variant
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => fetchResearchItems()}
+                  disabled={isLoading}
+                  className="rounded-none"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isLoading ? "animate-spin" : ""
+                      }`}
+                  />
+                  {isLoading ? "Refreshing..." : "Refresh"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowBatchDialog(true)}
+                  disabled={selectedItems.length === 0}
+                  className="rounded-none"
+                >
+                  <RefreshCw className="h-3 w-3" /> Batch Generate
+                </Button>
+              </div>
             </div>
             <div className="mt-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2 mb-4">
                 <Input
                   placeholder="Search research items..."
-                  className="h-9 max-w-md rounded-none"
+                  className="h-9 rounded-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push("/keywords")}
-                    className="rounded-none"
-                  >
-                    <SwatchBook className="h-4 w-4" /> New Variant
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => fetchResearchItems()}
-                    disabled={isLoading}
-                    className="rounded-none"
-                  >
-                    <RefreshCw
-                      className={`h-4 w-4 ${isLoading ? "animate-spin" : ""
-                        }`}
-                    />
-                    {isLoading ? "Refreshing..." : "Refresh"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setShowBatchDialog(true)}
-                    disabled={selectedItems.length === 0}
-                    className="rounded-none"
-                  >
-                    <RefreshCw className="h-3 w-3" /> Batch Generate
-                  </Button>
-                </div>
               </div>
 
               <div className="rounded-none border">
@@ -1102,45 +1093,16 @@ export default function KeywordsList() {
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
-                      <>
-                        {[...Array(5)].map((_, i) => (
-                          <TableRow key={`loading-row-${i}`}>
-                            <TableCell className="w-[30px] px-2">
-                              <div className="h-4 w-4 rounded bg-muted animate-pulse" />
-                            </TableCell>
-                            <TableCell className="w-[30px] px-2">
-                              <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
-                            </TableCell>
-                            <TableCell className="px-4">
-                              <div className="flex items-center space-x-4">
-                                <div className="h-12 w-12 rounded-sm bg-muted animate-pulse" />
-                                <div className="space-y-2">
-                                  <div className="h-4 w-28 bg-muted rounded animate-pulse" />
-                                  <div className="h-3 w-20 bg-muted/50 rounded animate-pulse" />
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="px-4">
-                              <div className="space-y-2">
-                                <div className="h-4 w-full max-w-[180px] bg-muted rounded animate-pulse" />
-                                <div className="h-3 w-3/4 bg-muted/50 rounded animate-pulse" />
-                              </div>
-                            </TableCell>
-                            <TableCell className="px-4">
-                              <div className="space-y-2">
-                                <div className="h-4 w-full max-w-[220px] bg-muted rounded animate-pulse" />
-                                <div className="h-3 w-1/2 bg-muted/50 rounded animate-pulse" />
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right px-4">
-                              <div className="flex justify-end gap-2">
-                                <div className="h-8 w-8 rounded-sm bg-muted animate-pulse" />
-                                <div className="h-8 w-8 rounded-sm bg-muted animate-pulse" />
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center h-24">
+                          <div className="flex flex-col justify-center items-center gap-2">
+                            <div className="h-8 w-8 animate-spin rounded-full border-primary border-t-transparent"></div>
+                            <p className="text-muted-foreground">
+                              Loading image data...
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     ) : loadError ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center h-24">
@@ -1182,7 +1144,7 @@ export default function KeywordsList() {
                               </TableCell>
                               <TableCell className="px-2">
                                 {item.variant_count > 0 ? (
-                                  <div className="flex items-center space-x-2">
+                                  <div className="flex items-center">
                                     <Button
                                       variant="ghost"
                                       size="sm"
@@ -1190,9 +1152,9 @@ export default function KeywordsList() {
                                       onClick={() => toggleRowExpansion(index)}
                                     >
                                       {item.expanded ? (
-                                        <FolderOpen className="h-4 w-4" />
+                                        <ChevronDown className="h-4 w-4" />
                                       ) : (
-                                        <FolderClosed className="h-4 w-4" />
+                                        <ChevronRight className="h-4 w-4" />
                                       )}
                                     </Button>
                                     <Tooltip>
@@ -1204,7 +1166,7 @@ export default function KeywordsList() {
                                             toggleRowExpansion(index)
                                           }
                                         >
-                                          <Sparkles className="h-3 w-3" />
+                                          <Sparkles className="h-3 w-3 mr-1" />
                                           {item.variant_count} variants
                                         </Badge>
                                       </TooltipTrigger>
@@ -1224,7 +1186,7 @@ export default function KeywordsList() {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className="h-6 rounded-none text-xs flex items-center gap-1 text-emerald-700 hover:bg-emerald-800/40 hover:text-white"
+                                          className="h-6 px-2 text-xs flex items-center gap-1 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50"
                                           onClick={() => generateVariants(item)}
                                           disabled={item.isGeneratingVariants}
                                         >
@@ -1235,7 +1197,7 @@ export default function KeywordsList() {
                                             </>
                                           ) : (
                                             <>
-                                              <SwatchBook className="h-3 w-3" />
+                                              <Plus className="h-3 w-3" />
                                               Generate Variants
                                             </>
                                           )}
@@ -1309,39 +1271,39 @@ export default function KeywordsList() {
                                   className="bg-gradient-to-b from-muted/30 to-muted/60"
                                 >
                                   <TableCell colSpan={6} className="p-0">
-                                    <div className="p-0">
-                                      {/* <div className="flex items-center justify-between mb-3">
+                                    <div className="p-4">
+                                      <div className="flex items-center justify-between mb-3">
                                         <h4 className="text-sm font-medium">
-                                          <span className="text-muted-foreground mr-1">
+                                          <span className="text-muted-foreground mr-2">
                                             Variants for
                                           </span>
                                           <span className="font-semibold">
                                             {item.li_name ||
                                               item.keyword ||
-                                              "Untitled Item"}
+                                              "Item"}
                                           </span>
                                         </h4>
                                         <Badge
                                           variant="outline"
-                                          className="bg-primary/10 text-primary rounded-none border-primary/20 text-xs"
+                                          className="bg-indigo-50 text-indigo-700 border-indigo-200"
                                         >
                                           {item.variants.length} results
                                         </Badge>
-                                      </div> */}
+                                      </div>
 
                                       {/* Enhanced variant table */}
                                       <div className="rounded-none border overflow-hidden shadow-sm">
                                         <Table>
                                           <TableHeader>
-                                            <TableRow className="bg-muted/50">
-                                              <TableHead className="text-xs font-medium">Keyword</TableHead>
-                                              <TableHead className="text-xs font-medium">Source</TableHead>
-                                              <TableHead className="text-xs font-medium">
+                                            <TableRow className="bg-muted/30">
+                                              <TableHead>Keyword</TableHead>
+                                              <TableHead>Source</TableHead>
+                                              <TableHead>
                                                 Search Volume
                                               </TableHead>
-                                              <TableHead className="text-xs font-medium">CPC</TableHead>
-                                              <TableHead className="text-xs font-medium">Metrics</TableHead>
-                                              <TableHead className="text-xs font-medium">Efficiency</TableHead>
+                                              <TableHead>CPC</TableHead>
+                                              <TableHead>Metrics</TableHead>
+                                              <TableHead>Efficiency</TableHead>
                                             </TableRow>
                                           </TableHeader>
                                           <TableBody>
@@ -1349,22 +1311,22 @@ export default function KeywordsList() {
                                               (variant, variantIndex) => (
                                                 <TableRow
                                                   key={variantIndex}
-                                                  className="hover:bg-muted/30 transition-colors border-b border-muted/50"
+                                                  className="hover:bg-muted/30 transition-colors"
                                                 >
                                                   <TableCell className="font-medium">
                                                     <HoverCard>
                                                       <HoverCardTrigger asChild>
-                                                        <span className="cursor-help border-b border-dotted border-muted-foreground/40 text-xs">
+                                                        <span className="cursor-help border-b border-dotted border-muted-foreground/40">
                                                           {variant.keyword ||
                                                             "—"}
                                                         </span>
                                                       </HoverCardTrigger>
-                                                      <HoverCardContent className="w-80 rounded-none">
+                                                      <HoverCardContent className="w-80">
                                                         <div className="space-y-2">
                                                           <h4 className="text-sm font-semibold">
                                                             {variant.keyword}
                                                           </h4>
-                                                          <p className="text-xs text-muted-foreground">
+                                                          <p className="text-xs">
                                                             {variant.explanation ||
                                                               "No explanation available for this keyword variant."}
                                                           </p>
@@ -1373,7 +1335,7 @@ export default function KeywordsList() {
                                                               .similar_keywords
                                                               .length > 0 && (
                                                               <div className="mt-2">
-                                                                <h5 className="text-xs font-medium mb-1 text-muted-foreground">
+                                                                <h5 className="text-xs font-medium mb-1">
                                                                   Similar
                                                                   Keywords:
                                                                 </h5>
@@ -1390,7 +1352,7 @@ export default function KeywordsList() {
                                                                             sk_index
                                                                           }
                                                                           variant="outline"
-                                                                          className="text-xs bg-primary/10 text-primary rounded-none border-primary/20"
+                                                                          className="text-xs"
                                                                         >
                                                                           {
                                                                             sk.keyword
@@ -1411,8 +1373,8 @@ export default function KeywordsList() {
                                                       className={
                                                         variant.source ===
                                                           "generated"
-                                                          ? "bg-primary/10 text-primary rounded-none border-primary/20 text-xs"
-                                                          : "bg-green-500/10 text-green-700 rounded-none border-green-200/20 text-xs"
+                                                          ? "bg-green-50 text-green-700 border-green-200"
+                                                          : "bg-amber-50 text-amber-700 border-amber-200"
                                                       }
                                                     >
                                                       {variant.source}
@@ -1420,15 +1382,15 @@ export default function KeywordsList() {
                                                   </TableCell>
                                                   <TableCell>
                                                     <div className="flex items-center">
-                                                      <span className="mr-2 text-xs">
+                                                      <span className="mr-2">
                                                         {formatMetric(
                                                           variant.search_volume,
                                                           "volume"
                                                         )}
                                                       </span>
-                                                      <div className="h-1.5 w-16 bg-muted rounded-none overflow-hidden">
+                                                      <div className="h-2 w-16 bg-muted rounded-full overflow-hidden">
                                                         <div
-                                                          className="h-full bg-primary"
+                                                          className="h-full bg-blue-500"
                                                           style={{
                                                             width: `${Math.min(
                                                               100,
@@ -1442,7 +1404,7 @@ export default function KeywordsList() {
                                                     </div>
                                                   </TableCell>
                                                   <TableCell>
-                                                    <span className="font-medium text-xs">
+                                                    <span className="font-medium text-amber-600">
                                                       $
                                                       {formatMetric(
                                                         variant.cpc,
@@ -1451,25 +1413,16 @@ export default function KeywordsList() {
                                                     </span>
                                                   </TableCell>
                                                   <TableCell>
-                                                    <div className="flex gap-3">
+                                                    <div className="flex gap-2">
                                                       <div className="flex flex-col items-center">
                                                         <span className="text-xs text-muted-foreground mb-1">
                                                           Difficulty
                                                         </span>
                                                         <div
-                                                          className="h-5 min-w-[20px] px-1.5 rounded-none flex items-center justify-center text-xs font-medium"
-                                                          style={{
-                                                            backgroundColor: variant.keyword_difficulty < 30
-                                                              ? 'rgba(74, 222, 128, 0.1)'
-                                                              : variant.keyword_difficulty < 70
-                                                                ? 'rgba(250, 204, 21, 0.1)'
-                                                                : 'rgba(248, 113, 113, 0.1)',
-                                                            color: variant.keyword_difficulty < 30
-                                                              ? 'rgb(21, 128, 61)'
-                                                              : variant.keyword_difficulty < 70
-                                                                ? 'rgb(161, 98, 7)'
-                                                                : 'rgb(185, 28, 28)'
-                                                          }}
+                                                          className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium ${getMetricColor(
+                                                            variant.keyword_difficulty,
+                                                            "difficulty"
+                                                          )}`}
                                                         >
                                                           {Math.round(
                                                             variant.keyword_difficulty
@@ -1481,19 +1434,10 @@ export default function KeywordsList() {
                                                           Comp
                                                         </span>
                                                         <div
-                                                          className="h-5 min-w-[20px] px-1.5 rounded-none flex items-center justify-center text-xs font-medium"
-                                                          style={{
-                                                            backgroundColor: variant.competition_percentage < 0.3
-                                                              ? 'rgba(74, 222, 128, 0.1)'
-                                                              : variant.competition_percentage < 0.7
-                                                                ? 'rgba(250, 204, 21, 0.1)'
-                                                                : 'rgba(248, 113, 113, 0.1)',
-                                                            color: variant.competition_percentage < 0.3
-                                                              ? 'rgb(21, 128, 61)'
-                                                              : variant.competition_percentage < 0.7
-                                                                ? 'rgb(161, 98, 7)'
-                                                                : 'rgb(185, 28, 28)'
-                                                          }}
+                                                          className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium ${getMetricColor(
+                                                            variant.competition_percentage,
+                                                            "competition"
+                                                          )}`}
                                                         >
                                                           {Math.round(
                                                             variant.competition_percentage *
@@ -1506,35 +1450,25 @@ export default function KeywordsList() {
                                                   <TableCell>
                                                     <div className="flex items-center gap-2">
                                                       <div
-                                                        className="h-5 min-w-[2rem] px-1.5 rounded-none flex items-center justify-center text-xs font-medium"
-                                                        style={{
-                                                          backgroundColor: variant.efficiency_index > 0.7
-                                                            ? 'rgba(74, 222, 128, 0.1)'
-                                                            : variant.efficiency_index > 0.3
-                                                              ? 'rgba(250, 204, 21, 0.1)'
-                                                              : 'rgba(248, 113, 113, 0.1)',
-                                                          color: variant.efficiency_index > 0.7
-                                                            ? 'rgb(21, 128, 61)'
-                                                            : variant.efficiency_index > 0.3
-                                                              ? 'rgb(161, 98, 7)'
-                                                              : 'rgb(185, 28, 28)'
-                                                        }}
+                                                        className={`h-8 min-w-[3rem] rounded-md px-2 flex items-center justify-center font-medium ${getMetricColor(
+                                                          variant.efficiency_index,
+                                                          "efficiency"
+                                                        )}`}
                                                       >
                                                         {(
                                                           variant.efficiency_index *
                                                           100
                                                         ).toFixed(0)}
                                                       </div>
-                                                      <div className="h-1.5 w-16 bg-muted rounded-none overflow-hidden">
+                                                      <div className="h-2 w-16 bg-muted rounded-full overflow-hidden">
                                                         <div
+                                                          className={`h-full ${getBarColor(
+                                                            variant.efficiency_index
+                                                          )}`}
                                                           style={{
-                                                            height: '100%',
-                                                            width: `${variant.efficiency_index * 100}%`,
-                                                            backgroundColor: variant.efficiency_index > 0.7
-                                                              ? 'rgb(74, 222, 128)'
-                                                              : variant.efficiency_index > 0.3
-                                                                ? 'rgb(250, 204, 21)'
-                                                                : 'rgb(248, 113, 113)'
+                                                            width: `${variant.efficiency_index *
+                                                              100
+                                                              }%`,
                                                           }}
                                                         />
                                                       </div>
@@ -1555,37 +1489,12 @@ export default function KeywordsList() {
                                 key={`${item.id}-loading`}
                                 className="bg-muted/50"
                               >
-                                <TableCell colSpan={6}>
-                                  <div className="py-4 px-6 space-y-4">
-                                    {/* Variant header skeleton */}
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <div className="h-5 w-24 bg-muted rounded-sm animate-pulse" />
-                                        <div className="h-5 w-16 bg-primary/10 rounded-sm animate-pulse" />
-                                      </div>
-                                      <div className="h-8 w-20 bg-muted rounded-sm animate-pulse" />
-                                    </div>
-
-                                    {/* Variants skeleton */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      {[...Array(2)].map((_, i) => (
-                                        <div key={i} className="border bg-muted/30 p-3 space-y-3">
-                                          <div className="flex items-center justify-between">
-                                            <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-                                            <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <div className="h-4 w-full bg-muted rounded animate-pulse" />
-                                            <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-                                          </div>
-                                          <div className="flex flex-wrap gap-2 mt-3">
-                                            <div className="h-6 w-16 bg-muted/70 rounded-sm animate-pulse" />
-                                            <div className="h-6 w-20 bg-muted/70 rounded-sm animate-pulse" />
-                                            <div className="h-6 w-24 bg-muted/70 rounded-sm animate-pulse" />
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
+                                <TableCell colSpan={6} className="py-8">
+                                  <div className="flex flex-col items-center justify-center gap-2">
+                                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Loading variants...
+                                    </p>
                                   </div>
                                 </TableCell>
                               </TableRow>
@@ -1661,7 +1570,7 @@ export default function KeywordsList() {
                           </div>
                           <div className="flex-grow">
                             <h4 className="font-medium mb-3">Intent Summary</h4>
-                            <div className="bg-muted/50 p-4 rounded-none">
+                            <div className="bg-muted/50 p-4 rounded-md">
                               <p className="text-sm">
                                 {selectedItemDetails.mr_intent_summary ||
                                   selectedItemDetails.intent_summary ||
@@ -1688,7 +1597,7 @@ export default function KeywordsList() {
                                 <h5 className="text-sm font-medium text-muted-foreground mb-2">
                                   Description
                                 </h5>
-                                <div className="bg-muted/30 p-3 rounded-none">
+                                <div className="bg-muted/30 p-3 rounded-md">
                                   <p className="text-sm">
                                     {selectedItemDetails.description}
                                   </p>
@@ -1710,7 +1619,7 @@ export default function KeywordsList() {
                             </h4>
                             <div className="space-y-3">
                               {selectedItemDetails.mr_target_audience.map(
-                                (audience: TargetAudience, index: number) => (
+                                (audience, index) => (
                                   <TargetAudienceCard
                                     key={`audience-${index}`}
                                     audience={audience}
@@ -1779,7 +1688,7 @@ export default function KeywordsList() {
                                 (adv, index) => (
                                   <div
                                     key={`adv-${index}`}
-                                    className="bg-green-50 dark:bg-green-950/20 p-3 rounded-none border border-green-200 dark:border-green-900"
+                                    className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-900"
                                   >
                                     <p className="text-sm text-green-800 dark:text-green-300">
                                       {adv}
@@ -1873,7 +1782,7 @@ export default function KeywordsList() {
                           <h4 className="font-medium mb-4">
                             Perplexity Insights
                           </h4>
-                          <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-none dark:prose-invert">
+                          <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-md dark:prose-invert">
                             <ReactMarkdown>
                               {selectedItemDetails.mr_perplexity_insights}
                             </ReactMarkdown>
@@ -1899,7 +1808,7 @@ export default function KeywordsList() {
                                     className="rounded-lg border p-4 mb-3 bg-background"
                                   >
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div className="p-3 bg-muted/50 rounded-none">
+                                      <div className="p-3 bg-muted/50 rounded-md">
                                         <h5 className="text-sm font-medium text-muted-foreground mb-1">
                                           Original
                                         </h5>
@@ -1908,7 +1817,7 @@ export default function KeywordsList() {
                                         </p>
                                       </div>
 
-                                      <div className="p-3 bg-primary/5 rounded-none border-l-4 border-primary">
+                                      <div className="p-3 bg-primary/5 rounded-md border-l-4 border-primary">
                                         <h5 className="text-sm font-medium text-primary mb-1">
                                           Improved
                                         </h5>
@@ -1936,7 +1845,7 @@ export default function KeywordsList() {
 
                                     {headline.expected_impact &&
                                       headline.expected_impact.length > 0 && (
-                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded-none border border-green-200 dark:border-green-900">
+                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-900">
                                           <h5 className="text-sm font-medium text-green-800 dark:text-green-400 mb-1">
                                             Expected Impact
                                           </h5>
@@ -2090,7 +1999,7 @@ export default function KeywordsList() {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className="border rounded-none p-3 flex flex-col space-y-2 hover:bg-muted/50 transition-colors"
+                      className="border rounded-md p-3 flex flex-col space-y-2 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex justify-center mb-2">
                         <AdImage
@@ -2184,7 +2093,7 @@ export default function KeywordsList() {
                           </div>
                           <div className="flex-grow">
                             <h4 className="font-medium mb-3">Intent Summary</h4>
-                            <div className="bg-muted/50 p-4 rounded-none">
+                            <div className="bg-muted/50 p-4 rounded-md">
                               <p className="text-sm">
                                 {selectedItemDetails.mr_intent_summary ||
                                   selectedItemDetails.intent_summary ||
@@ -2211,7 +2120,7 @@ export default function KeywordsList() {
                                 <h5 className="text-sm font-medium text-muted-foreground mb-2">
                                   Description
                                 </h5>
-                                <div className="bg-muted/30 p-3 rounded-none">
+                                <div className="bg-muted/30 p-3 rounded-md">
                                   <p className="text-sm">
                                     {selectedItemDetails.description}
                                   </p>
@@ -2233,7 +2142,7 @@ export default function KeywordsList() {
                             </h4>
                             <div className="space-y-3">
                               {selectedItemDetails.mr_target_audience.map(
-                                (audience: TargetAudience, index: number) => (
+                                (audience, index) => (
                                   <TargetAudienceCard
                                     key={`audience-${index}`}
                                     audience={audience}
@@ -2302,7 +2211,7 @@ export default function KeywordsList() {
                                 (adv, index) => (
                                   <div
                                     key={`adv-${index}`}
-                                    className="bg-green-50 dark:bg-green-950/20 p-3 rounded-none border border-green-200 dark:border-green-900"
+                                    className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-900"
                                   >
                                     <p className="text-sm text-green-800 dark:text-green-300">
                                       {adv}
@@ -2396,7 +2305,7 @@ export default function KeywordsList() {
                           <h4 className="font-medium mb-4">
                             Perplexity Insights
                           </h4>
-                          <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-none dark:prose-invert">
+                          <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-md dark:prose-invert">
                             <ReactMarkdown>
                               {selectedItemDetails.mr_perplexity_insights}
                             </ReactMarkdown>
@@ -2422,7 +2331,7 @@ export default function KeywordsList() {
                                     className="rounded-lg border p-4 mb-3 bg-background"
                                   >
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div className="p-3 bg-muted/50 rounded-none">
+                                      <div className="p-3 bg-muted/50 rounded-md">
                                         <h5 className="text-sm font-medium text-muted-foreground mb-1">
                                           Original
                                         </h5>
@@ -2431,7 +2340,7 @@ export default function KeywordsList() {
                                         </p>
                                       </div>
 
-                                      <div className="p-3 bg-primary/5 rounded-none border-l-4 border-primary">
+                                      <div className="p-3 bg-primary/5 rounded-md border-l-4 border-primary">
                                         <h5 className="text-sm font-medium text-primary mb-1">
                                           Improved
                                         </h5>
@@ -2459,7 +2368,7 @@ export default function KeywordsList() {
 
                                     {headline.expected_impact &&
                                       headline.expected_impact.length > 0 && (
-                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded-none border border-green-200 dark:border-green-900">
+                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-900">
                                           <h5 className="text-sm font-medium text-green-800 dark:text-green-400 mb-1">
                                             Expected Impact
                                           </h5>
