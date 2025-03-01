@@ -1,15 +1,18 @@
-import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { CookieOptions } from "@supabase/ssr";
 
-export async function middleware(request: NextRequest) {
+export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value;
+          return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           res.cookies.set({
@@ -29,20 +32,29 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // If user is not signed in and the current path is not /auth/*,
-  // redirect the user to /auth/login
-  if (!session && !request.nextUrl.pathname.startsWith("/auth")) {
-    const redirectUrl = new URL("/auth/login", request.url);
-    return NextResponse.redirect(redirectUrl);
+  // Check if this is an export file request
+  if (req.nextUrl.pathname.startsWith("/exports/")) {
+    if (!session) {
+      // Redirect to login page if not authenticated
+      return NextResponse.redirect(new URL("/auth/login", req.url));
+    }
+    // Forward the request to the exports directory
+    // This assumes you have a public/exports directory that contains the exported files
+    return res;
   }
 
-  // If user is signed in and the current path is /auth/*,
-  // redirect the user to /
-  if (session && request.nextUrl.pathname.startsWith("/auth")) {
-    const redirectUrl = new URL("/", request.url);
-    return NextResponse.redirect(redirectUrl);
+  // For API routes, allow the request to proceed
+  if (req.nextUrl.pathname.startsWith("/api/")) {
+    return res;
+  }
+
+  // For all other routes, check if authenticated
+  if (!session && !req.nextUrl.pathname.startsWith("/auth/")) {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
   return res;

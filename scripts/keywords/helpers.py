@@ -8,5 +8,5 @@ load_dotenv(".env.local")
 def get_supabase_client():
     return create_client(
         os.getenv("NEXT_PUBLIC_SUPABASE_URL"),
-        os.getenv("SUPABASE_SERVICE_KEY"),
+        os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_KEY"),
     )

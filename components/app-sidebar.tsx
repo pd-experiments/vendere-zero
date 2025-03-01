@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   Command,
@@ -9,28 +9,31 @@ import {
   GlobeIcon,
   LibraryBigIcon,
   BarChart3Icon,
+  KeyboardIcon,
   // SquareTerminal,
   // AudioLines,
-} from "lucide-react"
-import { LayoutGroup } from "framer-motion"
+  ListIcon,
+  PlusCircleIcon,
+} from "lucide-react";
+import { LayoutGroup } from "framer-motion";
 
-import { NavMain, type NavItem } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain, type NavItem } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/lib/auth-context"
-import _ from "lodash"
-import { Instrument_Serif } from 'next/font/google';
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from "react"
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/auth-context";
+import _ from "lodash";
+import { Instrument_Serif } from "next/font/google";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ['latin'] });
+const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ["latin"] });
 
 // Memoize the data for better performance
 const getNavData = () => ({
@@ -55,17 +58,34 @@ const getNavData = () => ({
     {
       title: "Market",
       url: "/market",
-      icon: BarChart3Icon
+      icon: BarChart3Icon,
     },
     {
       title: "Library",
       url: "/library",
-      icon: LibraryBigIcon
+      icon: LibraryBigIcon,
     },
     {
       title: "Knowledge",
       url: "/query",
-      icon: GlobeIcon
+      icon: GlobeIcon,
+    },
+    {
+      title: "Keywords",
+      url: "#",
+      icon: KeyboardIcon,
+      items: [
+        {
+          title: "Keywords List",
+          url: "/keywords/list",
+          icon: ListIcon,
+        },
+        {
+          title: "New Variant",
+          url: "/keywords",
+          icon: PlusCircleIcon,
+        },
+      ],
     },
     // {
     //   title: "Simulations",
@@ -97,29 +117,32 @@ const getNavData = () => ({
 });
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth()
-  const pathname = usePathname()
-  const router = useRouter()
-  const data = React.useMemo(() => getNavData(), [])
+  const { user } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const data = React.useMemo(() => getNavData(), []);
 
   // Prefetch the library page to improve navigation performance
   useEffect(() => {
     // Prefetch the library page when the sidebar mounts
-    router.prefetch('/library')
-  }, [router])
+    router.prefetch("/library");
+  }, [router]);
 
   // Remove console.log statements for better performance
   const items = React.useMemo(() => {
-    return data.navMain.map(item => ({
+    return data.navMain.map((item) => ({
       ...item,
-      isActive: pathname === item.url
-    })) as NavItem[]
-  }, [data.navMain, pathname])
+      isActive: pathname === item.url,
+    })) as NavItem[];
+  }, [data.navMain, pathname]);
 
   // Optimization: capture click events and use router.push for navigation
-  const handleNavItemClick = React.useCallback((url: string) => {
-    router.push(url)
-  }, [router])
+  const handleNavItemClick = React.useCallback(
+    (url: string) => {
+      router.push(url);
+    },
+    [router]
+  );
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -128,7 +151,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out">
             <Ratio className="h-6 w-6 bg-[#B1E116] text-black p-1 rounded-md transition-all duration-300 ease-in-out" />
           </div>
-          <span className={`${instrumentSerif.className} font-light text-2xl text-[#B1E116] whitespace-nowrap overflow-hidden transition-opacity duration-300 ease-in-out group-data-[state=collapsed]:opacity-0`}>
+          <span
+            className={`${instrumentSerif.className} font-light text-2xl text-[#B1E116] whitespace-nowrap overflow-hidden transition-opacity duration-300 ease-in-out group-data-[state=collapsed]:opacity-0`}
+          >
             vendere labs
           </span>
         </div>
@@ -149,8 +174,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {user && (
           <NavUser
             user={{
-              name: _.startCase(_.toLower(user.email?.split('@')[0] ?? 'User')),
-              email: user.email ?? '',
+              name: _.startCase(_.toLower(user.email?.split("@")[0] ?? "User")),
+              email: user.email ?? "",
               avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`,
             }}
           />
@@ -158,5 +183,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
