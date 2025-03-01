@@ -150,6 +150,21 @@ async def generate_keyword_variants_endpoint(
             f"Received keyword variant generation request for {ad_features.product_category} with image URL: {ad_features.image_url}"
         )
 
+        # Validate that image_url is provided either in ad_features or as a separate parameter
+        image_url = request.get("image_url")
+        if not ad_features.image_url and not image_url:
+            raise HTTPException(
+                status_code=400,
+                detail="An image URL is required - either in ad_features.image_url or as a separate image_url parameter",
+            )
+
+        # If image_url is provided as a separate parameter, ensure it's set in ad_features
+        if image_url and not ad_features.image_url:
+            ad_features.image_url = image_url
+            logger.info(
+                f"Using image URL from request parameter: {ad_features.image_url}"
+            )
+
         # Add timeout to ensure faster response
         try:
             # Set max execution time to 45 seconds
@@ -369,6 +384,12 @@ async def batch_generate_variants_endpoint(request: dict):
         if not keywords or not user_id:
             raise HTTPException(
                 status_code=400, detail="Keywords and user_id are required"
+            )
+
+        if not image_url:
+            raise HTTPException(
+                status_code=400,
+                detail="image_url is required for batch generation to properly associate variants with items",
             )
 
         logger.info(f"Received batch generation request for {len(keywords)} keywords")

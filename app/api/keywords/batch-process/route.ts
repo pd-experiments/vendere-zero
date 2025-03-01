@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
                 // Prepare the ad features data
                 const adFeatures = {
                     visual_cues: Array.isArray(item.mr_keywords)
-                        ? item.mr_keywords.slice(0, 5).map((k: any) =>
-                            typeof k === "string" ? k : String(k)
-                        )
+                        ? item.mr_keywords.slice(0, 5).map((
+                            k: string | unknown,
+                        ) => typeof k === "string" ? k : String(k))
                         : ["product"],
                     pain_points: ["problem", "challenge", "need"],
                     visitor_intent: "learn",

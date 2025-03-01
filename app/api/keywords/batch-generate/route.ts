@@ -23,10 +23,6 @@ const tasks: Record<string, Task> = {};
 
 export async function POST(request: NextRequest) {
     try {
-        // For simplicity, we'll use a placeholder user ID
-        // In a real app, you would get this from your auth system
-        const userId = "user-1";
-
         const body = await request.json();
 
         // Extract data from request
@@ -38,6 +34,38 @@ export async function POST(request: NextRequest) {
                 { status: 400 },
             );
         }
+
+        // Get the authenticated user's ID from Supabase
+        const { createServerClient } = await import("@supabase/ssr");
+        const { cookies } = await import("next/headers");
+
+        const cookieStore = cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                },
+            },
+        );
+
+        // Get the current user
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 },
+            );
+        }
+
+        // Use the real user ID
+        const userId = user.id;
 
         // Generate a unique task ID
         const taskId = uuidv4();
@@ -166,16 +194,29 @@ async function processBatchGenerationTask(
         }) => {
             const imageUrl = item.mr_image_url || item.li_preview_url;
             if (!imageUrl) {
-                console.warn(`Item ${item.mr_id} does not have an image URL`);
+                console.warn(
+                    `Item ${item.mr_id} does not have an image URL - this will cause generation to fail`,
+                );
             }
             return {
                 item_id: item.mr_id,
-                image_url: imageUrl || "placeholder-image-url.jpg",
+                image_url: imageUrl,
             };
         });
 
+        // Filter out items without image URLs
+        const validItemImageUrls = itemImageUrls.filter((
+            item: { item_id?: string; image_url?: string },
+        ) => item.image_url);
+
+        if (validItemImageUrls.length === 0) {
+            throw new Error(
+                "No valid image URLs found for selected items. Generation cannot proceed.",
+            );
+        }
+
         // Log extracted image URLs
-        console.log("Extracted image URLs:", itemImageUrls);
+        console.log("Extracted image URLs:", validItemImageUrls);
 
         // Prepare payload for the Python API
         const payload = {
@@ -199,8 +240,8 @@ async function processBatchGenerationTask(
             keywords: ["The primary intent of visitors"], // Default keyword for testing
             user_id: userId,
             // Pass the image URL directly instead of the array
-            image_url: itemImageUrls.length > 0
-                ? itemImageUrls[0].image_url
+            image_url: validItemImageUrls.length > 0
+                ? validItemImageUrls[0].image_url
                 : undefined,
         };
 
